@@ -15,6 +15,7 @@ public:
 
     int setHandler(int fd, Handler handler, __uint32_t flags);
     void removeHandler(int fd);
+    void changeFlags(int fd, __uint32_t flags);
     int exec();
     ~Application();
 private:

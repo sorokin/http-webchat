@@ -6,13 +6,13 @@ bool TcpServerSocket::listen(const std::string& host, const unsigned int port,
                              NewConnectionHandler newConnection) {
     if (listenerFD != NONE)
         return false;
-    addrinfo hints;
+    /*addrinfo hints;
     addrinfo *result;
     int s;
 
     memset(&hints, 0, sizeof (struct addrinfo));
-    hints.ai_family = AF_UNSPEC;     /* Return IPv4 and IPv6 choices */
-    hints.ai_socktype = SOCK_STREAM; /* We want a TCP socket */
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
     char sport[20];
@@ -21,12 +21,16 @@ bool TcpServerSocket::listen(const std::string& host, const unsigned int port,
     if (s != 0 || result == NULL) {
         printf("getaddrinfo: %s\n", gai_strerror(s));
         return false;
-    }
+    }*/
 
-    listenerFD = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    listenerFD = socket(AF_INET, SOCK_STREAM, 0);
     if (listenerFD == NONE)
         return false;
-    if (bind(listenerFD, result->ai_addr, result->ai_addrlen) != 0) {
+    sockaddr_in serv_addr;
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(port);
+    if (bind(listenerFD, (sockaddr*)&serv_addr, sizeof serv_addr) != 0) {
         listenerFD = NONE;
         return false;
     }
@@ -82,9 +86,7 @@ int TcpServerSocket::makeSocketNonBlocking (int socket) {
         printf("error: makeSocketNonBlocking: fcntl : get flags\n %s", gai_strerror(flags));
         return NONE;
     }
-
-    flags |= O_NONBLOCK;
-    s = fcntl(socket, F_SETFL, flags);
+    s = fcntl(socket, F_SETFL, flags  | O_NONBLOCK);
     if (s != 0) {
         printf("error: makeSocketNonBlocking: fcntl : set flags\n");
         return NONE;
@@ -113,8 +115,9 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
 
     sockaddr in_addr;
     socklen_t in_len = sizeof in_addr;
-    int incomingFD = accept4(listenerFD, &in_addr, &in_len, O_NONBLOCK);
+    int incomingFD = accept(listenerFD, &in_addr, &in_len);
     pendingConstructorFunctor = [=]() {
+        makeSocketNonBlocking(incomingFD);
         char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
         int s = getnameinfo(&in_addr, in_len,
                         hbuf, sizeof hbuf,
