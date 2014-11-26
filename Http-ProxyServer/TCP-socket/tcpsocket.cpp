@@ -30,8 +30,7 @@ TcpSocket::TcpSocket(int fd, char* host, char* port):TcpSocket() {
                                             {handler(ev);}, DEFAULT_FLAGS);
 }
 
-bool TcpSocket::connectToHost(const std::string& host, unsigned int port) {
-    //printf("connect to host\n");
+TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsigned int port) {
     if (fd != NONE)
         return AlreadyConnected;
 

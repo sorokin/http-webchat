@@ -17,7 +17,7 @@ if (IS_SERV) {
                 socket->write(string(str) + string(" request OK"));
             });
        });
-printf("state = %d\n", st);
+    printf("state = %d\n", st);
 }
 
 if (!IS_SERV) {
