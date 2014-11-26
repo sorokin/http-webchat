@@ -8,16 +8,16 @@ bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
 if (IS_SERV) {
     TcpServerSocket *serv = new TcpServerSocket();
-    cout << "succ = " << serv->listen("127.0.0.1", 10003,
+    TcpServerSocket::ConnectedState st = serv->listen("127.0.0.1", 10003,
         [=]{
             TcpSocket* socket = serv->getPendingConnecntion();
-            //socket->write("hello, client!");
             socket->setDataReceivedHandler([=] {
                 char *str = socket->readString();
                 printf("message: %s\n", str);
                 socket->write(string(str) + string(" request OK"));
             });
-       }) << endl;
+       });
+printf("state = %d\n", st);
 }
 
 if (!IS_SERV) {

@@ -15,6 +15,7 @@ class TcpSocket {
 public:
     typedef std::function<void()> ClosedConnectionHandler;
     typedef std::function<void()> DataReceivedHandler;
+    enum ConnectedState {SuccessConnected, AlreadyConnected, UnknownError};
 
     TcpSocket();
     bool connectToHost(const std::string& host, unsigned int port);

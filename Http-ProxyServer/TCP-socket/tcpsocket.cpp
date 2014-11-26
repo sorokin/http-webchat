@@ -33,7 +33,8 @@ TcpSocket::TcpSocket(int fd, char* host, char* port):TcpSocket() {
 bool TcpSocket::connectToHost(const std::string& host, unsigned int port) {
     //printf("connect to host\n");
     if (fd != NONE)
-        return false;
+        return AlreadyConnected;
+
     sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
     hostent *server = gethostbyname(host.c_str());
@@ -42,15 +43,19 @@ bool TcpSocket::connectToHost(const std::string& host, unsigned int port) {
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(fd, (struct sockaddr *) &servAddr,sizeof(servAddr)) < 0) {
         fd = NONE;
-        return false;
+        return UnknownError;
     }
-    makeSocketNonBlocking(fd);
+
+    if (makeSocketNonBlocking(fd) != 0) {
+        fd = NONE;
+        return UnknownError;
+    }
     this->host = host;
     this->port = port;
     //printf("apl:instance\n");
     Application::instance()->setHandler(fd, [this](const epoll_event& ev)
                                             {handler(ev);}, DEFAULT_FLAGS);
-    return true;
+    return SuccessConnected;
 }
 
 std::string TcpSocket::serverHost() {
@@ -117,6 +122,8 @@ void TcpSocket::removeCloseConnectionHandler() {
 
 void TcpSocket::setDataReceivedHandler(DataReceivedHandler h) {
     dataReceivedHandler = h;
+    if (h && !readBuffer.empty())
+        h();
 }
 
 void TcpSocket::removeDataReceivedHandler() {

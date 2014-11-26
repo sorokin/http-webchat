@@ -2,53 +2,39 @@
 
 TcpServerSocket::TcpServerSocket():MAX_EVENTS(128), listenerFD(NONE) {}
 
-bool TcpServerSocket::listen(const std::string& host, const unsigned int port,
+TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host, const unsigned int port,
                              NewConnectionHandler newConnection) {
     if (listenerFD != NONE)
-        return false;
-    /*addrinfo hints;
-    addrinfo *result;
-    int s;
-
-    memset(&hints, 0, sizeof (struct addrinfo));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    char sport[20];
-    sprintf(sport, "%d", port);
-    s = getaddrinfo(host.c_str(), sport, &hints, &result);
-    if (s != 0 || result == NULL) {
-        printf("getaddrinfo: %s\n", gai_strerror(s));
-        return false;
-    }*/
-
+        return AlreadyConnected;
     listenerFD = socket(AF_INET, SOCK_STREAM, 0);
     if (listenerFD == NONE)
-        return false;
+        return UnknownError;
     sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
     if (bind(listenerFD, (sockaddr*)&serv_addr, sizeof serv_addr) != 0) {
         listenerFD = NONE;
-        return false;
+        return AlreadyBinded;
     }
+
     if (makeSocketNonBlocking(listenerFD) != 0) {
         listenerFD = NONE;
-        return false;
+        return UnknownError;
     }
+
     if (::listen(listenerFD, SOMAXCONN) != 0) {
         listenerFD = NONE;
-        return false;
+        return UnknownError;
     }
+
     Application::instance()->setHandler(listenerFD , [this](epoll_event ev)
                                                      {acceptConnection(ev);}, EPOLLIN);
 
     this->port = port;
     this->host = host;
     this->newConnection = newConnection;
-    return true;
+    return SuccessConnected;
 }
 
 bool TcpServerSocket::isListening() {

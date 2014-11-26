@@ -16,9 +16,10 @@ class TcpServerSocket
 public:
     typedef std::function<void()> NewConnectionHandler;
     typedef std::function <TcpSocket*()> PendingConstructorFunctor;
+    enum ConnectedState {SuccessConnected, AlreadyBinded, AlreadyConnected, UnknownError};
 
     TcpServerSocket();
-    bool listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnection);
+    ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnection);
     bool isListening();
     std::string serverHost();
     unsigned int serverPort();
