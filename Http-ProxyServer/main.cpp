@@ -6,6 +6,7 @@ using namespace std;
 
 bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
+
 if (IS_SERV) {
     TcpServerSocket *serv = new TcpServerSocket();
     TcpServerSocket::ConnectedState st = serv->listen("127.0.0.1", 10003,
@@ -21,7 +22,7 @@ if (IS_SERV) {
 }
 
 if (!IS_SERV) {
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 10; ++i) {
         TcpSocket *sock = new TcpSocket();
         char ss[20];
         sprintf(ss, "%d", i);

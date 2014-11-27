@@ -87,7 +87,7 @@ int TcpSocket::readBytes(char *outData) {
     outData = new char[readBuffer.size()];
     for (int i = 0; i < readBuffer.size(); ++i) {
         outData[i] = readBuffer.front();
-        readBuffer.pop();
+        readBuffer.pop_front();
     }
     return size;
 }
@@ -96,17 +96,17 @@ char* TcpSocket::readBytes() {
     char *outData = new char[readBuffer.size()];
     for (int i = 0; !readBuffer.empty(); ++i) {
         outData[i] = readBuffer.front();
-        readBuffer.pop();
+        readBuffer.pop_front();
     }
     return outData;
 }
 
-char* TcpSocket::readString() {
+char* TcpSocket::readString() {//TODO wrong
     char *outData = new char[readBuffer.size() + 1];
     outData[readBuffer.size()] = 0;
     for (int i = 0; !readBuffer.empty(); ++i) {
         outData[i] = readBuffer.front();
-        readBuffer.pop();
+        readBuffer.pop_front();
     }
     return outData;
 }
@@ -130,7 +130,7 @@ void TcpSocket::removeDataReceivedHandler() {
 }
 
 void TcpSocket::clearBuffers() {
-    while (!readBuffer.empty()) readBuffer.pop();
+    while (!readBuffer.empty()) readBuffer.pop_front();
     while (!writeBuffer.empty()) writeBuffer.pop_front();
 }
 
@@ -139,7 +139,7 @@ int TcpSocket::bytesAvailable() {
 }
 
 void TcpSocket::close() {
-    //printf("Closed connection on descriptor %d\n", fd);
+    printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     ::close(fd);
     Application::instance()->removeHandler(fd);
@@ -149,12 +149,10 @@ void TcpSocket::close() {
 }
 
 void TcpSocket::handler(const epoll_event& event) {
-    //printf("in handler\n");
-    //if ((event.events & EPOLLRDHUP) && closedConnectionHandler)
-        //closedConnectionHandler();
+    if ((event.events & EPOLLHUP) && closedConnectionHandler)
+        closedConnectionHandler();
     if (event.events & EPOLLOUT)
         tryWrite();
-    //printf("handler = %d\n", (event.events & EPOLLIN));
     if (event.events & EPOLLIN) {
         bool done = false;
         bool  empty = true;
@@ -173,7 +171,7 @@ void TcpSocket::handler(const epoll_event& event) {
             } else {
                 empty = false;
                 for (int i = 0; i < count; ++i)
-                    readBuffer.push(buf[i]);
+                    readBuffer.push_back(buf[i]);
             }
         }
         //printf("end read. q.size() = %d\n", readBuffer.size());
@@ -196,7 +194,6 @@ void TcpSocket::appendDataForWrite(const char* data, int len) {
 void TcpSocket::appendCharForWrite(char c) {
     writeBuffer.push_back(c);
 }
-
 
 void TcpSocket::tryWrite() {
     static int currentFlags = DEFAULT_FLAGS;
@@ -227,4 +224,15 @@ bool TcpSocket::isErrorSocket(const epoll_event& ev) {
 
 TcpSocket::~TcpSocket() {
     close();
+    closedConnectionHandler = ClosedConnectionHandler();
+    dataReceivedHandler = DataReceivedHandler();
+}
+
+TcpSocket::TcpSocket(TcpSocket&& oth):BUFFER_SIZE_ON_READ(oth.BUFFER_SIZE_ON_READ),
+    BUFFER_SIZE_ON_WRITE(oth.BUFFER_SIZE_ON_WRITE), fd(oth.fd), port(oth.port) {
+    host.swap(oth.host);
+    writeBuffer.swap(oth.writeBuffer);
+    readBuffer.swap(oth.readBuffer);
+    closedConnectionHandler.swap(oth.closedConnectionHandler);
+    dataReceivedHandler.swap(oth.dataReceivedHandler);
 }

@@ -33,7 +33,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
 
     this->port = port;
     this->host = host;
-    this->newConnection = newConnection;
+    this->newConnectionHandler = newConnection;
     return SuccessConnected;
 }
 
@@ -61,8 +61,8 @@ void TcpServerSocket::close() {
 
 TcpServerSocket::~TcpServerSocket() {
     close();
-    //TODO write this
-    //remove from Apllication
+    pendingConstructorFunctor = PendingConstructorFunctor();
+    newConnectionHandler = NewConnectionHandler();
 }
 
 int TcpServerSocket::makeSocketNonBlocking (int socket) {
@@ -113,8 +113,8 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
         //makeSocketNonBlocking(incomingFD);
         return new TcpSocket(incomingFD, hbuf, sbuf);
     };
-    if (newConnection)
-        newConnection();
+    if (newConnectionHandler)
+        newConnectionHandler();
     //if (pendingConstructorFunctor) ::close(incomingFD);
     pendingConstructorFunctor = PendingConstructorFunctor();
 }
@@ -125,4 +125,11 @@ TcpSocket* TcpServerSocket::getPendingConnecntion() {
     TcpSocket *ret = pendingConstructorFunctor();
     pendingConstructorFunctor = PendingConstructorFunctor();
     return ret;
+}
+
+TcpServerSocket::TcpServerSocket(TcpServerSocket &&oth):
+    MAX_EVENTS(oth.MAX_EVENTS), listenerFD(oth.listenerFD), pendingFD(oth.pendingFD), port(oth.port) {
+    host.swap(oth.host);
+    pendingConstructorFunctor.swap(oth.pendingConstructorFunctor);
+    newConnectionHandler.swap(oth.newConnectionHandler);
 }

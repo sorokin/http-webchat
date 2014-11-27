@@ -19,23 +19,26 @@ public:
     enum ConnectedState {SuccessConnected, AlreadyBinded, AlreadyConnected, UnknownError};
 
     TcpServerSocket();
-    ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnection);
+    ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnectionHandler);
     bool isListening();
     std::string serverHost();
     unsigned int serverPort();
     TcpSocket* getPendingConnecntion();
     void close();
+    TcpServerSocket(TcpServerSocket&&);
     ~TcpServerSocket();
 private:
     static const int NONE = -1;
     const int MAX_EVENTS;
     int listenerFD;
     int pendingFD;
-    PendingConstructorFunctor pendingConstructorFunctor;
     int port;
     std::string host;
-    NewConnectionHandler newConnection;
+    PendingConstructorFunctor pendingConstructorFunctor;
+    NewConnectionHandler newConnectionHandler;
 
+    TcpServerSocket(const TcpServerSocket&) = delete;
+    TcpServerSocket& operator = (const TcpServerSocket&) = delete;
     int makeSocketNonBlocking(int listenerFD);
     int addToEpoll(int listenerFD);
     void handler();
