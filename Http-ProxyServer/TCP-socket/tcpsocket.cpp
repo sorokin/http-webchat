@@ -20,7 +20,6 @@ int TcpSocket::makeSocketNonBlocking(int socket) {
 
 TcpSocket::TcpSocket():
     fd(NONE), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024) {
-    //makeSocketNonBlocking(fd);
 }
 
 TcpSocket::TcpSocket(int fd, char* host, char* port):TcpSocket() {
