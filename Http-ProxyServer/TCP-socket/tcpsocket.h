@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <deque>
+#include <cstring>
 
 class TcpSocket {
 public:
@@ -22,9 +23,8 @@ public:
     unsigned int serverPort();
     bool write(const char* data, int len);
     bool write(const std::string& s);
-    int readBytes(char *outData);
     char* readBytes();
-    char* readString();
+    std::string readString();
 
     void setCloseConnectionHandler(ClosedConnectionHandler);
     void removeCloseConnectionHandler();
@@ -36,8 +36,8 @@ public:
     TcpSocket(TcpSocket&&);
     ~TcpSocket();
 private:
-    const int DEFAULT_FLAGS = EPOLLIN | EPOLLET | EPOLLHUP;
-    const int OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLET | EPOLLHUP;
+    const int DEFAULT_FLAGS = EPOLLIN | EPOLLHUP;
+    const int OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLHUP;
     const int NONE = -1;
     const int BUFFER_SIZE_ON_READ;
     const int BUFFER_SIZE_ON_WRITE;

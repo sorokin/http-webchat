@@ -1,4 +1,5 @@
 #include "tcpserversocket.h"
+#include <cassert>
 
 TcpServerSocket::TcpServerSocket():MAX_EVENTS(128), listenerFD(NONE) {}
 
@@ -18,15 +19,11 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
         return AlreadyBinded;
     }
 
-    if (makeSocketNonBlocking(listenerFD) != 0) {
-        listenerFD = NONE;
-        return UnknownError;
-    }
+    int s = makeSocketNonBlocking(listenerFD);
+    assert(s == 0);
 
-    if (::listen(listenerFD, SOMAXCONN) != 0) {
-        listenerFD = NONE;
-        return UnknownError;
-    }
+    s = ::listen(listenerFD, SOMAXCONN);
+    assert(s == 0);
 
     Application::instance()->setHandler(listenerFD , [this](epoll_event ev)
                                                      {acceptConnection(ev);}, EPOLLIN);
@@ -52,7 +49,8 @@ unsigned int TcpServerSocket::serverPort() {
 void TcpServerSocket::close() {
     if (listenerFD == NONE)
         return;
-    ::close(listenerFD);
+    int s = ::close(listenerFD);
+    assert(s == 0);
     Application::instance()->removeHandler(listenerFD);
     listenerFD = NONE;
     port = 0;
@@ -80,15 +78,6 @@ int TcpServerSocket::makeSocketNonBlocking (int socket) {
     return 0;
 }
 
-/*void TcpServerSocket::handler() {//TODO only incoming connections
-    int n = epoll_wait(epollFD, events, MAX_EVENTS, -1);
-    for (int i = 0; i < n; ++i)
-        if (isErrorSocket(events[i]))
-            ::close(events[i].data.fd);
-        else if (events[i].data.fd == listenerFD)
-            acceptConnections();
-}*/
-
 bool TcpServerSocket::isErrorSocket(const epoll_event& ev) {
     return (ev.events & EPOLLERR) || (ev.events & EPOLLHUP) || !(ev.events & EPOLLIN);
 }
@@ -115,7 +104,7 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
     };
     if (newConnectionHandler)
         newConnectionHandler();
-    //if (pendingConstructorFunctor) ::close(incomingFD);
+    if (pendingConstructorFunctor) ::close(incomingFD);//TODO good?
     pendingConstructorFunctor = PendingConstructorFunctor();
 }
 

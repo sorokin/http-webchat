@@ -1,4 +1,5 @@
 #include "tcpsocket.h"
+#include <cassert>
 
 int TcpSocket::makeSocketNonBlocking(int socket) {
     int flags, s;
@@ -69,6 +70,7 @@ bool TcpSocket::write(const char* data, int len) {
     if (fd == NONE)
         return false;
     appendDataForWrite(data, len);
+    appendCharForWrite(0);
     tryWrite();
     return true;
 }
@@ -78,18 +80,9 @@ bool TcpSocket::write(const std::string& s) {
         return false;
     for (int i = 0; i < s.size(); ++i)
         appendCharForWrite(s[i]);
+    appendCharForWrite(0);
     tryWrite();
     return true;
-}
-
-int TcpSocket::readBytes(char *outData) {
-    int size = readBuffer.size();
-    outData = new char[readBuffer.size()];
-    for (int i = 0; i < readBuffer.size(); ++i) {
-        outData[i] = readBuffer.front();
-        readBuffer.pop_front();
-    }
-    return size;
 }
 
 char* TcpSocket::readBytes() {
@@ -101,14 +94,15 @@ char* TcpSocket::readBytes() {
     return outData;
 }
 
-char* TcpSocket::readString() {//TODO wrong
-    char *outData = new char[readBuffer.size() + 1];
-    outData[readBuffer.size()] = 0;
-    for (int i = 0; !readBuffer.empty(); ++i) {
-        outData[i] = readBuffer.front();
+std::string TcpSocket::readString() {
+    std::string ret;
+    for (int i = 0; !readBuffer.empty() && readBuffer.front() != 0; ++i) {
+        ret += readBuffer.front();
         readBuffer.pop_front();
     }
-    return outData;
+    if (!readBuffer.empty())
+        readBuffer.pop_back();
+    return ret;
 }
 
 void TcpSocket::setCloseConnectionHandler(ClosedConnectionHandler h) {
@@ -130,8 +124,8 @@ void TcpSocket::removeDataReceivedHandler() {
 }
 
 void TcpSocket::clearBuffers() {
-    while (!readBuffer.empty()) readBuffer.pop_front();
-    while (!writeBuffer.empty()) writeBuffer.pop_front();
+    readBuffer.clear();
+    writeBuffer.clear();
 }
 
 int TcpSocket::bytesAvailable() {
@@ -139,9 +133,12 @@ int TcpSocket::bytesAvailable() {
 }
 
 void TcpSocket::close() {
+    if (fd == NONE)
+        return;
     printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
-    ::close(fd);
+    int s = ::close(fd);
+    assert(s == 0);
     Application::instance()->removeHandler(fd);
     fd = NONE;
     host = "";

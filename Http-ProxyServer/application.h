@@ -3,6 +3,8 @@
 #include <sys/epoll.h>
 #include <functional>
 #include <map>
+#include <vector>
+#include <unistd.h>
 
 class Application
 {
@@ -24,7 +26,7 @@ private:
     Application();
     const int MAX_EVENTS;
     int mainLoopFD;
-    epoll_event *events;
+    std::vector <epoll_event> events;
     std::map <int, Handler> handlers;
 };
 
