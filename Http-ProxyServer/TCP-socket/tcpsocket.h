@@ -18,7 +18,7 @@ public:
     enum ConnectedState {SuccessConnected, AlreadyConnected, UnknownError};
 
     TcpSocket();
-    ConnectedState connectToHost(const std::string& host, unsigned int port);
+    ConnectedState connectToHost(const std::string& host, unsigned int port = 80);
     std::string serverHost();
     unsigned int serverPort();
     bool write(const char* data, int len);

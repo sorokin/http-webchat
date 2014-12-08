@@ -18,11 +18,17 @@ TEMPLATE = app
 SOURCES += main.cpp \
     application.cpp \
     TCP-socket/tcpsocket.cpp \
-    TCP-socket/tcpserversocket.cpp
+    TCP-socket/tcpserversocket.cpp \
+    Http/httprequest.cpp \
+    Http/httpresponse.cpp \
+    Http/httpclient.cpp
 
 HEADERS += \
     application.h \
     TCP-socket/tcpsocket.h \
-    TCP-socket/tcpserversocket.h
+    TCP-socket/tcpserversocket.h \
+    Http/httprequest.h \
+    Http/httpresponse.h \
+    Http/httpclient.h
 
 QMAKE_CXXFLAGS += -std=c++11

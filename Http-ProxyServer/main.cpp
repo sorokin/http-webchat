@@ -2,11 +2,12 @@
 #include <TCP-socket/tcpserversocket.h>
 #include <iostream>
 #include <QDebug>
+#include <Http/httpclient.h>
 using namespace std;
 
 bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
-    if (IS_SERV) {
+    /*if (IS_SERV) {
         TcpServerSocket *serv = new TcpServerSocket();
         TcpServerSocket::ConnectedState st = serv->listen("127.0.0.1", 10003,
             [=]{
@@ -37,6 +38,13 @@ int main(int argc, char *argv[]) {
                 sock->write(s, strlen(s));
                 //sock->close();
             }
-    }
+    }*/
+
+    string r = "руск";
+    //QString rus("руск");
+    cout << r << endl;
+    //qDebug() << rus << endl;
+    HttpClient *client = new HttpClient();
+    client->request(HttpRequest());// [](const HttpResponse&) {});
     return Application::instance()->exec();
 }
