@@ -9,7 +9,7 @@ HttpClient::HttpClient() {}
 void HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
     TcpSocket *socket = new TcpSocket();
     printf("in\n");
-    socket->connectToHost("google.ru", 80);
+    socket->connectToHost("google.ru");
     //socket.write(request.data());
     socket->setDataReceivedHandler([=]() {
             //qDebug() << QString(socket->readBytes());

@@ -2,27 +2,38 @@
 #define HTTPREQUEST_H
 #include <cstring>
 #include <string>
+#include <map>
 #include <vector>
 
 class HttpRequest
 {
+    typedef std::string String;
+    std::string mMethod;
+    std::string mUrl;
+    std::string mVersion;
+    const char* mBody;
+    std::map <String, String> mHeaders;
 public:
     enum Method {HEAD, GET, PUT, POST, DELETE};
     HttpRequest();
-    HttpRequest(Method method, const std::string& url, int version = 1);
-    void setMethod(const std::string& method);
-    std::string method();
-    void setUrl(const std::string& url);
-    std::string url();
-    void setVersion(int vers);
-    int version();
-    HttpRequest(const std::string& method, const std::string& url, int version = 1);
-    void setHeader(const std::string& key, const std::string val);
-    void setHeaders(const std::vector <std::pair <std::string, std::string> >& headers);
-    void header(const std::string& key);
-    void setMessageBody(const std::string message);
-    std::string messageBody();
-
+    HttpRequest(Method method, const String& url, const char* body = NULL, const String& version = "1.0");
+    HttpRequest(const String& method, const String& url, const char* body = NULL, const String& version = "1.0");
+    void setMethod(const String& method);
+    void setMethod(Method method);
+    String method() const;
+    void setUrl(const String& url);
+    String url() const;
+    void setVersion(const String& vers);
+    String version() const;
+    void setHeader(const String& key, const String& val);
+    void setHeaders(const std::vector <std::pair <String, String> >& headers);
+    std::map <String, String> headers() const;
+    String header(const String& key);
+    void setMessageBody(const String& message);
+    void setMessageBody(const char* message);
+    const char* messageBody() const;
+private:
+    String getMethod(Method method);
 };
 
 #endif // HTTPREQUEST_H

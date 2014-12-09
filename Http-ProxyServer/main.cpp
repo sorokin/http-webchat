@@ -7,6 +7,8 @@ using namespace std;
 
 bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
+    //HttpRequest *q = new HttpRequest(HttpRequest::POST, "www.google.ru");
+
     /*if (IS_SERV) {
         TcpServerSocket *serv = new TcpServerSocket();
         TcpServerSocket::ConnectedState st = serv->listen("127.0.0.1", 10003,
@@ -39,12 +41,12 @@ int main(int argc, char *argv[]) {
                 //sock->close();
             }
     }*/
-
     string r = "руск";
     //QString rus("руск");
     cout << r << endl;
+    cout << r.size() << endl;
     //qDebug() << rus << endl;
-    HttpClient *client = new HttpClient();
-    client->request(HttpRequest());// [](const HttpResponse&) {});
+    //HttpClient *client = new HttpClient();
+    //client->request(HttpRequest());// [](const HttpResponse&) {});
     return Application::instance()->exec();
 }
