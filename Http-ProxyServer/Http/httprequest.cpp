@@ -1,4 +1,5 @@
 #include "httprequest.h"
+#include <QUrl>
 
 HttpRequest::HttpRequest() {}
 
@@ -11,19 +12,41 @@ HttpRequest::String HttpRequest::getMethod(Method method) {
     return "";
 }
 
-HttpRequest::HttpRequest(Method method, const String& url, const char* message, const String& version) {
+HttpRequest::HttpRequest(Method method, const String& url, const char* message,
+                         const String& version) {
     mMethod = getMethod(method);
-    mUrl = url;
+    splitUrl(url, mHost, mPath);
+    mHeaders["Host"] = mHost;
     mVersion = version;
     mBody = message;
 
 }
 
-HttpRequest::HttpRequest(const String& method, const String& url, const char* body, const String& version) {
+HttpRequest::HttpRequest(const String& method, const String& url,
+                         const char* message, const String& version) {
     mMethod = method;
-    mUrl = url;
+    splitUrl(url, mHost, mPath);
+    mHeaders["Host"] = mHost;
     mVersion = version;
-    mBody = body;
+    mBody = message;
+}
+
+HttpRequest::String HttpRequest::host() const {
+    return mHost;
+}
+
+HttpRequest::String HttpRequest::path() const {
+    return mPath;
+}
+
+void HttpRequest::splitUrl(String url, String& host, String& path) {
+    if (!QString(url.c_str()).startsWith("http://", Qt::CaseInsensitive))
+        url = "http://" + url;
+    QUrl t(url.c_str());
+    host = t.host().toStdString();
+    path = t.path().toStdString();
+    if (path == "")
+        path = "/";
 }
 
 void HttpRequest::setMethod(const String& method) {
@@ -40,11 +63,12 @@ HttpRequest::String HttpRequest::method() const {
 }
 
 void HttpRequest::setUrl(const String& url) {
-    mUrl = url;
+    splitUrl(url, mHost, mPath);
+    mHeaders["Host"] = mHost;
 }
 
 HttpRequest::String HttpRequest::url() const {
-    return mUrl;
+    return mHost + mPath;
 }
 
 void HttpRequest::setVersion(const String& vers) {
@@ -70,7 +94,7 @@ HttpRequest::String HttpRequest::header(const String& key) {
     return "";
 }
 
-std::map <HttpRequest::String, HttpRequest::String> HttpRequest::headers() const {
+HttpRequest::HeadersContainer HttpRequest::headers() const {
     return mHeaders;
 }
 
@@ -82,6 +106,6 @@ void HttpRequest::setMessageBody(const char* message) {
     mBody = message;
 }
 
-const char* HttpRequest::messageBody()  const{
+const char* HttpRequest::messageBody() const {
     return mBody;
 }

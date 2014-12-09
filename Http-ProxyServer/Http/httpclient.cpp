@@ -2,20 +2,26 @@
 #include <TCP-socket/tcpsocket.h>
 #include <QDebug>
 
-#include <iostream>
-using namespace std;
 HttpClient::HttpClient() {}
 
 void HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
+    const HttpRequest::String END_LINE = "\r\n";
+
     TcpSocket *socket = new TcpSocket();
-    printf("in\n");
     socket->connectToHost("google.ru");
-    //socket.write(request.data());
     socket->setDataReceivedHandler([=]() {
-            //qDebug() << QString(socket->readBytes());
             std::string data = socket->readString();
             qDebug() << QString(data.c_str());
-            delete socket;
     });
-    socket->write("GET / HTTP/1.0\nHost: www.google.ru\n\n");
+
+    HttpRequest::String msg = request.method() + " " + request.path() +
+            " HTTP/" + request.version() + END_LINE;
+    HttpRequest::HeadersContainer headers = request.headers();
+    for (HttpRequest::HeadersContainer::iterator it = headers.begin(); it != headers.end(); it++)
+        msg += it->first + ": " + it->second + END_LINE;
+    msg += END_LINE;
+    if (request.messageBody() != NULL)
+        msg += request.messageBody();
+    //printf("%s", msg.c_str());
+    socket->write(msg.c_str(), msg.size());
 }

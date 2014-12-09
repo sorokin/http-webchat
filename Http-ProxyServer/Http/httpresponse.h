@@ -7,13 +7,8 @@
 
 class HttpResponse
 {
-    typedef std::string String;
-    int mStatusCode;
-    String mReasonPhrase;
-    const char* mBody;
-    String mVersion;
-    std::map <String, String> mHeaders;
 public:
+    typedef std::string String;
     HttpResponse();
     HttpResponse(int statusCode, const String& reasonPhrase, const char* message = NULL, const String& version = "1.0");
     void setStatusCode(int statusCode);
@@ -26,6 +21,12 @@ public:
     void setHeader(const String& key, const String& value);
     String header(const String& key);
     std::map<String, String> headers() const;
+private:
+    int mStatusCode;
+    String mReasonPhrase;
+    const char* mBody;
+    String mVersion;
+    std::map <String, String> mHeaders;
 };
 
 #endif // HTTPRESPONSE_H

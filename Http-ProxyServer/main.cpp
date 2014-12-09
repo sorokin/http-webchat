@@ -3,6 +3,7 @@
 #include <iostream>
 #include <QDebug>
 #include <Http/httpclient.h>
+#include <QUrl>
 using namespace std;
 
 bool IS_SERV = 0;
@@ -41,12 +42,9 @@ int main(int argc, char *argv[]) {
                 //sock->close();
             }
     }*/
-    string r = "руск";
-    //QString rus("руск");
-    cout << r << endl;
-    cout << r.size() << endl;
     //qDebug() << rus << endl;
-    //HttpClient *client = new HttpClient();
-    //client->request(HttpRequest());// [](const HttpResponse&) {});
+    HttpClient *client = new HttpClient();
+    client->request(HttpRequest(HttpRequest::GET, "http://www.google.ru/drive/"));
+    // [](const HttpResponse&) {});
     return Application::instance()->exec();
 }

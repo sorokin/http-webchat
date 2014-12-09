@@ -37,21 +37,17 @@ TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsi
     sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
     hostent *server = gethostbyname(host.c_str());
+    if (server == NULL)
+        return UnknownHost;
     bcopy((char *)server->h_addr, (char *)&servAddr.sin_addr.s_addr, server->h_length);
     servAddr.sin_port = htons(port);
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (connect(fd, (struct sockaddr *) &servAddr,sizeof(servAddr)) < 0) {
-        fd = NONE;
-        return UnknownError;
-    }
-
-    if (makeSocketNonBlocking(fd) != 0) {
-        fd = NONE;
-        return UnknownError;
-    }
+    int s = connect(fd, (struct sockaddr *) &servAddr,sizeof(servAddr));
+    assert(s == 0);
+    s = makeSocketNonBlocking(fd);
+    assert(s == 0);
     this->host = host;
     this->port = port;
-    //printf("apl:instance\n");
     Application::instance()->setHandler(fd, [this](const epoll_event& ev)
                                             {handler(ev);}, DEFAULT_FLAGS);
     return SuccessConnected;
@@ -69,7 +65,6 @@ bool TcpSocket::write(const char* data, int len) {
     if (fd == NONE)
         return false;
     appendDataForWrite(data, len);
-    appendCharForWrite(0);
     tryWrite();
     return true;
 }
