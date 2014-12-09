@@ -13,6 +13,7 @@
 
 class TcpSocket {
 public:
+    typedef std::string Bytes;
     typedef std::function<void()> ClosedConnectionHandler;
     typedef std::function<void()> DataReceivedHandler;
     enum ConnectedState {SuccessConnected, AlreadyConnected, UnknownHost, UnknownError};
@@ -23,7 +24,7 @@ public:
     unsigned int serverPort();
     bool write(const char* data, int len);
     bool write(const std::string& s);
-    char* readBytes();
+    Bytes readBytes();
     std::string readString();
 
     void setCloseConnectionHandler(ClosedConnectionHandler);

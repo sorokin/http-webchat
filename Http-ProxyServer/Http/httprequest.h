@@ -8,13 +8,16 @@
 class HttpRequest
 {
 public:
+    typedef std::string Data;
     typedef std::string String;
     typedef std::map <String, String> HeadersContainer;
 
     enum Method {HEAD, GET, PUT, POST, DELETE};
     HttpRequest();
-    HttpRequest(Method method, const String& url, const char* body = NULL, const String& version = "1.0");
-    HttpRequest(const String& method, const String& url, const char* body = NULL, const String& version = "1.0");
+    HttpRequest(Method method, const String& url,
+                const Data& body = "", const String& version = "1.0");
+    HttpRequest(const String& method, const String& url,
+                const Data& body = "", const String& version = "1.0");
     void setMethod(const String& method);
     void setMethod(Method method);
     String method() const;
@@ -28,7 +31,7 @@ public:
     String header(const String& key);
     void setMessageBody(const String& message);
     void setMessageBody(const char* message);
-    const char* messageBody() const;
+    Data messageBody() const;
     String host() const;
     String path() const;
 private:
@@ -38,7 +41,7 @@ private:
     String mHost;
     String mPath;
     String mVersion;
-    const char* mBody;
+    Data mBody;
     HeadersContainer mHeaders;
 };
 

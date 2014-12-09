@@ -79,13 +79,19 @@ bool TcpSocket::write(const std::string& s) {
     return true;
 }
 
-char* TcpSocket::readBytes() {
-    char *outData = new char[readBuffer.size()];
+TcpSocket::Bytes TcpSocket::readBytes() {
+    Bytes ret;
+    for (int i = 0; !readBuffer.empty(); ++i) {
+        ret += readBuffer.front();
+        readBuffer.pop_front();
+    }
+    return ret;
+    /*char *outData = new char[readBuffer.size()];
     for (int i = 0; !readBuffer.empty(); ++i) {
         outData[i] = readBuffer.front();
         readBuffer.pop_front();
     }
-    return outData;
+    return outData;*/
 }
 
 std::string TcpSocket::readString() {
@@ -129,7 +135,7 @@ int TcpSocket::bytesAvailable() {
 void TcpSocket::close() {
     if (fd == NONE)
         return;
-    printf("Closed connection on descriptor %d\n", fd);
+    //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
     assert(s == 0);

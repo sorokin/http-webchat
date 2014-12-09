@@ -4,10 +4,17 @@
 #include <QDebug>
 #include <Http/httpclient.h>
 #include <QUrl>
+#include <QFile>
+#include <sstream>
 using namespace std;
 
 bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
+    //QFile file("output.txt");
+    //file.open(QIODevice::WriteOnly);
+    //QTextStream str(&file);
+
+    freopen("output.txt", "w", stdout);
     //HttpRequest *q = new HttpRequest(HttpRequest::POST, "www.google.ru");
 
     /*if (IS_SERV) {
@@ -44,7 +51,14 @@ int main(int argc, char *argv[]) {
     }*/
     //qDebug() << rus << endl;
     HttpClient *client = new HttpClient();
-    client->request(HttpRequest(HttpRequest::GET, "http://www.google.ru/drive/"));
+    client->request(HttpRequest(HttpRequest::GET, "http://www.google.ru/drive/"),
+                    [&](HttpResponse r) {
+                    string s = r.messageBody();
+            string inl;
+    stringstream in(s);
+    while (getline(in, inl))
+        cout << inl << endl;
+});
     // [](const HttpResponse&) {});
     return Application::instance()->exec();
 }

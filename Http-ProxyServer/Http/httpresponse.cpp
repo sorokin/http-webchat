@@ -2,9 +2,12 @@
 
 HttpResponse::HttpResponse() {}
 
-HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase,
-                           const char* message, const String& version) {
-
+HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const String& version,
+                           const Data& message) {
+    mStatusCode = statusCode;
+    mReasonPhrase = reasonPhrase;
+    mVersion = version;
+    mBody = message;
 }
 
 void HttpResponse::setStatusCode(int statusCode) {
@@ -23,15 +26,11 @@ HttpResponse::String HttpResponse::reasonPhrase() const {
     return mReasonPhrase;
 }
 
-void HttpResponse::setMessageBody(const String& message) {
-    mBody = message.c_str();
-}
-
-void HttpResponse::setMessageBody(const char* message) {
+void HttpResponse::setMessageBody(const Data& message) {
     mBody = message;
 }
 
-const char* HttpResponse::messageBody() const {
+HttpResponse::Data HttpResponse::messageBody() const {
     return mBody;
 }
 

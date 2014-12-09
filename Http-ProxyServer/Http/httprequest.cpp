@@ -12,7 +12,7 @@ HttpRequest::String HttpRequest::getMethod(Method method) {
     return "";
 }
 
-HttpRequest::HttpRequest(Method method, const String& url, const char* message,
+HttpRequest::HttpRequest(Method method, const String& url, const Data& message,
                          const String& version) {
     mMethod = getMethod(method);
     splitUrl(url, mHost, mPath);
@@ -23,7 +23,7 @@ HttpRequest::HttpRequest(Method method, const String& url, const char* message,
 }
 
 HttpRequest::HttpRequest(const String& method, const String& url,
-                         const char* message, const String& version) {
+                         const Data& message, const String& version) {
     mMethod = method;
     splitUrl(url, mHost, mPath);
     mHeaders["Host"] = mHost;
@@ -106,6 +106,6 @@ void HttpRequest::setMessageBody(const char* message) {
     mBody = message;
 }
 
-const char* HttpRequest::messageBody() const {
+HttpRequest::Data HttpRequest::messageBody() const {
     return mBody;
 }
