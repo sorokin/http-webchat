@@ -18,7 +18,7 @@ public:
     typedef std::function<void()> DataReceivedHandler;
     enum ConnectedState {SuccessConnected, AlreadyConnected, UnknownHost, UnknownError};
 
-    TcpSocket();
+    TcpSocket(Application *app);
     ConnectedState connectToHost(const std::string& host, unsigned int port = 80);
     std::string serverHost();
     unsigned int serverPort();
@@ -27,16 +27,20 @@ public:
     Bytes readBytes();
     std::string readString();
 
-    void setCloseConnectionHandler(ClosedConnectionHandler);
-    void removeCloseConnectionHandler();
+    void setClosedConnectionHandler(ClosedConnectionHandler);
+    void removeClosedConnectionHandler();
     void setDataReceivedHandler(DataReceivedHandler);
     void removeDataReceivedHandler();
     void clearBuffers();
     int bytesAvailable();
     void close();
     TcpSocket(TcpSocket&&);
+    bool inHandler;
+    bool pendingDelete;
+    static void operator delete(void* ptr, size_t size) throw();//DANGEROUS
     ~TcpSocket();
 private:
+    Application *app;
     const int DEFAULT_FLAGS = EPOLLIN | EPOLLHUP;
     const int OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLHUP;
     const int NONE = -1;
@@ -51,7 +55,7 @@ private:
     DataReceivedHandler dataReceivedHandler;
 
     friend class TcpServerSocket;
-    TcpSocket(int fd, char* host, char* port);
+    TcpSocket(Application *app, int fd, char* host, char* port);
     int makeSocketNonBlocking(int fd);
     void handler(const epoll_event&);
     bool isErrorSocket(const epoll_event& ev);

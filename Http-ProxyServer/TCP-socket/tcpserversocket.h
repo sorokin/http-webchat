@@ -18,7 +18,7 @@ public:
     typedef std::function <TcpSocket*()> PendingConstructorFunctor;
     enum ConnectedState {SuccessConnected, AlreadyBinded, AlreadyConnected, UnknownError};
 
-    TcpServerSocket();
+    TcpServerSocket(Application *app);
     ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnectionHandler);
     bool isListening();
     std::string serverHost();
@@ -28,6 +28,7 @@ public:
     TcpServerSocket(TcpServerSocket&&);
     ~TcpServerSocket();
 private:
+    Application *app;
     static const int NONE = -1;
     const int MAX_EVENTS;
     int listenerFD;

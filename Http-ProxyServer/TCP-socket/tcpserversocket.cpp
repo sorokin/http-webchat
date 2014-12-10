@@ -1,7 +1,7 @@
 #include "tcpserversocket.h"
 #include <cassert>
 
-TcpServerSocket::TcpServerSocket():MAX_EVENTS(128), listenerFD(NONE) {}
+TcpServerSocket::TcpServerSocket(Application *app):MAX_EVENTS(128), listenerFD(NONE), app(app) {}
 
 TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host, const unsigned int port,
                              NewConnectionHandler newConnection) {
@@ -25,7 +25,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     s = ::listen(listenerFD, SOMAXCONN);
     assert(s == 0);
 
-    Application::instance()->setHandler(listenerFD , [this](epoll_event ev)
+   app->setHandler(listenerFD , [this](epoll_event ev)
                                                      {acceptConnection(ev);}, EPOLLIN);
 
     this->port = port;
@@ -51,7 +51,7 @@ void TcpServerSocket::close() {
         return;
     int s = ::close(listenerFD);
     assert(s == 0);
-    Application::instance()->removeHandler(listenerFD);
+    app->removeHandler(listenerFD);
     listenerFD = NONE;
     port = 0;
     host = "";
@@ -100,7 +100,7 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
         printf("Accepted connection on descriptor %d "
              "(host=%s, port=%s)\n", incomingFD, hbuf, sbuf);
         //makeSocketNonBlocking(incomingFD);
-        return new TcpSocket(incomingFD, hbuf, sbuf);
+        return new TcpSocket(app, incomingFD, hbuf, sbuf);
     };
     if (newConnectionHandler)
         newConnectionHandler();

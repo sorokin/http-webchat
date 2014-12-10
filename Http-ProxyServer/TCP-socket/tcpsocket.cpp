@@ -1,6 +1,9 @@
 #include "tcpsocket.h"
 #include <cassert>
 
+#include <iostream>
+using namespace std;
+
 int TcpSocket::makeSocketNonBlocking(int socket) {
     int flags, s;
     flags = fcntl(socket, F_GETFL, 0);
@@ -18,15 +21,16 @@ int TcpSocket::makeSocketNonBlocking(int socket) {
     return 0;
 }
 
-TcpSocket::TcpSocket():
-    fd(NONE), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024) {
+TcpSocket::TcpSocket(Application *app):
+    fd(NONE), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024),
+    inHandler(false), pendingDelete(false), app(app) {
 }
 
-TcpSocket::TcpSocket(int fd, char* host, char* port):TcpSocket() {
+TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket(app) {
     this->fd = fd;
     this->host = std::string(host);
     sscanf(port, "%d", &this->port);
-    Application::instance()->setHandler(fd, [this](const epoll_event& ev)
+    app->setHandler(fd, [this](const epoll_event& ev)
                                             {handler(ev);}, DEFAULT_FLAGS);
 }
 
@@ -48,7 +52,7 @@ TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsi
     assert(s == 0);
     this->host = host;
     this->port = port;
-    Application::instance()->setHandler(fd, [this](const epoll_event& ev)
+    app->setHandler(fd, [this](const epoll_event& ev)
                                             {handler(ev);}, DEFAULT_FLAGS);
     return SuccessConnected;
 }
@@ -105,11 +109,11 @@ std::string TcpSocket::readString() {
     return ret;
 }
 
-void TcpSocket::setCloseConnectionHandler(ClosedConnectionHandler h) {
+void TcpSocket::setClosedConnectionHandler(ClosedConnectionHandler h) {
     closedConnectionHandler = h;
 }
 
-void TcpSocket::removeCloseConnectionHandler() {
+void TcpSocket::removeClosedConnectionHandler() {
     closedConnectionHandler = ClosedConnectionHandler();
 }
 
@@ -135,32 +139,35 @@ int TcpSocket::bytesAvailable() {
 void TcpSocket::close() {
     if (fd == NONE)
         return;
-    //printf("Closed connection on descriptor %d\n", fd);
+    printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
     assert(s == 0);
-    Application::instance()->removeHandler(fd);
+    app->removeHandler(fd);
     fd = NONE;
     host = "";
     port = 0;
 }
 
 void TcpSocket::handler(const epoll_event& event) {
-    if ((event.events & EPOLLHUP) && closedConnectionHandler)
+    if ((event.events & EPOLLHUP) && closedConnectionHandler) {
+        inHandler = true;
         closedConnectionHandler();
-    if (event.events & EPOLLOUT)
+        inHandler = false;
+    }
+
+    if (!pendingDelete && (event.events & EPOLLOUT))
         tryWrite();
-    if (event.events & EPOLLIN) {
+
+    if (!pendingDelete && (event.events & EPOLLIN)) {
         bool done = false;
         bool  empty = true;
         for(;;) {
             char buf[BUFFER_SIZE_ON_READ];
-            ssize_t count = ::read(fd, buf, sizeof buf);
+            ssize_t count = ::read(fd, buf, BUFFER_SIZE_ON_READ);
             if (count == -1) {
-                if (errno != EAGAIN) {
+                if (errno != EAGAIN)
                     done = true;
-                    //read error
-                }
                 break;
             } else if (count == 0) {
                 done = true;
@@ -171,16 +178,26 @@ void TcpSocket::handler(const epoll_event& event) {
                     readBuffer.push_back(buf[i]);
             }
         }
-        //printf("end read. q.size() = %d\n", readBuffer.size());
-        if (!empty && dataReceivedHandler)
+        cerr << "size = " << readBuffer.size() << endl;
+        if (!empty && dataReceivedHandler && !pendingDelete) {
+            inHandler = true;
             dataReceivedHandler();
+            inHandler = false;
+        }
 
         if (done) {
-            if (closedConnectionHandler)
+            if (closedConnectionHandler && !pendingDelete) {
+                inHandler = true;
                 closedConnectionHandler();
+                inHandler = false;
+            }
             close();
         }
     }
+
+    if (pendingDelete)
+        ::operator delete(this);
+    //cerr << "size = " << readBuffer.size() << endl;
 }
 
 void TcpSocket::appendDataForWrite(const char* data, int len) {
@@ -207,10 +224,10 @@ void TcpSocket::tryWrite() {
             writeBuffer.pop_front();
     }
     if (writeBuffer.empty() && currentFlags != DEFAULT_FLAGS) {
-        Application::instance()->changeFlags(fd, DEFAULT_FLAGS);
+        app->changeFlags(fd, DEFAULT_FLAGS);
         currentFlags = DEFAULT_FLAGS;
     } else if (currentFlags != OUT_FLAGS) {
-        Application::instance()->changeFlags(fd, OUT_FLAGS);
+        app->changeFlags(fd, OUT_FLAGS);
         currentFlags = OUT_FLAGS;
     }
 }
@@ -232,4 +249,15 @@ TcpSocket::TcpSocket(TcpSocket&& oth):BUFFER_SIZE_ON_READ(oth.BUFFER_SIZE_ON_REA
     readBuffer.swap(oth.readBuffer);
     closedConnectionHandler.swap(oth.closedConnectionHandler);
     dataReceivedHandler.swap(oth.dataReceivedHandler);
+}
+
+static void TcpSocket::operator delete(void* ptr, size_t size) throw() {
+    assert(ptr != NULL);
+    assert(size == sizeof(TcpSocket));
+    TcpSocket *obj = (TcpSocket*)ptr;
+    if (!obj->inHandler)
+        ::operator delete(ptr);
+    else
+        obj->pendingDelete = true;
+
 }

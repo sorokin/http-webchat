@@ -10,6 +10,7 @@ using namespace std;
 
 bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
+    Application app;
     //QFile file("output.txt");
     //file.open(QIODevice::WriteOnly);
     //QTextStream str(&file);
@@ -49,16 +50,15 @@ int main(int argc, char *argv[]) {
                 //sock->close();
             }
     }*/
-    //qDebug() << rus << endl;
-    HttpClient *client = new HttpClient();
-    client->request(HttpRequest(HttpRequest::GET, "http://www.google.ru/drive/"),
-                    [&](HttpResponse r) {
-                    string s = r.messageBody();
+    HttpClient *client = new HttpClient(&app);
+    client->request(HttpRequest(HttpRequest::GET, "http://codeforces.ru"),
+        [&](HttpResponse r) {
+            string s = r.messageBody();
             string inl;
-    stringstream in(s);
-    while (getline(in, inl))
-        cout << inl << endl;
-});
+            stringstream in(s);
+            while (getline(in, inl))
+                cout << inl << endl;
+    });
     // [](const HttpResponse&) {});
-    return Application::instance()->exec();
+    return app.exec();
 }

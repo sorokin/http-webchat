@@ -5,14 +5,16 @@
 #include <iostream>
 using namespace std;
 
-HttpClient::HttpClient() {}
+HttpClient::HttpClient(Application *app):app(app) {}
 
 void HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
     const HttpRequest::String END_LINE = "\r\n";
 
-    TcpSocket *socket = new TcpSocket();
+    TcpSocket *socket = new TcpSocket(app);
     socket->connectToHost(request.host());
-    socket->setCloseConnectionHandler([=]() {
+    socket->setClosedConnectionHandler([=]() {
+            cerr << "in close connection handler" << endl;
+            cerr << "handler = " << (bool)handler << endl;
         if (handler)
             handler(parseResponse(socket->readBytes()));
         delete socket;
@@ -26,9 +28,11 @@ void HttpClient::request(const HttpRequest& request, const ResponseHandler& hand
     msg += END_LINE;
     msg += request.messageBody();
     socket->write(msg.c_str(), msg.size());
+    delete socket;
 }
 
 HttpResponse HttpClient::parseResponse(const TcpSocket::Bytes& s) {
+    cerr << "in parse response\n";
     std::stringstream in(s);
     std::string protVersion, reasPhrase;
     int code;
@@ -37,10 +41,7 @@ HttpResponse HttpClient::parseResponse(const TcpSocket::Bytes& s) {
     HttpResponse ret(code, reasPhrase, protVersion);
     std::string line;
     getline(in, line);
-    while (true) {
-        getline(in, line);
-        if (line == "")
-            break;
+    while (getline(in, line)) {
         int pos = line.find(":");
         string key = line.substr(0, pos);
         string value = (pos + 2 < s.size() ? s.substr(pos + 2, s.size() - pos - 2) : "");

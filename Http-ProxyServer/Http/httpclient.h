@@ -8,8 +8,9 @@
 class HttpClient
 {
     HttpResponse parseResponse(const TcpSocket::Bytes& s);
+    Application* app;
 public:
-    HttpClient();
+    HttpClient(Application* app);
     typedef std::function<void (HttpResponse)> ResponseHandler;
     void request(const HttpRequest& request, const ResponseHandler &handler = ResponseHandler());
 };
