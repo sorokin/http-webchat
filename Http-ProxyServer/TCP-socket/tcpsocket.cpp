@@ -37,7 +37,6 @@ TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket
 TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsigned int port) {
     if (fd != NONE)
         return AlreadyConnected;
-
     sockaddr_in servAddr;
     servAddr.sin_family = AF_INET;
     hostent *server = gethostbyname(host.c_str());
@@ -139,7 +138,7 @@ int TcpSocket::bytesAvailable() {
 void TcpSocket::close() {
     if (fd == NONE)
         return;
-    printf("Closed connection on descriptor %d\n", fd);
+    //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
     assert(s == 0);
@@ -178,7 +177,7 @@ void TcpSocket::handler(const epoll_event& event) {
                     readBuffer.push_back(buf[i]);
             }
         }
-        cerr << "size = " << readBuffer.size() << endl;
+        //cerr << "size = " << readBuffer.size() << endl;
         if (!empty && dataReceivedHandler && !pendingDelete) {
             inHandler = true;
             dataReceivedHandler();

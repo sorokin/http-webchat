@@ -7,14 +7,17 @@ using namespace std;
 
 HttpClient::HttpClient(Application *app):app(app) {}
 
-void HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
+HttpClient::StatusRequest HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
     const HttpRequest::String END_LINE = "\r\n";
 
     TcpSocket *socket = new TcpSocket(app);
-    socket->connectToHost(request.host());
+    TcpSocket::ConnectedState er = socket->connectToHost(request.host());
+    if (er == TcpSocket::UnknownHost) {
+        delete socket;
+        return UnknownHost;
+    }
+
     socket->setClosedConnectionHandler([=]() {
-            cerr << "in close connection handler" << endl;
-            cerr << "handler = " << (bool)handler << endl;
         if (handler)
             handler(parseResponse(socket->readBytes()));
         delete socket;
@@ -28,11 +31,10 @@ void HttpClient::request(const HttpRequest& request, const ResponseHandler& hand
     msg += END_LINE;
     msg += request.messageBody();
     socket->write(msg.c_str(), msg.size());
-    delete socket;
+    return Success;
 }
 
 HttpResponse HttpClient::parseResponse(const TcpSocket::Bytes& s) {
-    cerr << "in parse response\n";
     std::stringstream in(s);
     std::string protVersion, reasPhrase;
     int code;

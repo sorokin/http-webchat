@@ -41,7 +41,7 @@ int Application::exec() {
     int c = 0;
     for (;;) {
         int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
-        cerr << "epol_wait " << ++c << endl;
+        //cerr << "epol_wait " << ++c << endl;
         for (int i = 0; i < n; ++i)
             handlers[events[i].data.fd](events[i]);
     }
