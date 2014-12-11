@@ -1,7 +1,13 @@
 #include "httprequest.h"
 #include <QUrl>
 
-HttpRequest::HttpRequest() {}
+void HttpRequest::parseFirstLine(const String &line) {
+    std::stringstream in(line);
+    in >> mMethod >> mPath >> mVersion;
+    mVersion.erase(0, 5);
+}
+
+HttpRequest::HttpRequest(CreationMode mode):HttpObject(mode) {}
 
 HttpRequest::String HttpRequest::getMethod(Method method) {
     int methods[] = {HEAD, GET, PUT, POST, DELETE};
@@ -15,28 +21,27 @@ HttpRequest::String HttpRequest::getMethod(Method method) {
 HttpRequest::HttpRequest(Method method, const String& url, const Data& body,
                          const String& version):HttpObject(body, version) {
     mMethod = getMethod(method);
-    splitUrl(url, mHost, mPath);
-    mHeaders["Host"] = mHost;
+    String h;
+    splitUrl(url, h, mPath);
+    mHeaders["Host"] = h;
 }
 
 HttpRequest::HttpRequest(const String& method, const String& url,
                          const Data& body, const String& version):HttpObject(body, version) {
     mMethod = method;
-    splitUrl(url, mHost, mPath);
-    mHeaders["Host"] = mHost;
+    String h;
+    splitUrl(url, h, mPath);
+    mHeaders["Host"] = h;
 }
 
 void HttpRequest::setUrl(const String& url) {
-    splitUrl(url, mHost, mPath);
-    mHeaders["Host"] = mHost;
+    String h;
+    splitUrl(url, h, mPath);
+    mHeaders["Host"] = h;
 }
 
 HttpObject::String HttpRequest::url() const {
-    return mHost + mPath;
-}
-
-HttpRequest::String HttpRequest::host() const {
-    return mHost;
+    return host() + path();
 }
 
 HttpRequest::String HttpRequest::path() const {

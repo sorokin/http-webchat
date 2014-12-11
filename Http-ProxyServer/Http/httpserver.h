@@ -8,6 +8,8 @@
 #include <cstring>
 #include <algorithm>
 #include <QUrl>
+#include <Http/httputils.h>
+#include <Http/httprequest.h>
 
 class HttpServer
 {

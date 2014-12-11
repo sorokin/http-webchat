@@ -44,16 +44,9 @@ void HttpServer::stop() {
 
 
 void HttpServer::readRequest(TcpSocket *socket) {
-    cerr << socket << endl;
-    socket->setDataReceivedHandler([=]()
+    HttpRequest *request = new HttpRequest(HttpObject::Dynamic);
+    HttpUtils::readHttp(socket, request, [=]()
     {
-        TcpSocket::Bytes s = socket->readBytes();
-        cerr << s << "#";
-        cerr << (int)s[s.size() - 2] << " " << (int)s[s.size() - 1];
-    });
-
-    socket->setClosedConnectionHandler([=]()
-    {
-        cout << socket->readBytes() << endl;
+        cerr << request->host();
     });
 }

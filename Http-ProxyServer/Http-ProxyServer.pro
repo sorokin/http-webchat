@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     Http/httpresponse.cpp \
     Http/httpclient.cpp \
     Http/httpserver.cpp \
-    Http/httpobject.cpp
+    Http/httpobject.cpp \
+    Http/httputils.cpp
 
 HEADERS += \
     application.h \
@@ -33,6 +34,7 @@ HEADERS += \
     Http/httpresponse.h \
     Http/httpclient.h \
     Http/httpserver.h \
-    Http/httpobject.h
+    Http/httpobject.h \
+    Http/httputils.h
 
 QMAKE_CXXFLAGS += -std=c++11

@@ -5,7 +5,7 @@
 class HttpResponse:public HttpObject
 {
 public:
-    HttpResponse();
+    HttpResponse(CreationMode mode = Static);
     HttpResponse(int statusCode, const String& reasonPhrase,
                  const String& version, const Data& message = "");
 
@@ -16,7 +16,10 @@ public:
     void setReasonPhrase(const String& rph);
     String reasonPhrase() const;
     ~HttpResponse();
+protected:
+    void parseFirstLine(const String &line);
 private:
+
     int mStatusCode;
     String mReasonPhrase;
     String mUrl;

@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
 
 class HttpObject
 {
@@ -12,7 +13,13 @@ public:
     typedef std::string String;
     typedef std::map <String, String> HeadersContainer;
 
-    HttpObject();
+    //Dynamic creating of object
+    enum CreationMode {Dynamic, Static};
+    bool append(const Data& data);
+    void commit();
+    CreationMode creationMode();
+
+    HttpObject(CreationMode mode);
     HttpObject(const Data& body, const String& version);
     virtual void setUrl(const String& url) = 0;
     virtual String url() const = 0;
@@ -26,10 +33,22 @@ public:
     void setBody(const char* message);
     Data body() const;
     virtual ~HttpObject();
+
+    //get of headers
+    String host() const;
+    int contentLength() const;
 protected:
     String mVersion;
     Data mBody;
     HeadersContainer mHeaders;
+    virtual void parseFirstLine(const String& line) = 0;
+private:
+    String trim(const String& s);
+
+    bool isBody;
+    Data tmp;
+    CreationMode mode;
+    int position;
 };
 
 #endif // HttpObject_H

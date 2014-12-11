@@ -1,6 +1,12 @@
 #include "httpresponse.h"
 
-HttpResponse::HttpResponse() {}
+void HttpResponse::parseFirstLine(const String &line) {
+    std::stringstream in(line);
+    in >> mVersion >> mStatusCode >> mReasonPhrase;
+    mVersion.erase(0, 5);
+}
+
+HttpResponse::HttpResponse(CreationMode mode):HttpObject(mode) {}
 
 HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const String& version,
                            const Data& body):HttpObject(body, version) {

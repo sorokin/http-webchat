@@ -7,7 +7,7 @@
 
 class HttpClient
 {
-    HttpResponse parseResponse(const TcpSocket::Bytes& s);
+    //HttpResponse parseResponse(const TcpSocket::Bytes& s);
     Application* app;
 public:
     enum RequestStatus {Success, UnknownHost};
