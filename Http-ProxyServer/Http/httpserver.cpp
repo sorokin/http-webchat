@@ -45,6 +45,7 @@ HttpServer::Response::Response(TcpSocket* socket): socket(socket),
 
 bool HttpServer::Response::response(const HttpResponse& response) {
     if (!alreadyResponsed) {
+        cerr << response.toString() << endl;
         socket->write(response.toString().c_str(), response.toString().size());
         alreadyResponsed = true;
         return true;
@@ -58,9 +59,7 @@ void HttpServer::readRequest(TcpSocket *socket) {
     {
         String m = request->method();
         transformMethod(m);
-        if (methodHandlers.find(m) != methodHandlers.end()) {
-            cerr << "in handler\n";
-            methodHandlers[request->method()](*request, Response(socket));
-        }
+        if (methodHandlers.find(m) != methodHandlers.end())
+            methodHandlers[m](*request, Response(socket));
     });
 }
