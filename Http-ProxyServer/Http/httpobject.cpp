@@ -4,7 +4,6 @@
 using namespace std;
 
 bool HttpObject::append(const Data& data) {
-    //cerr << "append\n";
     if (mode == Static)
         return false;
 
@@ -17,7 +16,6 @@ bool HttpObject::append(const Data& data) {
                     (position >= 1 && tmp[position - 1] == '\n' ||
                      position >= 2 && tmp[position - 1] == '\r' && tmp[position - 2] == '\n'))
                 break;
-        //cerr << "pos = " << position << " tmp " << tmp.size() << endl;
         if (position != tmp.size()) {
             mIsBody = true;
             if (position + 1 < tmp.size()) {

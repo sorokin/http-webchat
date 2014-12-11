@@ -11,14 +11,24 @@ HttpClient::RequestStatus HttpClient::request(const HttpRequest& request, const 
     const HttpRequest::String END_LINE = "\r\n";
 
     TcpSocket *socket = new TcpSocket(app);
+
+    HttpResponse *obj = new HttpResponse(HttpObject::Dynamic);
+    HttpUtils::readHttp(socket, obj, [=]()
+    {
+        if (handler)
+            handler(*obj);
+        delete socket;
+    });
+
     TcpSocket::ConnectedState er = socket->connectToHost(request.host());
+    cerr << "er = " << er << endl;
     if (er == TcpSocket::UnknownHost) {
         delete socket;
         return UnknownHost;
     }
 
     /*socket->setClosedConnectionHandler([=]() {
-            cerr << "in close";
+        cerr << "in close";
         if (handler) {
             HttpResponse ret(HttpResponse::Dynamic);
             ret.append(socket->readBytes());

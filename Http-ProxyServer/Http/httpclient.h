@@ -4,6 +4,7 @@
 #include <Http/httpresponse.h>
 #include <TCP-socket/tcpsocket.h>
 #include <functional>
+#include <Http/httputils.h>
 
 class HttpClient
 {

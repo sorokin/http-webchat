@@ -4,6 +4,8 @@
 #include <Http/httpobject.h>
 #include <functional>
 
+#include <iostream>
+using namespace std;
 
 class HttpUtils
 {
@@ -13,12 +15,18 @@ public:
                          const std::function <void()>& onFinish) {
         socket->setDataReceivedHandler([=]()
         {
-           object->append(socket->readBytes());
-           if (object->isBody() && object->body().size() == object->contentLength())
-               onFinish();
+            object->append(socket->readBytes());
+            if (object->isBody() && object->body().size() == object->contentLength()) {
+                object->commit();
+                onFinish();
+            }
         });
 
-        socket->setClosedConnectionHandler([=](){onFinish();});
+        socket->setClosedConnectionHandler([=]()
+        {
+            object->commit();
+            onFinish();
+        });
     }
 };
 
