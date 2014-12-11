@@ -10,10 +10,10 @@ class HttpClient
     HttpResponse parseResponse(const TcpSocket::Bytes& s);
     Application* app;
 public:
-    enum StatusRequest {Success, UnknownHost};
+    enum RequestStatus {Success, UnknownHost};
     HttpClient(Application* app);
     typedef std::function<void (HttpResponse)> ResponseHandler;
-    StatusRequest request(const HttpRequest& request, const ResponseHandler &handler = ResponseHandler());
+    RequestStatus request(const HttpRequest& request, const ResponseHandler &handler = ResponseHandler());
 };
 
 #endif // HTTPCLIENT_H

@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace std;
 
-Application::Application():MAX_EVENTS(64), events(MAX_EVENTS) {
+Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
     mainLoopFD = epoll_create1(0);
 }
 

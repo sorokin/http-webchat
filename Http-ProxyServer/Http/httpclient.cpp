@@ -7,7 +7,7 @@ using namespace std;
 
 HttpClient::HttpClient(Application *app):app(app) {}
 
-HttpClient::StatusRequest HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
+HttpClient::RequestStatus HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
     const HttpRequest::String END_LINE = "\r\n";
 
     TcpSocket *socket = new TcpSocket(app);
@@ -29,7 +29,7 @@ HttpClient::StatusRequest HttpClient::request(const HttpRequest& request, const 
     for (HttpRequest::HeadersContainer::iterator it = headers.begin(); it != headers.end(); it++)
         msg += it->first + ": " + it->second + END_LINE;
     msg += END_LINE;
-    msg += request.messageBody();
+    msg += request.body();
     socket->write(msg.c_str(), msg.size());
     return Success;
 }
@@ -46,12 +46,12 @@ HttpResponse HttpClient::parseResponse(const TcpSocket::Bytes& s) {
     while (getline(in, line)) {
         int pos = line.find(":");
         string key = line.substr(0, pos);
-        string value = (pos + 2 < s.size() ? s.substr(pos + 2, s.size() - pos - 2) : "");
+        string value = (pos + 2 < (int)s.size() ? s.substr(pos + 2, (int)s.size() - pos - 2) : "");
         ret.setHeader(key, value);
     }
     HttpResponse::Data sum, l;
     while (getline(in, l))
         sum += l;
-    ret.setMessageBody(s);
+    ret.setBody(s);
     return ret;
 }

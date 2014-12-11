@@ -6,19 +6,28 @@
 #include <QUrl>
 #include <QFile>
 #include <sstream>
+#include <Http/httpserver.h>
 using namespace std;
+class SimpleServer: public HttpServer {
+public:
+    SimpleServer(Application *app):HttpServer(app){}
+    void initializate() {
+        cerr << "lol init" << endl;
+    }
+};
 
-bool IS_SERV = 0;
 int main(int argc, char *argv[]) {
     Application app;
-    //QFile file("output.txt");
-    //file.open(QIODevice::WriteOnly);
-    //QTextStream str(&file);
-
     freopen("output.txt", "w", stdout);
+    //SimpleServer *serv = new SimpleServer(&app);
+    //cerr << "Status = " << serv->start(3333) << endl;
+
+    //HttpClient *cl = new HttpClient(&app);
     //HttpRequest *q = new HttpRequest(HttpRequest::POST, "www.google.ru");
 
-    /*if (IS_SERV) {
+    /*
+    bool IS_SERV = 0;
+    if (IS_SERV) {
         TcpServerSocket *serv = new TcpServerSocket();
         TcpServerSocket::ConnectedState st = serv->listen("127.0.0.1", 10003,
             [=]{
@@ -50,10 +59,11 @@ int main(int argc, char *argv[]) {
                 //sock->close();
             }
     }*/
+
     HttpClient *client = new HttpClient(&app);
     client->request(HttpRequest(HttpRequest::GET, "http://codeforces.ru"),
         [&](HttpResponse r) {
-            string s = r.messageBody();
+            string s = r.body();
             string inl;
             stringstream in(s);
             while (getline(in, inl))

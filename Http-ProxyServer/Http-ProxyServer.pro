@@ -21,7 +21,9 @@ SOURCES += main.cpp \
     TCP-socket/tcpserversocket.cpp \
     Http/httprequest.cpp \
     Http/httpresponse.cpp \
-    Http/httpclient.cpp
+    Http/httpclient.cpp \
+    Http/httpserver.cpp \
+    Http/httpobject.cpp
 
 HEADERS += \
     application.h \
@@ -29,6 +31,8 @@ HEADERS += \
     TCP-socket/tcpserversocket.h \
     Http/httprequest.h \
     Http/httpresponse.h \
-    Http/httpclient.h
+    Http/httpclient.h \
+    Http/httpserver.h \
+    Http/httpobject.h
 
 QMAKE_CXXFLAGS += -std=c++11

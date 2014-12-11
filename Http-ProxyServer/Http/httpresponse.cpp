@@ -3,11 +3,17 @@
 HttpResponse::HttpResponse() {}
 
 HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const String& version,
-                           const Data& message) {
+                           const Data& body):HttpObject(body, version) {
     mStatusCode = statusCode;
     mReasonPhrase = reasonPhrase;
-    mVersion = version;
-    mBody = message;
+}
+
+void HttpResponse::setUrl(const String& url) {
+    mUrl = url;
+}
+
+HttpResponse::String HttpResponse::url() const {
+    return mUrl;
 }
 
 void HttpResponse::setStatusCode(int statusCode) {
@@ -26,24 +32,4 @@ HttpResponse::String HttpResponse::reasonPhrase() const {
     return mReasonPhrase;
 }
 
-void HttpResponse::setMessageBody(const Data& message) {
-    mBody = message;
-}
-
-HttpResponse::Data HttpResponse::messageBody() const {
-    return mBody;
-}
-
-void HttpResponse::setHeader(const String& key, const String& value) {
-    mHeaders[key] = value;
-}
-
-HttpResponse::String HttpResponse::header(const String& key) {
-    if (mHeaders.find(key) != mHeaders.end())
-        return mHeaders[key];
-    return "";
-}
-
-std::map<HttpResponse::String, HttpResponse::String> HttpResponse::headers() const {
-    return mHeaders;
-}
+HttpResponse::~HttpResponse() {}

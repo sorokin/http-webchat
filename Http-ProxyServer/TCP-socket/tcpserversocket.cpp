@@ -8,8 +8,8 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     if (listenerFD != NONE)
         return AlreadyConnected;
     listenerFD = socket(AF_INET, SOCK_STREAM, 0);
-    if (listenerFD == NONE)
-        return UnknownError;
+    assert(listenerFD >= 0);
+
     sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -31,7 +31,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     this->port = port;
     this->host = host;
     this->newConnectionHandler = newConnection;
-    return SuccessConnected;
+    return Success;
 }
 
 bool TcpServerSocket::isListening() {

@@ -149,6 +149,7 @@ void TcpSocket::close() {
 }
 
 void TcpSocket::handler(const epoll_event& event) {
+    //cerr << "this = " << this << " EPOLLHUP = " << (event.events & EPOLLHUP) << endl;
     if ((event.events & EPOLLHUP) && closedConnectionHandler) {
         inHandler = true;
         closedConnectionHandler();
@@ -164,6 +165,7 @@ void TcpSocket::handler(const epoll_event& event) {
         for(;;) {
             char buf[BUFFER_SIZE_ON_READ];
             ssize_t count = ::read(fd, buf, BUFFER_SIZE_ON_READ);
+            //cerr << "this = " << this << " count = " << count << endl;
             if (count == -1) {
                 if (errno != EAGAIN)
                     done = true;
