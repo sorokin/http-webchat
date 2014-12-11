@@ -40,9 +40,7 @@ HttpResponse::String HttpResponse::reasonPhrase() const {
 
 HttpResponse::String HttpResponse::toString() const {
     String msg = "HTTP/" + version() + " ";
-    char s[5];
-    sprintf(s, "%d", mStatusCode);
-    msg += String(s) + " " + mReasonPhrase + END_LINE + HttpObject::toString();
+    msg += std::to_string(mStatusCode) + " " + mReasonPhrase + END_LINE + HttpObject::toString();
     return msg;
 }
 
