@@ -4,10 +4,11 @@
 using namespace std;
 
 bool HttpObject::append(const Data& data) {
+    //cerr << "append\n";
     if (mode == Static)
         return false;
 
-    if (isBody)
+    if (mIsBody)
         mBody += data;
     else {
         tmp += data;
@@ -18,7 +19,7 @@ bool HttpObject::append(const Data& data) {
                 break;
         //cerr << "pos = " << position << " tmp " << tmp.size() << endl;
         if (position != tmp.size()) {
-            isBody = true;
+            mIsBody = true;
             if (position + 1 < tmp.size()) {
                 mBody = tmp.substr(position + 1, (int)tmp.size() - position - 1);
                 tmp.erase(position + 1, (int)tmp.size() - position - 1);
@@ -34,7 +35,7 @@ bool HttpObject::append(const Data& data) {
                 if (pos == -1)
                     continue;
                 String key = trim(line.substr(0, pos));
-                String value = trim(tmp.substr(pos + 1, (int)line.size() - pos - 1));
+                String value = trim(line.substr(pos + 1, (int)line.size() - pos - 1));
                 mHeaders[key] = value;
             }
         }
@@ -44,6 +45,10 @@ bool HttpObject::append(const Data& data) {
 
 void HttpObject::commit() {
     mode = Static;
+}
+
+bool HttpObject::isBody() {
+    return mIsBody;
 }
 
 HttpObject::String HttpObject::trim(const String& s) {
@@ -59,7 +64,7 @@ HttpObject::CreationMode HttpObject::creationMode() {
     return mode;
 }
 
-HttpObject::HttpObject(HttpObject::CreationMode mode):isBody(false), mode(mode), position(0) {}
+HttpObject::HttpObject(HttpObject::CreationMode mode):mIsBody(false), mode(mode), position(0) {}
 
 HttpObject::HttpObject(const Data& body, const String& version) {
     mBody = body;

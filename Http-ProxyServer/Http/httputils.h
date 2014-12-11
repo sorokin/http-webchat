@@ -14,7 +14,7 @@ public:
         socket->setDataReceivedHandler([=]()
         {
            object->append(socket->readBytes());
-           if (object->body().size() == object->contentLength())
+           if (object->isBody() && object->body().size() == object->contentLength())
                onFinish();
         });
 

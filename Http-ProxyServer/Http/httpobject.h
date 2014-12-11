@@ -17,6 +17,7 @@ public:
     enum CreationMode {Dynamic, Static};
     bool append(const Data& data);
     void commit();
+    bool isBody();
     CreationMode creationMode();
 
     HttpObject(CreationMode mode);
@@ -45,7 +46,7 @@ protected:
 private:
     String trim(const String& s);
 
-    bool isBody;
+    bool mIsBody;
     Data tmp;
     CreationMode mode;
     int position;
