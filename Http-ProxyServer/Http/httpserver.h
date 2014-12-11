@@ -10,24 +10,32 @@
 #include <QUrl>
 #include <Http/httputils.h>
 #include <Http/httprequest.h>
+#include <Http/httpresponse.h>
 
 class HttpServer
 {
-private:
     typedef std::string String;
 public:
+    class Response {
+        Response(TcpSocket* socket);
+        bool alreadyResponsed;
+        TcpSocket *socket;
+    public:
+        bool response(const HttpResponse& response);
+        friend class HttpServer;
+    };
+
     enum ServerStatus {Success, AlreadyBinded, AlreadyStarted};
     typedef std::function <void()> RouteHandler;
-    typedef std::function <void()> MethodHandler;
+    typedef std::function <void(HttpRequest request, Response)> MethodHandler;
 
     HttpServer(Application* app);
     ServerStatus start(int port);
-    void stop();
     void setRouteHandler(String rout, const RouteHandler& handler);
     void setMethodHandler(String method, const MethodHandler& handler);
 protected:
     virtual void initializate() = 0;
-private:
+protected:
     Application *app;
     std::map <String, MethodHandler> methodHandlers;
     std::map <String, RouteHandler> routeHandlers;

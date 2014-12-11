@@ -15,6 +15,8 @@ public:
     int statusCode() const;
     void setReasonPhrase(const String& rph);
     String reasonPhrase() const;
+    String toString() const;
+
     ~HttpResponse();
 protected:
     void parseFirstLine(const String &line);

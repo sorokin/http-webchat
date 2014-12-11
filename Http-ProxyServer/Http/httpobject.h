@@ -13,6 +13,8 @@ public:
     typedef std::string String;
     typedef std::map <String, String> HeadersContainer;
 
+    const String END_LINE = "\r\n";
+
     //Dynamic creating of object
     enum CreationMode {Dynamic, Static};
     bool append(const Data& data);
@@ -32,6 +34,7 @@ public:
     HeadersContainer headers() const;
     void setBody(const String& message);
     void setBody(const char* message);
+    virtual String toString() const;
     Data body() const;
     virtual ~HttpObject();
 

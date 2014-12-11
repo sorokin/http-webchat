@@ -38,4 +38,12 @@ HttpResponse::String HttpResponse::reasonPhrase() const {
     return mReasonPhrase;
 }
 
+HttpResponse::String HttpResponse::toString() const {
+    String msg = "HTTP/" + version() + " ";
+    char s[5];
+    sprintf(s, "%d", mStatusCode);
+    msg += String(s) + " " + mReasonPhrase + END_LINE + HttpObject::toString();
+    return msg;
+}
+
 HttpResponse::~HttpResponse() {}

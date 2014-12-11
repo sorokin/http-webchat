@@ -39,14 +39,28 @@ HttpServer::ServerStatus HttpServer::start(int port) {
     return Success;
 }
 
-void HttpServer::stop() {
-}
 
+HttpServer::Response::Response(TcpSocket* socket): socket(socket),
+    alreadyResponsed(alreadyResponsed) {}
+
+bool HttpServer::Response::response(const HttpResponse& response) {
+    if (!alreadyResponsed) {
+        socket->write(response.toString().c_str(), response.toString().size());
+        alreadyResponsed = true;
+        return true;
+    }
+    return false;
+}
 
 void HttpServer::readRequest(TcpSocket *socket) {
     HttpRequest *request = new HttpRequest(HttpObject::Dynamic);
     HttpUtils::readHttp(socket, request, [=]()
     {
-        cerr << request->host();
+        String m = request->method();
+        transformMethod(m);
+        if (methodHandlers.find(m) != methodHandlers.end()) {
+            cerr << "in handler\n";
+            methodHandlers[request->method()](*request, Response(socket));
+        }
     });
 }

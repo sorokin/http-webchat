@@ -70,5 +70,11 @@ HttpRequest::String HttpRequest::method() const {
     return mMethod;
 }
 
+HttpRequest::String HttpRequest::toString() const {
+    HttpRequest::String msg = method() + " " + path() +
+            " HTTP/" + version() + END_LINE;
+    return msg + HttpObject::toString();
+}
+
 HttpRequest::~HttpRequest() {}
 

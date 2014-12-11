@@ -16,6 +16,7 @@ public:
     void setMethod(const String& method);
     void setMethod(Method method);
     String method() const;
+    String toString() const;
 
     String path() const;
     ~HttpRequest();

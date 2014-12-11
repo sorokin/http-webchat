@@ -121,5 +121,14 @@ int HttpObject::contentLength() const {
     return 0;
 }
 
+HttpObject::String HttpObject::toString() const {
+    String msg;
+    for (HeadersContainer::const_iterator it = mHeaders.begin(); it != mHeaders.end(); it++)
+        msg += it->first + ": " + it->second + END_LINE;
+    msg += END_LINE;
+    msg += mBody;
+    return msg;
+}
+
 HttpObject::~HttpObject() {}
 

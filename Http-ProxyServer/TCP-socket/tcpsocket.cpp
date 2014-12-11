@@ -75,8 +75,7 @@ bool TcpSocket::write(const char* data, int len) {
 bool TcpSocket::write(const std::string& s) {
     if (fd == NONE)
         return false;
-    for (int i = 0; i < s.size(); ++i)
-        appendCharForWrite(s[i]);
+    appendDataForWrite(s.c_str(), s.size());
     appendCharForWrite(0);
     tryWrite();
     return true;
