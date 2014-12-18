@@ -34,8 +34,6 @@ public:
     void setRouteHandler(String rout, const RouteHandler& handler);
     void setMethodHandler(String method, const MethodHandler& handler);
 protected:
-    virtual void initializate() = 0;
-protected:
     Application *app;
     std::map <String, MethodHandler> methodHandlers;
     std::map <String, RouteHandler> routeHandlers;

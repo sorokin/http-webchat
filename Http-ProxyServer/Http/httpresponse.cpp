@@ -38,7 +38,7 @@ HttpResponse::String HttpResponse::reasonPhrase() const {
     return mReasonPhrase;
 }
 
-HttpResponse::String HttpResponse::toString() const {
+HttpResponse::Data HttpResponse::toString() const {
     String msg = "HTTP/" + version() + " ";
     msg += std::to_string(mStatusCode) + " " + mReasonPhrase + END_LINE + HttpObject::toString();
     return msg;

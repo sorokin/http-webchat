@@ -13,7 +13,7 @@ public:
     typedef std::string String;
     typedef std::map <String, String> HeadersContainer;
 
-    const String END_LINE = "\r\n";
+    const String END_LINE = "\n";
 
     //Dynamic creating of object
     enum CreationMode {Dynamic, Static};
@@ -32,7 +32,7 @@ public:
     void setHeaders(const std::vector <std::pair <String, String> >& headers);
     String header(const String& key);
     HeadersContainer headers() const;
-    void setBody(const String& message);
+    void setBody(const Data& message);
     void setBody(const char* message);
     virtual String toString() const;
     Data body() const;

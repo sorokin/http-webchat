@@ -29,7 +29,6 @@ void HttpServer::setRouteHandler(std::string rout, const RouteHandler &handler) 
 }
 
 HttpServer::ServerStatus HttpServer::start(int port) {
-    initializate();
     TcpServerSocket::ConnectedState e =
             listener->listen("127.0.0.1", port, [this]() {readRequest(listener->getPendingConnecntion());});
     if (e == TcpServerSocket::AlreadyBinded)
@@ -40,13 +39,12 @@ HttpServer::ServerStatus HttpServer::start(int port) {
 }
 
 
-HttpServer::Response::Response(TcpSocket* socket): socket(socket),
-    alreadyResponsed(alreadyResponsed) {}
+HttpServer::Response::Response(TcpSocket* socket): alreadyResponsed(false), socket(socket) {}
 
 bool HttpServer::Response::response(const HttpResponse& response) {
     if (!alreadyResponsed) {
         cerr << response.toString() << endl;
-        socket->write(response.toString().c_str(), response.toString().size());
+        cerr << "wr = " << socket->write(response.toString()) << endl;
         alreadyResponsed = true;
         return true;
     }

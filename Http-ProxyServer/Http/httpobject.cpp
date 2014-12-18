@@ -67,6 +67,7 @@ HttpObject::HttpObject(HttpObject::CreationMode mode):mIsBody(false), mode(mode)
 HttpObject::HttpObject(const Data& body, const String& version) {
     mBody = body;
     mVersion = version;
+    setHeader("Content-Length", std::to_string(body.size()));
 }
 
 void HttpObject::setVersion(const String& vers) {
@@ -96,8 +97,9 @@ HttpObject::HeadersContainer HttpObject::headers() const {
     return mHeaders;
 }
 
-void HttpObject::setBody(const String& message) {
-    mBody = message.c_str();
+void HttpObject::setBody(const Data& body) {
+    mBody = body.c_str();
+    setHeader("Content-Length", std::to_string(body.size()));
 }
 
 void HttpObject::setBody(const char* message) {

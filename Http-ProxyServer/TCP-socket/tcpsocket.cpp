@@ -76,7 +76,6 @@ bool TcpSocket::write(const std::string& s) {
     if (fd == NONE)
         return false;
     appendDataForWrite(s.c_str(), s.size());
-    appendCharForWrite(0);
     tryWrite();
     return true;
 }
@@ -88,12 +87,6 @@ TcpSocket::Bytes TcpSocket::readBytes() {
         readBuffer.pop_front();
     }
     return ret;
-    /*char *outData = new char[readBuffer.size()];
-    for (int i = 0; !readBuffer.empty(); ++i) {
-        outData[i] = readBuffer.front();
-        readBuffer.pop_front();
-    }
-    return outData;*/
 }
 
 std::string TcpSocket::readString() {
