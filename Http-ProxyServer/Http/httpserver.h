@@ -7,10 +7,10 @@
 #include <string>
 #include <cstring>
 #include <algorithm>
-#include <QUrl>
 #include <Http/httputils.h>
 #include <Http/httprequest.h>
 #include <Http/httpresponse.h>
+#include <memory>
 
 class HttpServer
 {
@@ -18,7 +18,6 @@ class HttpServer
 public:
     class Response {
         Response(TcpSocket* socket);
-        bool alreadyResponsed;
         TcpSocket *socket;
     public:
         bool response(const HttpResponse& response);
@@ -27,7 +26,7 @@ public:
 
     enum ServerStatus {Success, AlreadyBinded, AlreadyStarted};
     typedef std::function <void()> RouteHandler;
-    typedef std::function <void(HttpRequest request, Response)> MethodHandler;
+    typedef std::function <void(HttpRequest, Response)> MethodHandler;
 
     HttpServer(Application* app);
     ServerStatus start(int port);

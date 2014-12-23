@@ -32,8 +32,8 @@ bool HttpObject::append(const Data& data) {
                 int pos = line.find(":");
                 if (pos == -1)
                     continue;
-                String key = trim(line.substr(0, pos));
-                String value = trim(line.substr(pos + 1, (int)line.size() - pos - 1));
+                String key = toLower(trim(line.substr(0, pos)));
+                String value = toLower(trim(line.substr(pos + 1, (int)line.size() - pos - 1)));
                 mHeaders[key] = value;
             }
         }
@@ -79,17 +79,18 @@ HttpObject::String HttpObject::version() const {
 }
 
 void HttpObject::setHeader(const String& key, const String& val) {
-    mHeaders[key] = val;
+    mHeaders[toLower(key)] = toLower(val);
 }
 
 void HttpObject::setHeaders(const std::vector <std::pair <String, String> >& headers) {
     for (int i = 0; i < (int)headers.size(); ++i)
-        mHeaders[headers[i].first] = headers[i].second;
+        mHeaders[toLower(headers[i].first)] = headers[i].second;
 }
 
 HttpObject::String HttpObject::header(const String& key) {
-    if (mHeaders.find(key) != mHeaders.end())
-        return mHeaders[key];
+    String k = toLower(key);
+    if (mHeaders.find(k) != mHeaders.end())
+        return mHeaders[k];
     return "";
 }
 
@@ -112,15 +113,19 @@ HttpObject::Data HttpObject::body() const {
 
 
 HttpObject::String HttpObject::host() const {
-    if (mHeaders.find("Host") != mHeaders.end())
-        return mHeaders.at("Host");
+    if (mHeaders.find("host") != mHeaders.end())
+        return mHeaders.at("host");
     return "";
 }
 
 int HttpObject::contentLength() const {
-    if (mHeaders.find("Content-Length") != mHeaders.end())
-        return std::stoi(mHeaders.at("Content-Length"));
+    if (mHeaders.find("content-length") != mHeaders.end())
+        return std::stoi(mHeaders.at("content-length"));
     return 0;
+}
+
+bool HttpObject::isKeepAlive() const {
+    return mHeaders.at("Connection") != "keep-alive";
 }
 
 HttpObject::String HttpObject::toString() const {
@@ -134,3 +139,7 @@ HttpObject::String HttpObject::toString() const {
 
 HttpObject::~HttpObject() {}
 
+std::string HttpObject::toLower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+}

@@ -3,31 +3,18 @@
 #include <TCP-socket/tcpsocket.h>
 #include <Http/httpobject.h>
 #include <functional>
+#include <algorithm>
+#include <QUrl>
+#include <Http/httprequest.h>
 
-#include <iostream>
-using namespace std;
-
-class HttpUtils
+namespace HttpUtils
 {
-    HttpUtils();
-public:
-    static void readHttp(TcpSocket *socket, HttpObject* object,
-                         const std::function <void()>& onFinish) {
-        socket->setDataReceivedHandler([=]()
-        {
-            object->append(socket->readBytes());
-            if (object->isBody() && object->body().size() == object->contentLength()) {
-                object->commit();
-                onFinish();
-            }
-        });
+    void readHttp(TcpSocket *socket,
+                  const std::function <void(HttpObject*)>& onFinish,
+                  const std::function <HttpObject*()>& creator);
 
-        socket->setClosedConnectionHandler([=]()
-        {
-            object->commit();
-            onFinish();
-        });
-    }
-};
+    std::string toLower(std::string s);
+    void transformRoute(std::string& route);
+}
 
 #endif // HTTPUTILS_H

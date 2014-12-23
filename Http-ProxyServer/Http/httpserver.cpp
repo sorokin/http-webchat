@@ -5,32 +5,22 @@ using namespace std;
 
 HttpServer::HttpServer(Application *app):app(app), listener(new TcpServerSocket(app)) {}
 
-void HttpServer::transformMethod(String& method) {
-    std::transform(method.begin(), method.end(), method.begin(), ::tolower);
-}
-
-void HttpServer::transformRoute(String& route) {
-    std::transform(route.begin(), route.end(), route.begin(), ::tolower);
-    QUrl url(route.c_str());
-    QString qstr = url.path();
-    if (qstr[qstr.size() - 1] == '/' && qstr.size() != 1)
-        qstr.remove(qstr.size() - 1, 1);
-    route = qstr.toStdString();
-}
-
 void HttpServer::setMethodHandler(String method, const MethodHandler &handler) {
-    transformMethod(method);
+    method = HttpUtils::toLower(method);
     methodHandlers[method] = handler;
 }
 
 void HttpServer::setRouteHandler(std::string rout, const RouteHandler &handler) {
-    transformRoute(rout);
+    HttpUtils::transformRoute(rout);
     routeHandlers[rout] = handler;
 }
 
 HttpServer::ServerStatus HttpServer::start(int port) {
-    TcpServerSocket::ConnectedState e =
-            listener->listen("127.0.0.1", port, [this]() {readRequest(listener->getPendingConnecntion());});
+    TcpServerSocket::ConnectedState e = listener->listen("127.0.0.1", port, [this]()
+    {
+        readRequest(listener->getPendingConnecntion());
+    });
+
     if (e == TcpServerSocket::AlreadyBinded)
         return AlreadyBinded;
     if (e == TcpServerSocket::AlreadyConnected)
@@ -39,25 +29,27 @@ HttpServer::ServerStatus HttpServer::start(int port) {
 }
 
 
-HttpServer::Response::Response(TcpSocket* socket): alreadyResponsed(false), socket(socket) {}
+HttpServer::Response::Response(TcpSocket* socket):socket(socket) {}
 
 bool HttpServer::Response::response(const HttpResponse& response) {
-    if (!alreadyResponsed) {
-        cerr << response.toString() << endl;
-        cerr << "wr = " << socket->write(response.toString()) << endl;
-        alreadyResponsed = true;
+    if (socket != NULL) {
+        socket->write(response.toString());
+        socket = NULL;
         return true;
     }
     return false;
 }
 
 void HttpServer::readRequest(TcpSocket *socket) {
-    HttpRequest *request = new HttpRequest(HttpObject::Dynamic);
-    HttpUtils::readHttp(socket, request, [=]()
+    HttpUtils::readHttp(socket, [=](HttpObject* tmp)
     {
+        std::shared_ptr <HttpRequest> request((HttpRequest*)tmp);
         String m = request->method();
-        transformMethod(m);
-        if (methodHandlers.find(m) != methodHandlers.end())
+        m = HttpUtils::toLower(m);
+        if (methodHandlers.find(m) != methodHandlers.end());
             methodHandlers[m](*request, Response(socket));
-    });
+        if (!request->isKeepAlive());
+            delete socket;
+    },
+    []() {return new HttpRequest(HttpObject::Dynamic);});
 }

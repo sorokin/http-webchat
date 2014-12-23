@@ -1,23 +1,19 @@
 #include "httpclient.h"
-#include <QDebug>
-#include <sstream>
-
-#include <iostream>
-using namespace std;
+#include <memory>
 
 HttpClient::HttpClient(Application *app):app(app) {}
 
-HttpClient::RequestStatus HttpClient::request(const HttpRequest& request, const ResponseHandler& handler) {
+HttpClient::RequestStatus HttpClient::request(const HttpRequest& request,
+                                              const ResponseHandler& handler) {
     TcpSocket *socket = new TcpSocket(app);
-
-    HttpResponse *obj = new HttpResponse(HttpObject::Dynamic);
-    HttpUtils::readHttp(socket, obj, [=]()
+    HttpUtils::readHttp(socket, [=](HttpObject* tmp)
     {
+        std::shared_ptr<HttpResponse> obj((HttpResponse*)tmp);
         if (handler)
             handler(*obj);
-        delete obj;
-        delete socket;
-    });
+        delete socket;//TODO keep alive ?
+    },
+    [](){return new HttpResponse(HttpObject::Dynamic);});
 
     TcpSocket::ConnectedState er = socket->connectToHost(request.host());
     if (er == TcpSocket::UnknownHost) {
@@ -25,6 +21,6 @@ HttpClient::RequestStatus HttpClient::request(const HttpRequest& request, const 
         return UnknownHost;
     }
 
-    socket->write(request.toString().c_str(), request.toString().size());
+    socket->write(request.toString());
     return Success;
 }

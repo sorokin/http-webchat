@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 class HttpObject
 {
@@ -19,7 +20,7 @@ public:
     enum CreationMode {Dynamic, Static};
     bool append(const Data& data);
     void commit();
-    bool isBody();
+    bool hasBody();
     CreationMode creationMode();
 
     HttpObject(CreationMode mode);
@@ -36,6 +37,7 @@ public:
     void setBody(const char* message);
     virtual String toString() const;
     Data body() const;
+    bool isKeepAlive() const;
     virtual ~HttpObject();
 
     //get of headers
@@ -47,6 +49,7 @@ protected:
     HeadersContainer mHeaders;
     virtual void parseFirstLine(const String& line) = 0;
 private:
+    std::string toLower(std::string s);
     String trim(const String& s);
 
     bool mIsBody;
