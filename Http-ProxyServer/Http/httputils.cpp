@@ -9,22 +9,32 @@ void HttpUtils::readHttp(TcpSocket *socket,
               const std::function <void(HttpObject*)>& onFinish,
               const std::function <HttpObject*()>& creator) {
     bool *alreadyFinished = new bool(false);
-    HttpObject *object = creator();
-    socket->setDataReceivedHandler([=]()
+    HttpObject *obj = NULL;
+    socket->setDataReceivedHandler([=]() mutable
     {
-        object->append(socket->readBytes());
-        if (object->isBody() && object->body().size() == object->contentLength()) {
-            object->commit();
+        if (obj == NULL)
+            obj = creator();
+
+        obj->append(socket->readBytes());
+        if (obj->hasBody() && obj->body().size() == obj->contentLength()) {
+            obj->commit();
             *alreadyFinished = true;
-            onFinish(object);
+            onFinish(obj);
+            delete obj;
+            obj = NULL;
         }
     });
 
-    socket->setClosedConnectionHandler([=]()
+    socket->setClosedConnectionHandler([=]() mutable
     {
         if (!*alreadyFinished) {
-            object->commit();
-            onFinish(object);
+            if (obj != NULL)
+                obj->commit();
+            onFinish(obj);
+            if (obj != NULL) {
+                delete obj;
+                obj = NULL;
+            }
         }
         delete alreadyFinished;
     });

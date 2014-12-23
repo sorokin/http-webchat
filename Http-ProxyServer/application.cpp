@@ -4,6 +4,8 @@
 #include <iostream>
 using namespace std;
 
+Application::AbortHandler Application::abortHandler;
+
 Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
     mainLoopFD = epoll_create1(0);
 }
@@ -38,10 +40,8 @@ void Application::removeHandler(int fd) {
 }
 
 int Application::exec() {
-    int c = 0;
     for (;;) {
         int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
-        //cerr << "epol_wait " << ++c << endl;
         for (int i = 0; i < n; ++i)
             handlers[events[i].data.fd](events[i]);
     }

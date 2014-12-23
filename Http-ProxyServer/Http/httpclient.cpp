@@ -11,7 +11,8 @@ HttpClient::RequestStatus HttpClient::request(const HttpRequest& request,
         std::shared_ptr<HttpResponse> obj((HttpResponse*)tmp);
         if (handler)
             handler(*obj);
-        delete socket;//TODO keep alive ?
+        if (!request.isKeepAlive())
+            delete socket;
     },
     [](){return new HttpResponse(HttpObject::Dynamic);});
 

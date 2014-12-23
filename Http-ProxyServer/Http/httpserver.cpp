@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-HttpServer::HttpServer(Application *app):app(app), listener(new TcpServerSocket(app)) {}
+HttpServer::HttpServer(Application *app):app(app), listener(TcpServerSocket(app)) {}
 
 void HttpServer::setMethodHandler(String method, const MethodHandler &handler) {
     method = HttpUtils::toLower(method);
@@ -16,9 +16,9 @@ void HttpServer::setRouteHandler(std::string rout, const RouteHandler &handler) 
 }
 
 HttpServer::ServerStatus HttpServer::start(int port) {
-    TcpServerSocket::ConnectedState e = listener->listen("127.0.0.1", port, [this]()
+    TcpServerSocket::ConnectedState e = listener.listen("127.0.0.1", port, [this]()
     {
-        readRequest(listener->getPendingConnecntion());
+        readRequest(listener.getPendingConnecntion());
     });
 
     if (e == TcpServerSocket::AlreadyBinded)
@@ -43,13 +43,22 @@ bool HttpServer::Response::response(const HttpResponse& response) {
 void HttpServer::readRequest(TcpSocket *socket) {
     HttpUtils::readHttp(socket, [=](HttpObject* tmp)
     {
-        std::shared_ptr <HttpRequest> request((HttpRequest*)tmp);
-        String m = request->method();
-        m = HttpUtils::toLower(m);
-        if (methodHandlers.find(m) != methodHandlers.end());
-            methodHandlers[m](*request, Response(socket));
-        if (!request->isKeepAlive());
-            delete socket;
+        if (tmp != NULL) {
+            HttpRequest *request = (HttpRequest*)tmp;
+            String m = request->method();
+            m = HttpUtils::toLower(m);
+            if (methodHandlers.find(m) != methodHandlers.end());
+                methodHandlers[m](*request, Response(socket));
+            if (!request->isKeepAlive())
+                delete socket;
+        }
+        sockets.insert(socket);
     },
     []() {return new HttpRequest(HttpObject::Dynamic);});
 }
+
+HttpServer::~HttpServer() {
+    for (set <TcpSocket*>::iterator it = sockets.begin(); it != sockets.end(); it++)
+        delete *it;
+}
+

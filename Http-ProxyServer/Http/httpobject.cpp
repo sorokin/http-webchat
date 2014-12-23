@@ -45,7 +45,7 @@ void HttpObject::commit() {
     mode = Static;
 }
 
-bool HttpObject::isBody() {
+bool HttpObject::hasBody() {
     return mIsBody;
 }
 
@@ -125,7 +125,9 @@ int HttpObject::contentLength() const {
 }
 
 bool HttpObject::isKeepAlive() const {
-    return mHeaders.at("Connection") != "keep-alive";
+    if (mHeaders.find("connection") != mHeaders.end())
+        return mHeaders.at("connection") != "keep-alive";
+    return false;
 }
 
 HttpObject::String HttpObject::toString() const {

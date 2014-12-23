@@ -76,8 +76,6 @@ HttpRequest::Data HttpRequest::toString() const {
     return msg + HttpObject::toString();
 }
 
-#include <iostream>
 HttpRequest::~HttpRequest() {
-    std::cerr << "destructor http request " << this << std::endl;
 }
 

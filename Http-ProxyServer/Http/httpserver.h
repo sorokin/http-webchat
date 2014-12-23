@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include <set>
 #include <algorithm>
 #include <Http/httputils.h>
 #include <Http/httprequest.h>
@@ -32,11 +33,14 @@ public:
     ServerStatus start(int port);
     void setRouteHandler(String rout, const RouteHandler& handler);
     void setMethodHandler(String method, const MethodHandler& handler);
+    ~HttpServer();
 protected:
+    std::set <TcpSocket*> sockets;
+
     Application *app;
     std::map <String, MethodHandler> methodHandlers;
     std::map <String, RouteHandler> routeHandlers;
-    TcpServerSocket *listener;
+    TcpServerSocket listener;
     void readRequest(TcpSocket *socket);
 
     void transformRoute(String& route);
