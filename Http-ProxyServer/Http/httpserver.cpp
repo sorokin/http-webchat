@@ -5,14 +5,8 @@ using namespace std;
 
 HttpServer::HttpServer(Application *app):app(app), listener(TcpServerSocket(app)) {}
 
-void HttpServer::setMethodHandler(String method, const MethodHandler &handler) {
-    method = HttpUtils::toLower(method);
-    methodHandlers[method] = handler;
-}
-
-void HttpServer::setRouteHandler(std::string rout, const RouteHandler &handler) {
-    HttpUtils::transformRoute(rout);
-    routeHandlers[rout] = handler;
+void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const RequestHandler &handler) {
+    matchers.push_back(make_pair(matcher, handler));
 }
 
 HttpServer::ServerStatus HttpServer::start(int port) {
@@ -27,7 +21,6 @@ HttpServer::ServerStatus HttpServer::start(int port) {
         return AlreadyStarted;
     return Success;
 }
-
 
 HttpServer::Response::Response(TcpSocket* socket):socket(socket) {}
 
@@ -45,10 +38,9 @@ void HttpServer::readRequest(TcpSocket *socket) {
     {
         if (tmp != NULL) {
             HttpRequest *request = (HttpRequest*)tmp;
-            String m = request->method();
-            m = HttpUtils::toLower(m);
-            if (methodHandlers.find(m) != methodHandlers.end());
-                methodHandlers[m](*request, Response(socket));
+            for (int i = 0; i < (int)matchers.size(); ++i)
+                if (matchers[i].first.match(*request))
+                    matchers[i].second(*request, Response(socket));
             if (!request->isKeepAlive())
                 delete socket;
         }

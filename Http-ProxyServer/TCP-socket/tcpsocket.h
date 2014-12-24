@@ -35,7 +35,7 @@ public:
     int bytesAvailable();
     void close();
     TcpSocket(TcpSocket&&);
-    bool inHandler;
+    bool inCallback;
     bool pendingDelete;
     static void operator delete(void* ptr, size_t size) throw();//DANGEROUS
     ~TcpSocket();
@@ -47,6 +47,7 @@ private:
     const int BUFFER_SIZE_ON_READ;
     const int BUFFER_SIZE_ON_WRITE;
     int fd;
+    int currentFlags;
     std::string host;
     unsigned int port;
     std::deque <char> readBuffer;

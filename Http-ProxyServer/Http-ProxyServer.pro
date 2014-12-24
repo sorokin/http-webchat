@@ -24,7 +24,9 @@ SOURCES += main.cpp \
     Http/httpclient.cpp \
     Http/httpserver.cpp \
     Http/httpobject.cpp \
-    Http/httputils.cpp
+    Http/httputils.cpp \
+    ChatServer/chatserver.cpp \
+    Http/routematcher.cpp
 
 HEADERS += \
     application.h \
@@ -35,6 +37,8 @@ HEADERS += \
     Http/httpclient.h \
     Http/httpserver.h \
     Http/httpobject.h \
-    Http/httputils.h
+    Http/httputils.h \
+    ChatServer/chatserver.h \
+    Http/routematcher.h
 
 QMAKE_CXXFLAGS += -std=c++11

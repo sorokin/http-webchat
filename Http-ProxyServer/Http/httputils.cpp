@@ -8,17 +8,17 @@ using namespace std;
 void HttpUtils::readHttp(TcpSocket *socket,
               const std::function <void(HttpObject*)>& onFinish,
               const std::function <HttpObject*()>& creator) {
-    bool *alreadyFinished = new bool(false);
+    cerr << "in read http\n";
     HttpObject *obj = NULL;
     socket->setDataReceivedHandler([=]() mutable
     {
+        cerr << "data received in read http\n";
         if (obj == NULL)
             obj = creator();
 
         obj->append(socket->readBytes());
-        if (obj->hasBody() && obj->body().size() == obj->contentLength()) {
+        if (obj->hasBody() && (int)obj->body().size() == obj->contentLength()) {
             obj->commit();
-            *alreadyFinished = true;
             onFinish(obj);
             delete obj;
             obj = NULL;
@@ -27,16 +27,13 @@ void HttpUtils::readHttp(TcpSocket *socket,
 
     socket->setClosedConnectionHandler([=]() mutable
     {
-        if (!*alreadyFinished) {
-            if (obj != NULL)
-                obj->commit();
-            onFinish(obj);
-            if (obj != NULL) {
-                delete obj;
-                obj = NULL;
-            }
+        if (obj != NULL)
+            obj->commit();
+        onFinish(obj);
+        if (obj != NULL) {
+            delete obj;
+            obj = NULL;
         }
-        delete alreadyFinished;
     });
 }
 
@@ -46,11 +43,12 @@ std::string HttpUtils::toLower(std::string s) {
     return s;
 }
 
-void HttpUtils::transformRoute(std::string& route) {
+std::string HttpUtils::transformRoute(string route) {
     std::transform(route.begin(), route.end(), route.begin(), ::tolower);
     QUrl url(route.c_str());
     QString qstr = url.path();
     if (qstr[qstr.size() - 1] == '/' && qstr.size() != 1)
         qstr.remove(qstr.size() - 1, 1);
     route = qstr.toStdString();
+    return route;
 }

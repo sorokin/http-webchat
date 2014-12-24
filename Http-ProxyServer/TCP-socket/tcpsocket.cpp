@@ -23,7 +23,7 @@ int TcpSocket::makeSocketNonBlocking(int socket) {
 
 TcpSocket::TcpSocket(Application *app):
     fd(NONE), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024),
-    inHandler(false), pendingDelete(false), app(app) {
+    inCallback(false), pendingDelete(false), app(app), currentFlags(DEFAULT_FLAGS) {
 }
 
 TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket(app) {
@@ -130,7 +130,7 @@ int TcpSocket::bytesAvailable() {
 void TcpSocket::close() {
     if (fd == NONE)
         return;
-    //printf("Closed connection on descriptor %d\n", fd);
+    printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
     assert(s == 0);
@@ -141,11 +141,10 @@ void TcpSocket::close() {
 }
 
 void TcpSocket::handler(const epoll_event& event) {
-    //cerr << "this = " << this << " EPOLLHUP = " << (event.events & EPOLLHUP) << endl;
     if ((event.events & EPOLLHUP) && closedConnectionHandler) {
-        inHandler = true;
+        inCallback = true;
         closedConnectionHandler();
-        inHandler = false;
+        inCallback = false;
     }
 
     if (!pendingDelete && (event.events & EPOLLOUT))
@@ -157,7 +156,6 @@ void TcpSocket::handler(const epoll_event& event) {
         for(;;) {
             char buf[BUFFER_SIZE_ON_READ];
             ssize_t count = ::read(fd, buf, BUFFER_SIZE_ON_READ);
-            //cerr << "this = " << this << " count = " << count << endl;
             if (count == -1) {
                 if (errno != EAGAIN)
                     done = true;
@@ -171,26 +169,22 @@ void TcpSocket::handler(const epoll_event& event) {
                     readBuffer.push_back(buf[i]);
             }
         }
-        //cerr << "size = " << readBuffer.size() << endl;
         if (!empty && dataReceivedHandler && !pendingDelete) {
-            inHandler = true;
+            inCallback = true;
             dataReceivedHandler();
-            inHandler = false;
+            inCallback = false;
         }
-
         if (done) {
             if (closedConnectionHandler && !pendingDelete) {
-                inHandler = true;
+                inCallback = true;
                 closedConnectionHandler();
-                inHandler = false;
+                inCallback = false;
             }
             close();
         }
     }
-
     if (pendingDelete)
         ::operator delete(this);
-    //cerr << "size = " << readBuffer.size() << endl;
 }
 
 void TcpSocket::appendDataForWrite(const char* data, int len) {
@@ -203,7 +197,6 @@ void TcpSocket::appendCharForWrite(char c) {
 }
 
 void TcpSocket::tryWrite() {
-    static int currentFlags = DEFAULT_FLAGS;
     char tmpBuffer[BUFFER_SIZE_ON_WRITE];
     while (!writeBuffer.empty()) {
         int tmpBufferSize = 0;
@@ -248,7 +241,7 @@ static void TcpSocket::operator delete(void* ptr, size_t size) throw() {
     assert(ptr != NULL);
     assert(size == sizeof(TcpSocket));
     TcpSocket *obj = (TcpSocket*)ptr;
-    if (!obj->inHandler)
+    if (!obj->inCallback)
         ::operator delete(ptr);
     else
         obj->pendingDelete = true;

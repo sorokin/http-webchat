@@ -14,7 +14,7 @@ namespace HttpUtils
                   const std::function <HttpObject*()>& creator);
 
     std::string toLower(std::string s);
-    void transformRoute(std::string& route);
+    std::string transformRoute(std::string route);
 }
 
 #endif // HTTPUTILS_H

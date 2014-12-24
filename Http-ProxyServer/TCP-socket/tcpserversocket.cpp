@@ -84,7 +84,7 @@ bool TcpServerSocket::isErrorSocket(const epoll_event& ev) {
 
 void TcpServerSocket::acceptConnection(const epoll_event& ev) {
     if (isErrorSocket(ev)) {
-        close();
+        //close();
         return;
     }
 
