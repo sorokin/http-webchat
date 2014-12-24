@@ -15,12 +15,17 @@ ChatServer::ChatServer(Application* app):httpServer(new HttpServer(app))
     });
 }
 
-void ChatServer::addStaticHandler(const RouteMatcher& matcher, const char* filename) {
+void ChatServer::addStaticHandler(const RouteMatcher& matcher, const std::string& filename) {
     httpServer->addRouteMatcher(matcher, [=](HttpRequest req, HttpServer::Response resp) {
-        //cerr << "path st = " << req.path() << endl;
-        HttpResponse r(200, "OK", req.version(), getStringByFile(filename));
+        HttpResponse r(200, "OK", req.version(), getStringByFile(filename.c_str()));
         if (req.isKeepAlive())
             r.setHeader("Connection", "Keep-Alive");
+        int pos = filename.find(".");
+        std::string type = filename.substr(pos + 1, filename.size() - pos - 1);
+        if (type == "js")
+            r.setHeader("Content-Type", "application/javascript");
+        else if (type == "html")
+            r.setHeader("Content-Type", "text/html");
         resp.response(r);
     });
 }
@@ -28,7 +33,6 @@ void ChatServer::addStaticHandler(const RouteMatcher& matcher, const char* filen
 int ChatServer::start(int port) {
     return httpServer->start(port);
 }
-
 
 std::string ChatServer::getStringByFile(const char* name) {
     ifstream in(name);

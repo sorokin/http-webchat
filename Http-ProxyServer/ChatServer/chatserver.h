@@ -16,7 +16,7 @@ public:
     int start(int port);
 private:
     HttpServer *httpServer;
-    void addStaticHandler(const RouteMatcher& matcher, const char* filename);
+    void addStaticHandler(const RouteMatcher& matcher, const std::string& filename);
     std::string getStringByFile(const char* name);
 };
 

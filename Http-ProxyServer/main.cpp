@@ -8,7 +8,7 @@ using namespace std;
 int main(int, char**) {
     Application app;
     ChatServer *server = new ChatServer(&app);
-    cout << "Status = " << server->start(3333) << endl;
+    cout << "Status = " << server->start(3334) << endl;
     Application::setAbortHandler([=]() {
         delete server;
     });
