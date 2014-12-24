@@ -42,11 +42,8 @@ void Application::removeHandler(int fd) {
 int Application::exec() {
     for (;;) {
         int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
-        cerr << "epoll go!\n";
-        for (int i = 0; i < n; ++i) {
-            cerr << "ep go = " << events[i].data.fd << endl;
+        for (int i = 0; i < n; ++i)
             handlers[events[i].data.fd](events[i]);
-        }
     }
 }
 

@@ -11,7 +11,7 @@ RouteMatcher::RouteMatcher(const std::string& url):method(""), url(url)
 }
 
 bool RouteMatcher::match(const HttpRequest& request) {
-    std::string m = HttpUtils::toLower(request.path());
+    std::string m = HttpUtils::toLower(request.method());
     std::string r = HttpUtils::transformRoute(request.path());
     return m == method && r == url;
 }

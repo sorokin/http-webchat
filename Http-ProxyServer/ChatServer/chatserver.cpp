@@ -6,16 +6,18 @@ ChatServer::ChatServer(Application* app):httpServer(new HttpServer(app))
     addStaticHandler(RouteMatcher("GET", "/script.js"), "script.js");
     addStaticHandler(RouteMatcher("GET", "/jquery.js"), "jquery.js");
 
-    /*httpServer->setRouteHandler("/messages", [](HttpRequest req, HttpServer::Response resp) {
+    httpServer->addRouteMatcher(RouteMatcher("POST", "/messages"), [=](HttpRequest req, HttpServer::Response resp) {
+        cerr << "post messages " << req.body() << endl;
         HttpResponse r(200, "OK", req.version(), "");
         if (req.isKeepAlive())
             r.setHeader("Connection", "Keep-Alive");
         resp.response(r);
-    });*/
+    });
 }
 
 void ChatServer::addStaticHandler(const RouteMatcher& matcher, const char* filename) {
     httpServer->addRouteMatcher(matcher, [=](HttpRequest req, HttpServer::Response resp) {
+        //cerr << "path st = " << req.path() << endl;
         HttpResponse r(200, "OK", req.version(), getStringByFile(filename));
         if (req.isKeepAlive())
             r.setHeader("Connection", "Keep-Alive");

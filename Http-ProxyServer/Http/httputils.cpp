@@ -8,11 +8,9 @@ using namespace std;
 void HttpUtils::readHttp(TcpSocket *socket,
               const std::function <void(HttpObject*)>& onFinish,
               const std::function <HttpObject*()>& creator) {
-    cerr << "in read http\n";
     HttpObject *obj = NULL;
     socket->setDataReceivedHandler([=]() mutable
     {
-        cerr << "data received in read http\n";
         if (obj == NULL)
             obj = creator();
 
