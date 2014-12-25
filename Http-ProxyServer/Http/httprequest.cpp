@@ -23,7 +23,7 @@ HttpRequest::HttpRequest(Method method, const String& url, const Data& body,
     mMethod = getMethod(method);
     String h;
     splitUrl(url, h, mPath);
-    mHeaders["Host"] = h;
+    addHeader("Host", h);
 }
 
 HttpRequest::HttpRequest(const String& method, const String& url,
@@ -31,13 +31,13 @@ HttpRequest::HttpRequest(const String& method, const String& url,
     mMethod = method;
     String h;
     splitUrl(url, h, mPath);
-    mHeaders["Host"] = h;
+    addHeader("Host", h);
 }
 
 void HttpRequest::setUrl(const String& url) {
     String h;
     splitUrl(url, h, mPath);
-    mHeaders["Host"] = h;
+    addHeader("Host", h);
 }
 
 HttpObject::String HttpRequest::url() const {

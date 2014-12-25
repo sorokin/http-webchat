@@ -12,7 +12,7 @@ class HttpObject
 public:
     typedef std::string Data;
     typedef std::string String;
-    typedef std::map <String, String> HeadersContainer;
+    typedef std::vector <std::pair <String, String> > HeadersContainer;
 
     const String END_LINE = "\n";
 
@@ -29,8 +29,9 @@ public:
     virtual String url() const = 0;
     void setVersion(const String& vers);
     String version() const;
+    void addHeader(const String& key, const String& val);
+    void addHeaders(const std::vector <std::pair <String, String> >& headers);
     void setHeader(const String& key, const String& val);
-    void setHeaders(const std::vector <std::pair <String, String> >& headers);
     String header(const String& key);
     HeadersContainer headers() const;
     void setBody(const Data& message);
@@ -38,18 +39,19 @@ public:
     virtual String toString() const;
     Data body() const;
     bool isKeepAlive() const;
-    virtual ~HttpObject();
+    std::string findHeader(std::string key) const;
 
-    //get of headers
     String host() const;
     int contentLength() const;
+
+    virtual ~HttpObject();
 protected:
     String mVersion;
     Data mBody;
     HeadersContainer mHeaders;
     virtual void parseFirstLine(const String& line) = 0;
 private:
-    std::string toLower(std::string s);
+    std::string toLower(std::string s) const;
     String trim(const String& s);
 
     bool mIsBody;

@@ -33,8 +33,8 @@ bool HttpObject::append(const Data& data) {
                 if (pos == -1)
                     continue;
                 String key = toLower(trim(line.substr(0, pos)));
-                String value = toLower(trim(line.substr(pos + 1, (int)line.size() - pos - 1)));
-                mHeaders[key] = value;
+                String value = trim(line.substr(pos + 1, (int)line.size() - pos - 1));
+                mHeaders.push_back(make_pair(key, value));
             }
         }
     }
@@ -78,19 +78,30 @@ HttpObject::String HttpObject::version() const {
     return mVersion;
 }
 
-void HttpObject::setHeader(const String& key, const String& val) {
-    mHeaders[toLower(key)] = toLower(val);
+void HttpObject::addHeader(const String& key, const String& val) {
+    mHeaders.push_back(make_pair(toLower(key), toLower(val)));
 }
 
-void HttpObject::setHeaders(const std::vector <std::pair <String, String> >& headers) {
+void HttpObject::setHeader(const String& key, const String& val) {
+    String k = toLower(key);
+    for (int i = 0; i < mHeaders.size(); ++i)
+        if (mHeaders[i].first == k) {
+            mHeaders[i].second = val;
+            return;
+        }
+    mHeaders.push_back(make_pair(toLower(key), toLower(val)));
+}
+
+void HttpObject::addHeaders(const std::vector <std::pair <String, String> >& headers) {
     for (int i = 0; i < (int)headers.size(); ++i)
-        mHeaders[toLower(headers[i].first)] = headers[i].second;
+        mHeaders.push_back(make_pair(toLower(headers[i].first), headers[i].second));
 }
 
 HttpObject::String HttpObject::header(const String& key) {
     String k = toLower(key);
-    if (mHeaders.find(k) != mHeaders.end())
-        return mHeaders[k];
+    for (int i = 0; i < mHeaders.size(); ++i)
+        if (mHeaders[i].first == k)
+            return mHeaders[i].second;
     return "";
 }
 
@@ -111,23 +122,28 @@ HttpObject::Data HttpObject::body() const {
     return mBody;
 }
 
-
-HttpObject::String HttpObject::host() const {
-    if (mHeaders.find("host") != mHeaders.end())
-        return mHeaders.at("host");
+std::string HttpObject::findHeader(std::string key) const{
+    for (int i = 0; i < mHeaders.size(); ++i)
+        if (mHeaders[i].first == key)
+            return mHeaders[i].second;
     return "";
 }
 
+HttpObject::String HttpObject::host() const {
+    return toLower(findHeader("host"));
+}
+
 int HttpObject::contentLength() const {
-    if (mHeaders.find("content-length") != mHeaders.end())
-        return std::stoi(mHeaders.at("content-length"));
-    return 0;
+    std::string cleng = findHeader("content-length");
+    if (cleng.size() == 0)
+        return 0;
+    return atoi(cleng.c_str());
 }
 
 bool HttpObject::isKeepAlive() const {
-    if (mHeaders.find("connection") != mHeaders.end())
-        return mHeaders.at("connection") != "keep-alive";
-    return false;
+    //cerr << "find keep alive = " << toLower(findHeader("connection")) << "#" << endl;
+    //cerr << "bool = " << (toLower(findHeader("connection")) == "keep-alive") << endl;
+    return toLower(findHeader("connection")) != "keep-alive";
 }
 
 HttpObject::String HttpObject::toString() const {
@@ -141,7 +157,7 @@ HttpObject::String HttpObject::toString() const {
 
 HttpObject::~HttpObject() {}
 
-std::string HttpObject::toLower(std::string s) {
+std::string HttpObject::toLower(std::string s) const {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     return s;
 }
