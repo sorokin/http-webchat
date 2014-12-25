@@ -7,12 +7,13 @@
 class RouteMatcher
 {
 public:
-    RouteMatcher(const std::string& method = "", const std::string& url = "");
-    RouteMatcher(const std::string& url);
+    RouteMatcher(const std::string& mMethod = "", const std::string& mUrl = "");
     bool match(const HttpRequest& request);
+    std::string method();
+    std::string url();
 private:
-    std::string method;
-    std::string url;
+    std::string mMethod;
+    std::string mUrl;
 
     void normalize();
 };

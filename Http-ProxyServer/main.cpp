@@ -9,7 +9,7 @@ int main(int, char**) {
     Application app;
     srand(time(NULL));
     ChatServer *server = new ChatServer(&app);
-    cout << "Status = " << server->start(3333) << endl;
+    cout << "Status = " << server->start(3335) << endl;
     Application::setAbortHandler([=]() {
         delete server;
     });

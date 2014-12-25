@@ -3,9 +3,50 @@
 ChatServer::ChatServer(Application* app):
     httpServer(new HttpServer(app)), COOKIE_USER("user"), COOKIE_HASH("hash"), numUsers(0)
 {
-    addStaticHandler(RouteMatcher("GET", "/"), "index.html");
-    addStaticHandler(RouteMatcher("GET", "/script.js"), "script.js");
-    addStaticHandler(RouteMatcher("GET", "/jquery.js"), "jquery.js");
+    httpServer->addRouteMatcher(RouteMatcher(), [this](HttpRequest req, HttpServer::Response resp) {
+        int i = (int)req.path().size() - 1;
+        std::string path = req.path();
+        while (i >= 0 && path[i] != '/') --i;
+        std::string filename = path.substr(i + 1, path.size() - i - 1);
+        if (filename == "")
+            filename = "index.html";
+        ifstream in(filename.c_str());
+        if (!in) {
+            HttpResponse r(404, "Not Found", req.version(),
+                           "<html><head>"
+                           "<title>404 Not Found</title>"
+                           "</head><body>"
+                           "<h1>Not Found</h1>"
+                           "<p>The requested URL " + path + " was not found on this server.</p>"
+                           "<hr></body></html>");
+            resp.response(r);
+            return;
+
+        }
+
+        std::string s, ret;
+        while (getline(in, s))
+            ret += s + "\n";
+        std::string cookie = req.header("Cookie");
+        UserType userId = getUserIdByCookie(cookie);
+        if (userId == 0)
+            userId = ++numUsers;
+        HttpResponse r(200, "OK", req.version(), ret);
+        if (req.isKeepAlive())
+            r.addHeader("Connection", "Keep-Alive");
+
+        int pos = filename.find(".");
+        std::string type = filename.substr(pos + 1, filename.size() - pos - 1);
+
+        if (type == "js")
+            r.addHeader("Content-Type", "application/javascript");
+        else if (type == "html")
+            r.addHeader("Content-Type", "text/html");
+
+        r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
+        r.addHeader("Set-Cookie", "hash=" + to_string(hash(userId)) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
+        resp.response(r);
+    });
 
     httpServer->addRouteMatcher(RouteMatcher("POST", "/messages"), [=] (HttpRequest req, HttpServer::Response resp) {
         std::string cookie = req.header("Cookie");
@@ -62,31 +103,6 @@ ChatServer::ChatServer(Application* app):
                 r.addHeader("Connection", "Keep-Alive");
             resp.response(r);
         }
-    });
-}
-
-void ChatServer::addStaticHandler(const RouteMatcher& matcher, const std::string& filename) {
-
-    httpServer->addRouteMatcher(matcher, [=](HttpRequest req, HttpServer::Response resp) {
-        std::string cookie = req.header("Cookie");
-        UserType userId = getUserIdByCookie(cookie);
-        if (userId == 0)
-            userId = ++numUsers;
-
-        HttpResponse r(200, "OK", req.version(), getStringByFile(filename.c_str()));
-        if (req.isKeepAlive())
-            r.addHeader("Connection", "Keep-Alive");
-
-        int pos = filename.find(".");
-        std::string type = filename.substr(pos + 1, filename.size() - pos - 1);
-        if (type == "js")
-            r.addHeader("Content-Type", "application/javascript");
-        else if (type == "html")
-            r.addHeader("Content-Type", "text/html");
-
-        r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
-        r.addHeader("Set-Cookie", "hash=" + to_string(hash(userId)) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
-        resp.response(r);
     });
 }
 

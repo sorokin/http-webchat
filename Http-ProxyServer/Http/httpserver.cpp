@@ -38,10 +38,18 @@ void HttpServer::readRequest(TcpSocket *socket) {
     {
         if (tmp != NULL) {
             HttpRequest *request = (HttpRequest*)tmp;
-            cerr << " request = " << request->toString() << endl;
+            bool found = false;
             for (int i = 0; i < (int)matchers.size(); ++i)
-                if (matchers[i].first.match(*request))
+                if (matchers[i].first.match(*request)) {
                     matchers[i].second(*request, Response(socket));
+                    found = true;
+                }
+
+            if (!found)
+                for (int i = 0; i < (int)matchers.size(); ++i)
+                    if (matchers[i].first.method() == "" && matchers[i].first.url() == "")
+                        matchers[i].second(*request, Response(socket));
+
             if (!request->isKeepAlive())
                 delete socket;
         }

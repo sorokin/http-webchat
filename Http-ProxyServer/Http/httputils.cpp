@@ -42,6 +42,8 @@ std::string HttpUtils::toLower(std::string s) {
 }
 
 std::string HttpUtils::transformRoute(string route) {
+    if (route == "")
+        return route;
     std::transform(route.begin(), route.end(), route.begin(), ::tolower);
     QUrl url(route.c_str());
     QString qstr = url.path();

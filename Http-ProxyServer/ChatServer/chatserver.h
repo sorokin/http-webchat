@@ -32,7 +32,7 @@ private:
 
     typedef unsigned int UserType;
     HttpServer *httpServer;
-    void addStaticHandler(const RouteMatcher& matcher, const std::string& filename);
+    //void addStaticHandler(const RouteMatcher& matcher, const std::string& filename);
     std::string getStringByFile(const char* name);
     UserType numUsers;
     UserType hash(UserType userId);
