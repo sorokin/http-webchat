@@ -38,7 +38,7 @@ void HttpServer::readRequest(TcpSocket *socket) {
     {
         if (tmp != NULL) {
             HttpRequest *request = (HttpRequest*)tmp;
-            //cerr << " request = " << request->toString() << endl;
+            cerr << " request = " << request->toString() << endl;
             for (int i = 0; i < (int)matchers.size(); ++i)
                 if (matchers[i].first.match(*request))
                     matchers[i].second(*request, Response(socket));

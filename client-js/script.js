@@ -6,21 +6,34 @@ function scrollMessages() {
 	$('#messages').parent().scrollTop(wd);
 }
 
+function wrap(val, nums) {
+	var ret = "" + val;
+	while (ret.length < nums) ret = "0" + ret;
+	console.log(ret);
+	return ret;
+}
+
 function appendMessage(messages, message) {
+	message.text = decodeURIComponent(message.text);
+	while (message.text.indexOf("+") != -1)
+		message.text = message.text.replace("+", " ");
+
+	var date = new Date(message.timestamp * 1000);
+	var format =  wrap(date.getDay(), 2) + "-" + wrap(date.getMonth(), 2) + "-" + wrap(date.getYear() % 100, 2) + 
+	" " + wrap(date.getHours(), 2) + ":" + wrap(date.getMinutes(), 2) + ":" + wrap(date.getSeconds(), 2);
 	if (message.from != 0) {
-		console.log(message.from);
-		console.log(myId);
 		if (message.from == myId) 
-			messages.append('<li><b>user'  + message.from + '</b>(' + message.timestamp  + '): ' + message.text + '</li>' );
+			messages.append('<li><b>user'  + message.from + '</b>(' + format  + '): ' + message.text + '</li>' );
 		else
-			messages.append('<li>user'  + message.from + '(' + message.timestamp  + '): ' + message.text + '</li>' );
+			messages.append('<li>user'  + message.from + '(' + format  + '): ' + message.text + '</li>' );
 	} else
-		messages.append('<li><font color="gray"><i>System(' + message.timestamp  + '): ' + message.text + '</i></font></li>' );	
+		messages.append('<li><font color="gray"><i>System(' + format  + '): ' + message.text + '</i></font></li>' );	
 }
 
 function loadMessages(all) {
 	return function() {
 		$.ajax({
+			//headers: {'Content-Type' : 'application/json; charset=utf-8'},
 			url: '/messages', 
 			method: 'GET',
 			dataType: 'json',
@@ -42,7 +55,8 @@ function loadMessages(all) {
 function sendMessage(message) {
 	$.ajax({
 		url: '/messages', 
-		method: 'POST', //POST here
+		method: 'POST',
+		headers: {'Content-Type' : 'text/html; charset=utf-8'},
 		data: {
 			message: message
 		},
