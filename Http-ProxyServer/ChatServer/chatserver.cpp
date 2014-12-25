@@ -5,11 +5,10 @@ ChatServer::ChatServer(Application* app):
 {
     httpServer->addRouteMatcher(RouteMatcher(), [this](HttpRequest req, HttpServer::Response resp) {
         int i = (int)req.path().size() - 1;
-        std::string path = req.path();
-        while (i >= 0 && path[i] != '/') --i;
-        std::string filename = path.substr(i + 1, path.size() - i - 1);
-        if (filename == "")
-            filename = "index.html";
+        std::string filename = req.path();
+        if (filename == "/")
+            filename = "/index.html";
+        filename = "." + filename;
         ifstream in(filename.c_str());
         if (!in) {
             HttpResponse r(404, "Not Found", req.version(),
@@ -17,7 +16,7 @@ ChatServer::ChatServer(Application* app):
                            "<title>404 Not Found</title>"
                            "</head><body>"
                            "<h1>Not Found</h1>"
-                           "<p>The requested URL " + path + " was not found on this server.</p>"
+                           "<p>The requested URL " + req.path() + " was not found on this server.</p>"
                            "<hr></body></html>");
             resp.response(r);
             return;

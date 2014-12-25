@@ -97,8 +97,7 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
         int s = getnameinfo(&in_addr, in_len,
                         hbuf, sizeof hbuf,
                         sbuf, sizeof sbuf, NI_NUMERICHOST | NI_NUMERICSERV);
-        printf("Accepted connection on descriptor %d "
-             "(host=%s, port=%s)\n", incomingFD, hbuf, sbuf);
+        //printf("Accepted connection on descriptor %d "(host=%s, port=%s)\n", incomingFD, hbuf, sbuf);
         //makeSocketNonBlocking(incomingFD);
         return new TcpSocket(app, incomingFD, hbuf, sbuf);
     };

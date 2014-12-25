@@ -130,7 +130,7 @@ int TcpSocket::bytesAvailable() {
 void TcpSocket::close() {
     if (fd == NONE)
         return;
-    printf("Closed connection on descriptor %d\n", fd);
+    //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
     assert(s == 0);

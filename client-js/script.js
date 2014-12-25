@@ -9,7 +9,6 @@ function scrollMessages() {
 function wrap(val, nums) {
 	var ret = "" + val;
 	while (ret.length < nums) ret = "0" + ret;
-	console.log(ret);
 	return ret;
 }
 
@@ -19,7 +18,7 @@ function appendMessage(messages, message) {
 		message.text = message.text.replace("+", " ");
 
 	var date = new Date(message.timestamp * 1000);
-	var format =  wrap(date.getDay(), 2) + "-" + wrap(date.getMonth(), 2) + "-" + wrap(date.getYear() % 100, 2) + 
+	var format =  wrap(date.getDate(), 2) + "-" + wrap(date.getMonth() + 1, 2) + "-" + wrap(date.getYear() % 100, 2) + 
 	" " + wrap(date.getHours(), 2) + ":" + wrap(date.getMinutes(), 2) + ":" + wrap(date.getSeconds(), 2);
 	if (message.from != 0) {
 		if (message.from == myId) 
@@ -70,7 +69,7 @@ function sendMessage(message) {
 
 $(document).ready(function () {
 	myId = parseInt(document.cookie.substring(5, document.cookie.indexOf(";")));
-	$('#myForm').on('submit', function(event) {
+	/*$('#myForm').on('submit', function(event) {
 		event.preventDefault();
 		
 		var message = $(this).find('input').val();
@@ -79,6 +78,21 @@ $(document).ready(function () {
 		$(this).find('input').val('');
 		sendMessage(message);
 		console.log(message);
+	});*/
+
+	$(document).on('keydown', function(event) { 
+		//console.log("code = " + event.keyCode);
+		//alert(event.keyCode);
+		if (event.keyCode == 13) {
+			event.preventDefault();
+			var message = $(this).find('input').val();
+			if (message === '')
+				return;
+			console.log("mes" + message);
+			$(this).find('input').val('');
+			sendMessage(message);
+		}
 	});
+
 	loadMessages(true)();
 });
