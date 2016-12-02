@@ -1,11 +1,14 @@
 #ifndef HttpObject_H
 #define HttpObject_H
-#include <cstring>
-#include <string>
-#include <map>
-#include <vector>
-#include <sstream>
+
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 class HttpObject
 {

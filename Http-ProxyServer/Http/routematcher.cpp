@@ -8,7 +8,7 @@ RouteMatcher::RouteMatcher(const std::string& method, const std::string& url):mM
 bool RouteMatcher::match(const HttpRequest& request) {
     std::string m = HttpUtils::toLower(request.method());
     std::string r = HttpUtils::transformRoute(request.path());
-    return m == mMethod && r == mUrl;
+    return (mMethod == "*" || mMethod == m) && (mUrl == "*" || mUrl == r);
 }
 
 void RouteMatcher::normalize() {

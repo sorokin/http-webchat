@@ -1,8 +1,7 @@
+#include <stdlib.h>
 #include "application.h"
-#include <ChatServer/chatserver.h>
+#include "ChatServer/chatserver.h"
 
-#include <iostream>
-#include <fstream>
 using namespace std;
 
 int main(int, char**) {

@@ -12,6 +12,7 @@ HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const Str
                            const Data& body):HttpObject(body, version) {
     mStatusCode = statusCode;
     mReasonPhrase = reasonPhrase;
+    setHeader("Access-Control-Allow-Origin", "*");
 }
 
 void HttpResponse::setUrl(const String& url) {

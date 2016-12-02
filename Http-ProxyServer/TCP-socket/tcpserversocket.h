@@ -1,15 +1,19 @@
 #ifndef TCPSERVERSOCKET_H
 #define TCPSERVERSOCKET_H
-#include <sys/types.h>
-#include <sys/epoll.h>
+
+#include <cassert>
 #include <cstring>
-#include <string>
+#include <fcntl.h>
 #include <functional>
 #include <netdb.h>
-#include <TCP-socket/tcpsocket.h>
+#include <string>
 #include <unistd.h>
-#include <fcntl.h>
-#include <application.h>
+#include <sys/epoll.h>
+#include <sys/types.h>
+
+#include "../application.h"
+
+#include "tcpsocket.h"
 
 class TcpServerSocket
 {

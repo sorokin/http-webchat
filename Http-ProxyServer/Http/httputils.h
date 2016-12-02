@@ -1,11 +1,15 @@
 #ifndef HTTPUTILS_H
 #define HTTPUTILS_H
-#include <TCP-socket/tcpsocket.h>
-#include <Http/httpobject.h>
-#include <functional>
+
 #include <algorithm>
+#include <functional>
+
 #include <QUrl>
-#include <Http/httprequest.h>
+
+#include "../TCP-socket/tcpsocket.h"
+
+#include "httpobject.h"
+#include "httprequest.h"
 
 namespace HttpUtils
 {

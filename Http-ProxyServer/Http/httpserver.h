@@ -1,22 +1,26 @@
 #ifndef HTTPSERVER_H
 #define HTTPSERVER_H
-#include <application.h>
-#include <TCP-socket/tcpserversocket.h>
+
+#include <algorithm>
+#include <cstring>
 #include <functional>
 #include <map>
-#include <string>
-#include <cstring>
-#include <set>
-#include <algorithm>
-#include <Http/httputils.h>
-#include <Http/httprequest.h>
-#include <Http/httpresponse.h>
 #include <memory>
-#include <Http/routematcher.h>
+#include <set>
+#include <string>
+
+#include "../application.h"
+#include "../TCP-socket/tcpserversocket.h"
+#include "../TCP-socket/tcpsocket.h"
+
+#include "httprequest.h"
+#include "httpresponse.h"
+#include "httputils.h"
+#include "routematcher.h"
 
 class HttpServer
 {
-    typedef std::string String;
+//    typedef std::string String;
 public:
 
     class Response {

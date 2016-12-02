@@ -1,6 +1,9 @@
 #ifndef HTTPREQUEST_H
 #define HTTPREQUEST_H
-#include <Http/httpobject.h>
+
+#include <QUrl>
+
+#include "httpobject.h"
 
 class HttpRequest: public HttpObject
 {

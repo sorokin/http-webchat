@@ -1,6 +1,5 @@
 #include "httpobject.h"
 
-#include <iostream>
 using namespace std;
 
 bool HttpObject::append(const Data& data) {

@@ -1,6 +1,7 @@
 #ifndef HTTPRESPONSE_H
 #define HTTPRESPONSE_H
-#include <Http/httpobject.h>
+
+#include "httpobject.h"
 
 class HttpResponse:public HttpObject
 {

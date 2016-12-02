@@ -1,5 +1,4 @@
 #include "httpclient.h"
-#include <memory>
 
 HttpClient::HttpClient(Application *app):app(app) {}
 

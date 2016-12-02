@@ -1,10 +1,14 @@
 #ifndef HTTPCLIENT_H
 #define HTTPCLIENT_H
-#include "Http/httprequest.h"
-#include <Http/httpresponse.h>
-#include <TCP-socket/tcpsocket.h>
+
 #include <functional>
-#include <Http/httputils.h>
+#include <memory>
+
+#include "../TCP-socket/tcpsocket.h"
+
+#include "httprequest.h"
+#include "httpresponse.h"
+#include "httputils.h"
 
 class HttpClient
 {

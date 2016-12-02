@@ -29,16 +29,28 @@ function appendMessage(messages, message) {
 		messages.append('<li><font color="gray"><i>System(' + format  + '): ' + message.text + '</i></font></li>' );	
 }
 
+function join() {
+    $.ajax({
+        url: '/join',
+        method: 'POST',
+        data: {},
+        success: function(data) {}
+    });
+}
+
 function loadMessages(all) {
 	return function() {
 		$.ajax({
 			//headers: {'Content-Type' : 'application/json; charset=utf-8'},
-			url: '/messages', 
+			url: '/messages',
 			method: 'GET',
 			dataType: 'json',
 			data: {
 				all: all
 			},
+            xhrFields: {
+                withCredentials: true
+            },
 			success: function(data) {
 				for (var i = 0; i < data.messages.length; ++i)
 					appendMessage($('#messages'), data.messages[i]);
@@ -53,12 +65,15 @@ function loadMessages(all) {
 
 function sendMessage(message) {
 	$.ajax({
-		url: '/messages', 
+		url: '/messages',
 		method: 'POST',
-		headers: {'Content-Type' : 'text/html; charset=utf-8'},
+		headers: {'Content-Type' : 'application/json; charset=utf-8'},
 		data: {
 			message: message
 		},
+        xhrFields: {
+            withCredentials: true
+        },
 		dataType: 'json',
 		success: function(response) {
 		}
@@ -88,11 +103,11 @@ $(document).ready(function () {
 			var message = $(this).find('input').val();
 			if (message === '')
 				return;
-			console.log("mes" + message);
 			$(this).find('input').val('');
 			sendMessage(message);
 		}
 	});
 
+    join();
 	loadMessages(true)();
 });

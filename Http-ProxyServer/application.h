@@ -1,14 +1,16 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
-#include <sys/epoll.h>
+
+#include <cstdlib>
+#include <cstring>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <vector>
-#include <unistd.h>
-#include <cstring>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/epoll.h>
 
-#include <iostream>
 using namespace std;
 
 class Application

@@ -1,5 +1,4 @@
 #include "httprequest.h"
-#include <QUrl>
 
 void HttpRequest::parseFirstLine(const String &line) {
     std::stringstream in(line);

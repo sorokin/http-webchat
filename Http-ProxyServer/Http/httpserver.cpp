@@ -1,6 +1,5 @@
 #include "httpserver.h"
 
-#include <iostream>
 using namespace std;
 
 HttpServer::HttpServer(Application *app):app(app), listener(TcpServerSocket(app)) {}
@@ -26,6 +25,7 @@ HttpServer::Response::Response(TcpSocket* socket):socket(socket) {}
 
 bool HttpServer::Response::response(const HttpResponse& response) {
     if (socket != NULL) {
+//        cout << "sending response \"" << response.toString() << "\"" << endl << endl << endl;
         socket->write(response.toString());
         socket = NULL;
         return true;

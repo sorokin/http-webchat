@@ -1,9 +1,6 @@
 #include "httputils.h"
 
-#include <cstdio>
-#include <iostream>
 using namespace std;
-
 
 void HttpUtils::readHttp(TcpSocket *socket,
               const std::function <void(HttpObject*)>& onFinish,

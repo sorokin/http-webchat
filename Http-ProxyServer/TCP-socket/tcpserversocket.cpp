@@ -1,5 +1,4 @@
 #include "tcpserversocket.h"
-#include <cassert>
 
 TcpServerSocket::TcpServerSocket(Application *app):MAX_EVENTS(128), listenerFD(NONE), app(app) {}
 
@@ -16,6 +15,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     serv_addr.sin_port = htons(port);
     if (bind(listenerFD, (sockaddr*)&serv_addr, sizeof serv_addr) != 0) {
         listenerFD = NONE;
+//        cout << "Already binded: " << errno << ", " << strerror(errno) << endl;
         return AlreadyBinded;
     }
 

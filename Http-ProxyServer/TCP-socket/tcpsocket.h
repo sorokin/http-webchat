@@ -1,15 +1,16 @@
 #ifndef TCPSOCKET_H
 #define TCPSOCKET_H
+
 #include <cstring>
-#include <sys/epoll.h>
-#include <application.h>
+#include <deque>
+#include <fcntl.h>
+#include <netdb.h>
 #include <unistd.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <deque>
-#include <cstring>
+
+#include "../application.h"
 
 class TcpSocket {
 public:
