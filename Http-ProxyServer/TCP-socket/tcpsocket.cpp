@@ -1,7 +1,5 @@
 #include "tcpsocket.h"
-#include <cassert>
 
-#include <iostream>
 using namespace std;
 
 int TcpSocket::makeSocketNonBlocking(int socket) {
@@ -22,8 +20,8 @@ int TcpSocket::makeSocketNonBlocking(int socket) {
 }
 
 TcpSocket::TcpSocket(Application *app):
-    fd(NONE), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024),
-    inCallback(false), pendingDelete(false), app(app), currentFlags(DEFAULT_FLAGS) {
+        inCallback(false), pendingDelete(false), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024),
+        currentFlags(DEFAULT_FLAGS), fd(NONE), app(app) {
 }
 
 TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket(app) {

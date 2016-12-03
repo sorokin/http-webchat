@@ -32,12 +32,14 @@ public:
     TcpServerSocket(TcpServerSocket&&);
     ~TcpServerSocket();
 private:
-    Application *app;
     static const int NONE = -1;
     const int MAX_EVENTS;
+
     int listenerFD;
     int pendingFD;
     int port;
+
+    Application *app;
     std::string host;
     PendingConstructorFunctor pendingConstructorFunctor;
     NewConnectionHandler newConnectionHandler;

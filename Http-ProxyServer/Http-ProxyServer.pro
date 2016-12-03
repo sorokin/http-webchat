@@ -17,28 +17,28 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     application.cpp \
-    TCP-socket/tcpsocket.cpp \
-    TCP-socket/tcpserversocket.cpp \
+    ChatServer/chatserver.cpp \
+    Http/httpclient.cpp \
+    Http/httpobject.cpp \
     Http/httprequest.cpp \
     Http/httpresponse.cpp \
-    Http/httpclient.cpp \
     Http/httpserver.cpp \
-    Http/httpobject.cpp \
     Http/httputils.cpp \
-    ChatServer/chatserver.cpp \
-    Http/routematcher.cpp
+    Http/routematcher.cpp \
+    TCP-socket/tcpsocket.cpp \
+    TCP-socket/tcpserversocket.cpp
 
 HEADERS += \
     application.h \
-    TCP-socket/tcpsocket.h \
-    TCP-socket/tcpserversocket.h \
+    ChatServer/chatserver.h \
+    Http/httpclient.h \
+    Http/httpobject.h \
     Http/httprequest.h \
     Http/httpresponse.h \
-    Http/httpclient.h \
     Http/httpserver.h \
-    Http/httpobject.h \
     Http/httputils.h \
-    ChatServer/chatserver.h \
-    Http/routematcher.h
+    Http/routematcher.h \
+    TCP-socket/tcpsocket.h \
+    TCP-socket/tcpserversocket.h \
 
 QMAKE_CXXFLAGS += -std=c++11

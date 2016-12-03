@@ -1,6 +1,6 @@
 #include "tcpserversocket.h"
 
-TcpServerSocket::TcpServerSocket(Application *app):MAX_EVENTS(128), listenerFD(NONE), app(app) {}
+TcpServerSocket::TcpServerSocket(Application *app): MAX_EVENTS(128), listenerFD(NONE), app(app) {}
 
 TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host, const unsigned int port,
                              NewConnectionHandler newConnection) {
@@ -94,7 +94,8 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
     pendingConstructorFunctor = [=]() {
         makeSocketNonBlocking(incomingFD);
         char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
-        int s = getnameinfo(&in_addr, in_len,
+        getnameinfo(&in_addr, in_len,
+//        int s = getnameinfo(&in_addr, in_len,
                         hbuf, sizeof hbuf,
                         sbuf, sizeof sbuf, NI_NUMERICHOST | NI_NUMERICSERV);
         //printf("Accepted connection on descriptor %d "(host=%s, port=%s)\n", incomingFD, hbuf, sbuf);

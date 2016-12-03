@@ -110,8 +110,6 @@ ChatServer::ChatServer(Application* app):
 
             r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
             r.addHeader("Set-Cookie", "hash=" + to_string(s_hash(userId)) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
-            cout << "User " << userId << " wants messages from " << l << " to " << history.size() - 1;
-            cout << ", so he'll get: \"" << packageToJsonHistory(l, history.size()) << endl;
             r.setBody(packageToJsonHistory(l, history.size()));
             lastReadMessage[userId] = history.size();
             resp.response(r);

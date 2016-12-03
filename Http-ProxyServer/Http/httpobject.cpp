@@ -10,7 +10,7 @@ bool HttpObject::append(const Data& data) {
         mBody += data;
     else {
         tmp += data;
-        for (;position < tmp.size(); ++position)
+        for (; position < tmp.size(); ++position)
             if (tmp[position] == '\n' &&
                     (position >= 1 && tmp[position - 1] == '\n' ||
                      position >= 2 && tmp[position - 1] == '\r' && tmp[position - 2] == '\n'))

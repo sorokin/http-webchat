@@ -1,6 +1,7 @@
 #ifndef TCPSOCKET_H
 #define TCPSOCKET_H
 
+#include <cassert>
 #include <cstring>
 #include <deque>
 #include <fcntl.h>
@@ -41,16 +42,18 @@ public:
     static void operator delete(void* ptr, size_t size) throw();//DANGEROUS
     ~TcpSocket();
 private:
-    Application *app;
     const int DEFAULT_FLAGS = EPOLLIN | EPOLLHUP;
     const int OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLHUP;
     const int NONE = -1;
     const int BUFFER_SIZE_ON_READ;
     const int BUFFER_SIZE_ON_WRITE;
-    int fd;
+
     int currentFlags;
-    std::string host;
+    int fd;
     unsigned int port;
+
+    Application *app;
+    std::string host;
     std::deque <char> readBuffer;
     std::deque <char> writeBuffer;
     ClosedConnectionHandler closedConnectionHandler;
