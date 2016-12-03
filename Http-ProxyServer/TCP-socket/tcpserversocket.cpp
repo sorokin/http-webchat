@@ -13,7 +13,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
-    if (bind(listenerFD, (sockaddr*)&serv_addr, sizeof serv_addr) != 0) {
+    if (bind(listenerFD, (sockaddr *) &serv_addr, sizeof serv_addr) != 0) {
         listenerFD = NONE;
 //        cout << "Already binded: " << errno << ", " << strerror(errno) << endl;
         return AlreadyBinded;
@@ -25,8 +25,7 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     s = ::listen(listenerFD, SOMAXCONN);
     assert(s == 0);
 
-   app->setHandler(listenerFD , [this](epoll_event ev)
-                                                     {acceptConnection(ev);}, EPOLLIN);
+    app->setHandler(listenerFD, [this](epoll_event ev) { acceptConnection(ev); }, EPOLLIN);
 
     this->port = port;
     this->host = host;

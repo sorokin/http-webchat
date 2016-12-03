@@ -6,10 +6,10 @@ void HttpResponse::parseFirstLine(const String &line) {
     mVersion.erase(0, 5);
 }
 
-HttpResponse::HttpResponse(CreationMode mode):HttpObject(mode) {}
+HttpResponse::HttpResponse(CreationMode mode): HttpObject(mode) {}
 
 HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const String& version,
-                           const Data& body):HttpObject(body, version) {
+                           const Data& body): HttpObject(body, version) {
     mStatusCode = statusCode;
     mReasonPhrase = reasonPhrase;
     setHeader("Access-Control-Allow-Origin", "*");

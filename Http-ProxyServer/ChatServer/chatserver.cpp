@@ -54,6 +54,7 @@ ChatServer::ChatServer(Application* app):
             userId = ++numUsers;
         }
         firstReadMessage[userId] = lastReadMessage[userId] = history.size();
+        cout << "User " << to_string(userId) << " joined to chat!" << endl;
         history.push_back(Message(userId, time(NULL), "User " + to_string(userId) + " joined to chat!"));
 
         HttpResponse r(200, "OK", req.version());
@@ -76,7 +77,9 @@ ChatServer::ChatServer(Application* app):
             HttpResponse r(200, "OK", req.version());
             if (req.isKeepAlive())
                 r.addHeader("Connection", "Keep-Alive");
-            history.push_back(Message(userId, time(NULL), getMessage(req.body())));
+            std::string message = getMessage(req.body());
+            cout << "User " << to_string(userId) << " sent message: " << message << endl;
+            history.push_back(Message(userId, time(NULL), message));
             r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
             r.addHeader("Set-Cookie", "hash=" + to_string(s_hash(userId)) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
             resp.response(r);
