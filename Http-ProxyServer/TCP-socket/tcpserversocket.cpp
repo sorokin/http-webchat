@@ -7,22 +7,31 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     if (listenerFD != NONE)
         return AlreadyConnected;
     listenerFD = socket(AF_INET, SOCK_STREAM, 0);
-    assert(listenerFD >= 0);
+    if (listenerFD < 0) {
+        return SocketCreationError;
+    }
 
     sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(port);
     if (bind(listenerFD, (sockaddr *) &serv_addr, sizeof serv_addr) != 0) {
+        ::close(listenerFD);
         listenerFD = NONE;
-        return AlreadyBinded;
+        return BindError;
     }
 
     int s = makeSocketNonBlocking(listenerFD);
-    assert(s == 0);
+    if (s != 0) {
+        ::close(listenerFD);
+        return NonBlockingError;
+    }
 
     s = ::listen(listenerFD, SOMAXCONN);
-    assert(s == 0);
+    if (s != 0) {
+        ::close(listenerFD);
+        return ListenError;
+    }
 
     app->setHandler(listenerFD, [this](epoll_event ev) { acceptConnection(ev); }, EPOLLIN);
 
@@ -48,7 +57,7 @@ void TcpServerSocket::close() {
     if (listenerFD == NONE)
         return;
     int s = ::close(listenerFD);
-    assert(s == 0);
+//    assert(s == 0);
     app->removeHandler(listenerFD);
     listenerFD = NONE;
     port = 0;
@@ -88,7 +97,7 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
 
     sockaddr in_addr;
     socklen_t in_len = sizeof in_addr;
-    int incomingFD = accept(listenerFD, &in_addr, &in_len);
+    int incomingFD = accept(listenerFD, &in_addr, &in_len);         // TODO
     pendingConstructorFunctor = [=]() {
         makeSocketNonBlocking(incomingFD);
         char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
@@ -106,7 +115,7 @@ void TcpServerSocket::acceptConnection(const epoll_event& ev) {
     pendingConstructorFunctor = PendingConstructorFunctor();
 }
 
-TcpSocket* TcpServerSocket::getPendingConnecntion() {
+TcpSocket* TcpServerSocket::getPendingConnection() {
     if (!pendingConstructorFunctor)
         return NULL;
     TcpSocket *ret = pendingConstructorFunctor();

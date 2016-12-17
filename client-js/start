@@ -1,0 +1,2 @@
+#!/bin/sh
+/storage/University/cpp/Http-chat/client-js/node_modules/http-server/bin/http-server -p 21021 --cors

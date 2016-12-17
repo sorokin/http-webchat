@@ -31,7 +31,7 @@ public:
         friend class HttpServer;
     };
 
-    enum ServerStatus {Success, AlreadyBinded, AlreadyStarted};
+    enum ServerStatus {Success, AlreadyStarted, StartError};
     typedef std::function <void(HttpRequest, Response)> RequestHandler;
 
     HttpServer(Application* app);

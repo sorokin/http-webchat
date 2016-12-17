@@ -2,22 +2,22 @@
 
 using namespace std;
 
-int TcpSocket::makeSocketNonBlocking(int socket) {
-    int flags, s;
-    flags = fcntl(socket, F_GETFL, 0);
-    if (flags == -1) {
-        printf("error: makeSocketNonBlocking: fcntl : get flags : %s", gai_strerror(flags));
-        return NONE;
-    }
-
-    flags |= O_NONBLOCK;
-    s = fcntl(socket, F_SETFL, flags);
-    if (s != 0) {
-        printf("error: makeSocketNonBlocking: fcntl : set flags\n");
-        return NONE;
-    }
-    return 0;
-}
+//int TcpSocket::makeSocketNonBlocking(int socket) {
+//    int flags, s;
+//    flags = fcntl(socket, F_GETFL, 0);
+//    if (flags == -1) {
+//        printf("error: makeSocketNonBlocking: fcntl : get flags : %s", gai_strerror(flags));
+//        return NONE;
+//    }
+//
+//    flags |= O_NONBLOCK;
+//    s = fcntl(socket, F_SETFL, flags);
+//    if (s != 0) {
+//        printf("error: makeSocketNonBlocking: fcntl : set flags\n");
+//        return NONE;
+//    }
+//    return 0;
+//}
 
 TcpSocket::TcpSocket(Application *app):
         inCallback(false), pendingDelete(false), BUFFER_SIZE_ON_READ(1024), BUFFER_SIZE_ON_WRITE(1024),
@@ -32,43 +32,43 @@ TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket
                                             {handler(ev);}, DEFAULT_FLAGS);
 }
 
-TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsigned int port) {
-    if (fd != NONE)
-        return AlreadyConnected;
-    sockaddr_in servAddr;
-    servAddr.sin_family = AF_INET;
-    hostent *server = gethostbyname(host.c_str());
-    if (server == NULL)
-        return UnknownHost;
-    bcopy((char *)server->h_addr, (char *)&servAddr.sin_addr.s_addr, server->h_length);
-    servAddr.sin_port = htons(port);
-    fd = socket(AF_INET, SOCK_STREAM, 0);
-    int s = connect(fd, (struct sockaddr *) &servAddr,sizeof(servAddr));
-    assert(s == 0);
-    s = makeSocketNonBlocking(fd);
-    assert(s == 0);
-    this->host = host;
-    this->port = port;
-    app->setHandler(fd, [this](const epoll_event& ev)
-                                            {handler(ev);}, DEFAULT_FLAGS);
-    return SuccessConnected;
-}
+//TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsigned int port) {
+//    if (fd != NONE)
+//        return AlreadyConnected;
+//    sockaddr_in servAddr;
+//    servAddr.sin_family = AF_INET;
+//    hostent *server = gethostbyname(host.c_str());
+//    if (server == NULL)
+//        return UnknownHost;
+//    bcopy((char *)server->h_addr, (char *)&servAddr.sin_addr.s_addr, server->h_length);
+//    servAddr.sin_port = htons(port);
+//    fd = socket(AF_INET, SOCK_STREAM, 0);
+//    int s = connect(fd, (struct sockaddr *) &servAddr,sizeof(servAddr));
+//    assert(s == 0);
+//    s = makeSocketNonBlocking(fd);
+//    assert(s == 0);
+//    this->host = host;
+//    this->port = port;
+//    app->setHandler(fd, [this](const epoll_event& ev)
+//                                            {handler(ev);}, DEFAULT_FLAGS);
+//    return SuccessConnected;
+//}
 
-std::string TcpSocket::serverHost() {
-    return host;
-}
+//std::string TcpSocket::serverHost() {
+//    return host;
+//}
 
-unsigned int TcpSocket::serverPort() {
-    return port;
-}
+//unsigned int TcpSocket::serverPort() {
+//    return port;
+//}
 
-bool TcpSocket::write(const char* data, int len) {
-    if (fd == NONE)
-        return false;
-    appendDataForWrite(data, len);
-    tryWrite();
-    return true;
-}
+//bool TcpSocket::write(const char* data, int len) {
+//    if (fd == NONE)
+//        return false;
+//    appendDataForWrite(data, len);
+//    tryWrite();
+//    return true;
+//}
 
 bool TcpSocket::write(const std::string& s) {
     if (fd == NONE)
@@ -87,24 +87,24 @@ TcpSocket::Bytes TcpSocket::readBytes() {
     return ret;
 }
 
-std::string TcpSocket::readString() {
-    std::string ret;
-    for (int i = 0; !readBuffer.empty() && readBuffer.front() != 0; ++i) {
-        ret += readBuffer.front();
-        readBuffer.pop_front();
-    }
-    if (!readBuffer.empty())
-        readBuffer.pop_back();
-    return ret;
-}
+//std::string TcpSocket::readString() {
+//    std::string ret;
+//    for (int i = 0; !readBuffer.empty() && readBuffer.front() != 0; ++i) {
+//        ret += readBuffer.front();
+//        readBuffer.pop_front();
+//    }
+//    if (!readBuffer.empty())
+//        readBuffer.pop_back();
+//    return ret;
+//}
 
 void TcpSocket::setClosedConnectionHandler(ClosedConnectionHandler h) {
     closedConnectionHandler = h;
 }
 
-void TcpSocket::removeClosedConnectionHandler() {
-    closedConnectionHandler = ClosedConnectionHandler();
-}
+//void TcpSocket::removeClosedConnectionHandler() {
+//    closedConnectionHandler = ClosedConnectionHandler();
+//}
 
 void TcpSocket::setDataReceivedHandler(DataReceivedHandler h) {
     dataReceivedHandler = h;
@@ -112,18 +112,18 @@ void TcpSocket::setDataReceivedHandler(DataReceivedHandler h) {
         h();
 }
 
-void TcpSocket::removeDataReceivedHandler() {
-    dataReceivedHandler = DataReceivedHandler();
-}
+//void TcpSocket::removeDataReceivedHandler() {
+//    dataReceivedHandler = DataReceivedHandler();
+//}
 
 void TcpSocket::clearBuffers() {
     readBuffer.clear();
     writeBuffer.clear();
 }
 
-int TcpSocket::bytesAvailable() {
-    return readBuffer.size();
-}
+//int TcpSocket::bytesAvailable() {
+//    return readBuffer.size();
+//}
 
 void TcpSocket::close() {
     if (fd == NONE)
@@ -131,7 +131,7 @@ void TcpSocket::close() {
     //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     int s = ::close(fd);
-    assert(s == 0);
+//    assert(s == 0);
     app->removeHandler(fd);
     fd = NONE;
     host = "";
@@ -216,9 +216,9 @@ void TcpSocket::tryWrite() {
     }
 }
 
-bool TcpSocket::isErrorSocket(const epoll_event& ev) {
-    return (ev.events & EPOLLERR) || (ev.events & EPOLLHUP) || !(ev.events & EPOLLIN) || !(ev.events & EPOLLOUT);
-}
+//bool TcpSocket::isErrorSocket(const epoll_event& ev) {
+//    return (ev.events & EPOLLERR) || (ev.events & EPOLLHUP) || !(ev.events & EPOLLIN) || !(ev.events & EPOLLOUT);
+//}
 
 TcpSocket::~TcpSocket() {
     close();

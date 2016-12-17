@@ -11,13 +11,13 @@ void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const RequestHandl
 HttpServer::ServerStatus HttpServer::start(int port) {
     TcpServerSocket::ConnectedState e = listener.listen("127.0.0.1", port, [this]()
     {
-        readRequest(listener.getPendingConnecntion());
+        readRequest(listener.getPendingConnection());
     });
 
-    if (e == TcpServerSocket::AlreadyBinded)
-        return AlreadyBinded;
     if (e == TcpServerSocket::AlreadyConnected)
         return AlreadyStarted;
+    if (e != TcpServerSocket::Success)
+        return StartError;
     return Success;
 }
 
@@ -33,6 +33,9 @@ bool HttpServer::Response::response(const HttpResponse& response) {
 }
 
 void HttpServer::readRequest(TcpSocket *socket) {
+    if (socket == NULL) {
+        return;
+    }
     HttpUtils::readHttp(socket, [=](HttpObject* tmp)
     {
         if (tmp != NULL) {
@@ -49,7 +52,7 @@ void HttpServer::readRequest(TcpSocket *socket) {
                     if (matchers[i].first.method() == "" && matchers[i].first.url() == "")
                         matchers[i].second(*request, Response(socket));
 
-            if (!request->isKeepAlive())
+            if (!request->notKeptAlive())
                 delete socket;
         }
         sockets.insert(socket);

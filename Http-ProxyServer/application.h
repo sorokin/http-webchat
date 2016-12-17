@@ -1,6 +1,8 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include <cassert>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <functional>

@@ -31,7 +31,7 @@ ChatServer::ChatServer(Application* app):
         if (userId == 0)
             userId = ++numUsers;
         HttpResponse r(200, "OK", req.version(), ret);
-        if (req.isKeepAlive())
+        if (req.notKeptAlive())
             r.addHeader("Connection", "Keep-Alive");
 
         int pos = filename.find(".");
@@ -58,7 +58,7 @@ ChatServer::ChatServer(Application* app):
         history.push_back(Message(userId, time(NULL), "User " + to_string(userId) + " joined to chat!"));
 
         HttpResponse r(200, "OK", req.version());
-        if (req.isKeepAlive())
+        if (req.notKeptAlive())
             r.addHeader("Connection", "Keep-Alive");
         r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
         r.addHeader("Set-Cookie", "hash=" + to_string(s_hash(userId)) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
@@ -75,7 +75,7 @@ ChatServer::ChatServer(Application* app):
             }
 
             HttpResponse r(200, "OK", req.version());
-            if (req.isKeepAlive())
+            if (req.notKeptAlive())
                 r.addHeader("Connection", "Keep-Alive");
             std::string message = getMessage(req.body());
             cout << "User " << to_string(userId) << " sent message: " << message << endl;
@@ -85,7 +85,7 @@ ChatServer::ChatServer(Application* app):
             resp.response(r);
         } else {
             HttpResponse r(401, "Unauthorized", req.version());
-            if (req.isKeepAlive())
+            if (req.notKeptAlive())
                 r.addHeader("Connection", "Keep-Alive");
             resp.response(r);
         }
@@ -108,7 +108,7 @@ ChatServer::ChatServer(Application* app):
                 l = lastReadMessage[userId];
 
             HttpResponse r(200, "OK", req.version());
-            if (req.isKeepAlive())
+            if (req.notKeptAlive())
                 r.addHeader("Connection", "Keep-Alive");
 
             r.addHeader("Set-Cookie", "user=" + to_string(userId) + "; expires=Fri, 31 Dec 2099 23:59:59 GMT;");
@@ -118,7 +118,7 @@ ChatServer::ChatServer(Application* app):
             resp.response(r);
         } else {
             HttpResponse r(401, "Unauthorized", req.version());
-            if (req.isKeepAlive())
+            if (req.notKeptAlive())
                 r.addHeader("Connection", "Keep-Alive");
             resp.response(r);
         }
@@ -126,7 +126,7 @@ ChatServer::ChatServer(Application* app):
 
     httpServer->addRouteMatcher(RouteMatcher("OPTIONS", "*"), [=] (HttpRequest req, HttpServer::Response resp) {
         HttpResponse r(200, "OK", req.version());
-        if (req.isKeepAlive())
+        if (req.notKeptAlive())
             r.addHeader("Connection", "Keep-Alive");
         r.addHeader("Access-Control-Allow-Headers", "Content-Type");
         r.addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");

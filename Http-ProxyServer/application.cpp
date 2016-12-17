@@ -1,7 +1,5 @@
 #include "application.h"
-#include <cassert>
 
-#include <iostream>
 using namespace std;
 
 Application::AbortHandler Application::abortHandler;
@@ -10,9 +8,9 @@ Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
     mainLoopFD = epoll_create1(0);
 }
 
-int Application::setHandler(int fd, Handler handler, __uint32_t flags) {
-    epoll_event ev;
-    memset(&ev, 0, sizeof ev);
+int Application::setHandler(int fd, Handler handler, uint32_t flags) {
+    epoll_event ev = {};
+    //memset(&ev, 0, sizeof ev);
     ev.data.fd = fd;
     ev.events = flags;
     int s;
@@ -26,9 +24,9 @@ int Application::setHandler(int fd, Handler handler, __uint32_t flags) {
     return s;
 }
 
-void Application::changeFlags(int fd, __uint32_t flags) {
-    epoll_event event;
-    memset(&event, 0, sizeof event);
+void Application::changeFlags(int fd, uint32_t flags) {
+    epoll_event event = {};
+    //memset(&event, 0, sizeof event);
     event.events = flags;
     event.data.fd = fd;
     epoll_ctl(mainLoopFD, EPOLL_CTL_MOD, fd, &event);

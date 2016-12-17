@@ -41,7 +41,7 @@ public:
     void setBody(const char* message);
     virtual String toString() const;
     Data body() const;
-    bool isKeepAlive() const;
+    bool notKeptAlive() const;
     std::string findHeader(std::string key) const;
 
     String host() const;

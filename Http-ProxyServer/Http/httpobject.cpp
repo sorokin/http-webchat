@@ -139,7 +139,7 @@ int HttpObject::contentLength() const {
     return atoi(cleng.c_str());
 }
 
-bool HttpObject::isKeepAlive() const {
+bool HttpObject::notKeptAlive() const {
     //cerr << "find keep alive = " << toLower(findHeader("connection")) << "#" << endl;
     //cerr << "bool = " << (toLower(findHeader("connection")) == "keep-alive") << endl;
     return toLower(findHeader("connection")) != "keep-alive";
