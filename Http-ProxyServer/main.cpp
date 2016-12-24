@@ -10,6 +10,7 @@ int main(int, char**) {
     ChatServer *server = new ChatServer(&app);
     int status;
     if ((status = server->start(3334)) != 0) {
+        cout << "Server couldn't start" << endl;
         return status;
     } else {
         cout << "Server started on port 3334" << endl;

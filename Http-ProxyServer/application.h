@@ -37,14 +37,11 @@ public:
     }
 private:
     static void sigHandler(int) {
-        running = 1;
-        int one = 1;
-        ::write(stopFD, &one, sizeof(int));
+        ::eventfd_write(stopFD, 1);
     }
     static ExitHandler exitHandler;
 
     const int MAX_EVENTS;
-    static int running;
     int mainLoopFD;
     static int stopFD;
     std::vector <epoll_event> events;

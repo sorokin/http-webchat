@@ -2,7 +2,6 @@
 
 using namespace std;
 
-int Application::running = 0;
 int Application::stopFD = 0;
 
 Application::ExitHandler Application::exitHandler;
@@ -13,7 +12,7 @@ Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
 
     epoll_event ev = {};
     ev.data.fd = stopFD;
-    ev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
+    ev.events = EPOLLIN;
     epoll_ctl(mainLoopFD, EPOLL_CTL_ADD, stopFD, &ev);
 }
 
@@ -47,16 +46,19 @@ void Application::removeHandler(int fd) {
 }
 
 int Application::exec() {
-    for (; running == 0;) {
+    for (;;) {
         int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
         for (int i = 0; i < n; ++i)
-            if (events[i].data.fd != stopFD)
+            if (events[i].data.fd != stopFD) {
                 handlers[events[i].data.fd](events[i]);
+            } else {
+                if (exitHandler) {
+                    exitHandler();
+                }
+                cout << "Server is closing" << endl;
+                return 0;
+            }
     }
-    if (exitHandler) {
-        exitHandler();
-    }
-    return 0;
 }
 
 Application::~Application() {
