@@ -100,7 +100,7 @@ ChatServer::ChatServer(Application* app):
                 firstReadMessage[userId] = lastReadMessage[userId] = history.size();
                 history.push_back(Message(0, time(NULL), "user" + to_string(userId) + " joined to chat!"));
             }
-            QUrl url(req.url().c_str());
+            QUrlQuery url(req.url().c_str());
             int l;
             if (url.queryItemValue("all") == "true")
                 l = firstReadMessage[userId];

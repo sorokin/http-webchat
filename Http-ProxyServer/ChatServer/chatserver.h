@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <QUrl>
+#include <QUrlQuery>
 
 #include "../application.h"
 #include "../Http/httprequest.h"

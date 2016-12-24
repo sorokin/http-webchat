@@ -2,10 +2,19 @@
 
 using namespace std;
 
-Application::AbortHandler Application::abortHandler;
+int Application::running = 0;
+int Application::stopFD = 0;
+
+Application::ExitHandler Application::exitHandler;
 
 Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
     mainLoopFD = epoll_create1(0);
+    stopFD = eventfd(0, EFD_NONBLOCK);
+
+    epoll_event ev = {};
+    ev.data.fd = stopFD;
+    ev.events = EPOLLIN | EPOLLOUT | EPOLLHUP;
+    epoll_ctl(mainLoopFD, EPOLL_CTL_ADD, stopFD, &ev);
 }
 
 int Application::setHandler(int fd, Handler handler, uint32_t flags) {
@@ -38,11 +47,16 @@ void Application::removeHandler(int fd) {
 }
 
 int Application::exec() {
-    for (;;) {
+    for (; running == 0;) {
         int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
         for (int i = 0; i < n; ++i)
-            handlers[events[i].data.fd](events[i]);
+            if (events[i].data.fd != stopFD)
+                handlers[events[i].data.fd](events[i]);
     }
+    if (exitHandler) {
+        exitHandler();
+    }
+    return 0;
 }
 
 Application::~Application() {

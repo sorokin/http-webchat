@@ -130,9 +130,9 @@ void TcpSocket::close() {
         return;
     //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
-    int s = ::close(fd);
-//    assert(s == 0);
     app->removeHandler(fd);
+    int s = ::close(fd);
+    assert(s == 0);
     fd = NONE;
     host = "";
     port = 0;

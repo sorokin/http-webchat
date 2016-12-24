@@ -56,9 +56,9 @@ unsigned int TcpServerSocket::serverPort() {
 void TcpServerSocket::close() {
     if (listenerFD == NONE)
         return;
-    int s = ::close(listenerFD);
-//    assert(s == 0);
     app->removeHandler(listenerFD);
+    int s = ::close(listenerFD);
+    assert(s == 0);
     listenerFD = NONE;
     port = 0;
     host = "";

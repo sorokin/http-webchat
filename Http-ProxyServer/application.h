@@ -12,6 +12,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 
 using namespace std;
 
@@ -19,7 +20,7 @@ class Application
 {
 public:
     typedef std::function <void(epoll_event)> Handler;
-    typedef std::function <void()> AbortHandler;
+    typedef std::function <void()> ExitHandler;
 
     Application();
 
@@ -29,21 +30,23 @@ public:
     int exec();
     ~Application();
 
-    static void setAbortHandler(AbortHandler handler) {
-        abortHandler = handler;
+    static void setExitHandler(ExitHandler handler) {
+        exitHandler = handler;
         signal(SIGINT, Application::sigHandler);
         signal(SIGTERM, Application::sigHandler);
     }
 private:
     static void sigHandler(int) {
-        if (abortHandler)
-            abortHandler();
-        exit(0);
+        running = 1;
+        int one = 1;
+        ::write(stopFD, &one, sizeof(int));
     }
-    static AbortHandler abortHandler;
+    static ExitHandler exitHandler;
 
     const int MAX_EVENTS;
+    static int running;
     int mainLoopFD;
+    static int stopFD;
     std::vector <epoll_event> events;
     std::map <int, Handler> handlers;
 };
