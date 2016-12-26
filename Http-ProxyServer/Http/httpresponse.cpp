@@ -23,21 +23,21 @@ HttpResponse::String HttpResponse::url() const {
     return mUrl;
 }
 
-void HttpResponse::setStatusCode(int statusCode) {
-    mStatusCode = statusCode;
-}
-
-int HttpResponse::statusCode() const {
-    return mStatusCode;
-}
-
-void HttpResponse::setReasonPhrase(const String& reasonPhrase) {
-    mReasonPhrase = reasonPhrase;
-}
-
-HttpResponse::String HttpResponse::reasonPhrase() const {
-    return mReasonPhrase;
-}
+//void HttpResponse::setStatusCode(int statusCode) {
+//    mStatusCode = statusCode;
+//}
+//
+//int HttpResponse::statusCode() const {
+//    return mStatusCode;
+//}
+//
+//void HttpResponse::setReasonPhrase(const String& reasonPhrase) {
+//    mReasonPhrase = reasonPhrase;
+//}
+//
+//HttpResponse::String HttpResponse::reasonPhrase() const {
+//    return mReasonPhrase;
+//}
 
 HttpResponse::Data HttpResponse::toString() const {
     String msg = "HTTP/" + version() + " ";

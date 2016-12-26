@@ -24,21 +24,21 @@ public:
     bool append(const Data& data);
     void commit();
     bool hasBody();
-    CreationMode creationMode();
+//    CreationMode creationMode();
 
     HttpObject(CreationMode mode);
     HttpObject(const Data& body, const String& version);
-    virtual void setUrl(const String& url) = 0;
+//    virtual void setUrl(const String& url) = 0;
     virtual String url() const = 0;
-    void setVersion(const String& vers);
+//    void setVersion(const String& vers);
     String version() const;
     void addHeader(const String& key, const String& val);
-    void addHeaders(const std::vector <std::pair <String, String> >& headers);
+//    void addHeaders(const std::vector <std::pair <String, String> >& headers);
     void setHeader(const String& key, const String& val);
     String header(const String& key);
-    HeadersContainer headers() const;
+//    HeadersContainer headers() const;
     void setBody(const Data& message);
-    void setBody(const char* message);
+//    void setBody(const char* message);
     virtual String toString() const;
     Data body() const;
     bool notKeptAlive() const;

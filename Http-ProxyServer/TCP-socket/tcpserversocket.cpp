@@ -41,17 +41,17 @@ TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host,
     return Success;
 }
 
-bool TcpServerSocket::isListening() {
-    return listenerFD != NONE;
-}
-
-std::string TcpServerSocket::serverHost() {
-    return host;
-}
-
-unsigned int TcpServerSocket::serverPort() {
-    return port;
-}
+//bool TcpServerSocket::isListening() {
+//    return listenerFD != NONE;
+//}
+//
+//std::string TcpServerSocket::serverHost() {
+//    return host;
+//}
+//
+//unsigned int TcpServerSocket::serverPort() {
+//    return port;
+//}
 
 void TcpServerSocket::close() {
     if (listenerFD == NONE)

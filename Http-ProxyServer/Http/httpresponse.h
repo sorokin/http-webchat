@@ -12,10 +12,10 @@ public:
 
     void setUrl(const String& url);
     String url() const;
-    void setStatusCode(int statusCode);
-    int statusCode() const;
-    void setReasonPhrase(const String& rph);
-    String reasonPhrase() const;
+//    void setStatusCode(int statusCode);
+//    int statusCode() const;
+//    void setReasonPhrase(const String& rph);
+//    String reasonPhrase() const;
     Data toString() const;
 
     ~HttpResponse();

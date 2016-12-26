@@ -1,7 +1,7 @@
-#include "httpclient.h"
-
-HttpClient::HttpClient(Application *app):app(app) {}
-
+//#include "httpclient.h"
+//
+//HttpClient::HttpClient(Application *app):app(app) {}
+//
 //HttpClient::RequestStatus HttpClient::request(const HttpRequest& request,
 //                                              const ResponseHandler& handler) {
 //    TcpSocket *socket = new TcpSocket(app);

@@ -57,13 +57,13 @@ void HttpRequest::splitUrl(String url, String& host, String& path) {
         path = "/";
 }
 
-void HttpRequest::setMethod(const String& method) {
-    mMethod = method;
-}
-
-void HttpRequest::setMethod(Method method) {
-    mMethod = getMethod(method);
-}
+//void HttpRequest::setMethod(const String& method) {
+//    mMethod = method;
+//}
+//
+//void HttpRequest::setMethod(Method method) {
+//    mMethod = getMethod(method);
+//}
 
 HttpRequest::String HttpRequest::method() const {
     return mMethod;

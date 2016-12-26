@@ -16,8 +16,6 @@ void RouteMatcher::normalize() {
     mUrl = HttpUtils::transformRoute(mUrl);
 }
 
-
-
 std::string RouteMatcher::method() {
     return mMethod;
 }

@@ -57,9 +57,9 @@ HttpObject::String HttpObject::trim(const String& s) {
     return s.substr(i, j - i + 1);
 }
 
-HttpObject::CreationMode HttpObject::creationMode() {
-    return mode;
-}
+//HttpObject::CreationMode HttpObject::creationMode() {
+//    return mode;
+//}
 
 HttpObject::HttpObject(HttpObject::CreationMode mode):mIsBody(false), mode(mode), position(0) {}
 
@@ -69,9 +69,9 @@ HttpObject::HttpObject(const Data& body, const String& version) {
     setHeader("Content-Length", std::to_string(body.size()));
 }
 
-void HttpObject::setVersion(const String& vers) {
-    mVersion = vers;
-}
+//void HttpObject::setVersion(const String& vers) {
+//    mVersion = vers;
+//}
 
 HttpObject::String HttpObject::version() const {
     return mVersion;
@@ -91,10 +91,10 @@ void HttpObject::setHeader(const String& key, const String& val) {
     mHeaders.push_back(make_pair(toLower(key), toLower(val)));
 }
 
-void HttpObject::addHeaders(const std::vector <std::pair <String, String> >& headers) {
-    for (int i = 0; i < (int)headers.size(); ++i)
-        mHeaders.push_back(make_pair(toLower(headers[i].first), headers[i].second));
-}
+//void HttpObject::addHeaders(const std::vector <std::pair <String, String> >& headers) {
+//    for (int i = 0; i < (int)headers.size(); ++i)
+//        mHeaders.push_back(make_pair(toLower(headers[i].first), headers[i].second));
+//}
 
 HttpObject::String HttpObject::header(const String& key) {
     String k = toLower(key);
@@ -104,18 +104,18 @@ HttpObject::String HttpObject::header(const String& key) {
     return "";
 }
 
-HttpObject::HeadersContainer HttpObject::headers() const {
-    return mHeaders;
-}
+//HttpObject::HeadersContainer HttpObject::headers() const {
+//    return mHeaders;
+//}
 
 void HttpObject::setBody(const Data& body) {
     mBody = body.c_str();
     setHeader("Content-Length", std::to_string(body.size()));
 }
 
-void HttpObject::setBody(const char* message) {
-    mBody = message;
-}
+//void HttpObject::setBody(const char* message) {
+//    mBody = message;
+//}
 
 HttpObject::Data HttpObject::body() const {
     return mBody;

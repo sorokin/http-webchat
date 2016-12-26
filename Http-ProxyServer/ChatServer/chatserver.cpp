@@ -138,13 +138,13 @@ int ChatServer::start(int port) {
     return httpServer->start(port);
 }
 
-std::string ChatServer::getStringByFile(const char* name) {
-    ifstream in(name);
-    std::string s, ret;
-    while (getline(in, s))
-        ret += s + "\n";
-    return ret;
-}
+//std::string ChatServer::getStringByFile(const char* name) {
+//    ifstream in(name);
+//    std::string s, ret;
+//    while (getline(in, s))
+//        ret += s + "\n";
+//    return ret;
+//}
 
 ChatServer::UserType ChatServer::getUserIdByCookie(std::string cookie) {
     if (cookie == "")

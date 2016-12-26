@@ -16,8 +16,8 @@ public:
                 const Data& body = "", const String& version = "1.0");
     String url() const;
     void setUrl(const String& url);
-    void setMethod(const String& method);
-    void setMethod(Method method);
+//    void setMethod(const String& method);
+//    void setMethod(Method method);
     String method() const;
     Data toString() const;
 

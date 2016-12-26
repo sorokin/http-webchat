@@ -24,9 +24,9 @@ public:
 
     TcpServerSocket(Application *app);
     ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnectionHandler);
-    bool isListening();
-    std::string serverHost();
-    unsigned int serverPort();
+//    bool isListening();
+//    std::string serverHost();
+//    unsigned int serverPort();
     TcpSocket* getPendingConnection();
     void close();
     TcpServerSocket(TcpServerSocket&&);
@@ -47,8 +47,8 @@ private:
     TcpServerSocket(const TcpServerSocket&) = delete;
     TcpServerSocket& operator = (const TcpServerSocket&) = delete;
     int makeSocketNonBlocking(int listenerFD);
-    int addToEpoll(int listenerFD);
-    void handler();
+//    int addToEpoll(int listenerFD);
+//    void handler();
     bool isErrorSocket(const epoll_event& ev);
     void acceptConnection(const epoll_event& flags);
 };
