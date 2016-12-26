@@ -33,11 +33,11 @@ HttpRequest::HttpRequest(const String& method, const String& url,
     addHeader("Host", h);
 }
 
-void HttpRequest::setUrl(const String& url) {
-    String h;
-    splitUrl(url, h, mPath);
-    addHeader("Host", h);
-}
+//void HttpRequest::setUrl(const String& url) {
+//    String h;
+//    splitUrl(url, h, mPath);
+//    addHeader("Host", h);
+//}
 
 HttpObject::String HttpRequest::url() const {
     return host() + path();

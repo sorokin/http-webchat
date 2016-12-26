@@ -2,7 +2,7 @@
 
 TcpServerSocket::TcpServerSocket(Application *app): MAX_EVENTS(128), listenerFD(NONE), app(app) {}
 
-TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host, const unsigned int port,
+TcpServerSocket::ConnectedState TcpServerSocket::listen(const std::string& host, const uint16_t port,
                              NewConnectionHandler newConnection) {
     if (listenerFD != NONE)
         return AlreadyConnected;

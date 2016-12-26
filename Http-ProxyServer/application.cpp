@@ -47,7 +47,7 @@ void Application::removeHandler(int fd) {
 
 int Application::exec() {
     for (;;) {
-        int n = epoll_wait(mainLoopFD, events.data(), events.size(), -1);
+        int n = epoll_wait(mainLoopFD, events.data(), (int) events.size(), -1);
         for (int i = 0; i < n; ++i)
             if (events[i].data.fd != stopFD) {
                 handlers[events[i].data.fd](events[i]);

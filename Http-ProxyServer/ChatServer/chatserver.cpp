@@ -1,10 +1,10 @@
 #include "chatserver.h"
 
 ChatServer::ChatServer(Application* app):
-    httpServer(new HttpServer(app)), COOKIE_USER("user"), COOKIE_HASH("hash"), numUsers(0)
+    COOKIE_USER("user"), COOKIE_HASH("hash"), httpServer(new HttpServer(app)), numUsers(0)
 {
     httpServer->addRouteMatcher(RouteMatcher(), [this](HttpRequest req, HttpServer::Response resp) {
-        int i = (int)req.path().size() - 1;
+//        int i = (int)req.path().size() - 1;
         std::string filename = req.path();
         if (filename == "/")
             filename = "/index.html";
@@ -34,7 +34,7 @@ ChatServer::ChatServer(Application* app):
         if (req.notKeptAlive())
             r.addHeader("Connection", "Keep-Alive");
 
-        int pos = filename.find(".");
+        size_t pos = filename.find(".");
         std::string type = filename.substr(pos + 1, filename.size() - pos - 1);
 
         if (type == "js")
@@ -101,7 +101,7 @@ ChatServer::ChatServer(Application* app):
                 history.push_back(Message(0, time(NULL), "user" + to_string(userId) + " joined to chat!"));
             }
             QUrlQuery url(req.url().c_str());
-            int l;
+            size_t l;
             if (url.queryItemValue("all") == "true")
                 l = firstReadMessage[userId];
             else
@@ -134,7 +134,7 @@ ChatServer::ChatServer(Application* app):
     });
 }
 
-int ChatServer::start(int port) {
+int ChatServer::start(uint16_t port) {
     return httpServer->start(port);
 }
 
@@ -150,8 +150,8 @@ ChatServer::UserType ChatServer::getUserIdByCookie(std::string cookie) {
     if (cookie == "")
         return 0;
     std::string userId;
-    int i = cookie.find(COOKIE_USER);
-    if (i == -1)
+    size_t i = cookie.find(COOKIE_USER);
+    if (i == string::npos)
         return 0;
     i += 5;
     while (i < cookie.size() && cookie[i] != ';')
@@ -159,8 +159,8 @@ ChatServer::UserType ChatServer::getUserIdByCookie(std::string cookie) {
     if (userId.size() == 0)
         return 0;
 
-    int j = cookie.find(COOKIE_HASH);
-    if (j == -1)
+    size_t j = cookie.find(COOKIE_HASH);
+    if (j == string::npos)
         return 0;
     j += 5;
     std::string h;
@@ -169,9 +169,9 @@ ChatServer::UserType ChatServer::getUserIdByCookie(std::string cookie) {
     if (h.size() == 0)
         return 0;
 
-    if (s_hash(atol(userId.c_str())) != atol(h.c_str()))
+    if (s_hash(strtoul(userId.c_str(), NULL, 0)) != strtoul(h.c_str(), NULL, 0))
         return 0;
-    return atol(userId.c_str());
+    return strtoul(userId.c_str(), NULL, 0);
 }
 
 std::string ChatServer::getMessage(const std::string& str) {
@@ -192,7 +192,7 @@ std::string ChatServer::getMessage(const std::string& str) {
 //    return ret;
 //}
 
-std::string ChatServer::packageToJsonHistory(int l, int r) {
+std::string ChatServer::packageToJsonHistory(size_t l, size_t r) {
     std::string ret = "{\"messages\": [";
     for (; l < r; ++l)
         if (l == r - 1)

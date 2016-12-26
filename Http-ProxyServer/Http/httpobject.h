@@ -60,7 +60,7 @@ private:
     bool mIsBody;
     Data tmp;
     CreationMode mode;
-    int position;
+    size_t position;
 };
 
 #endif // HttpObject_H

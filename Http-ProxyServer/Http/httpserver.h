@@ -35,7 +35,7 @@ public:
     typedef std::function <void(HttpRequest, Response)> RequestHandler;
 
     HttpServer(Application* app);
-    ServerStatus start(int port);
+    ServerStatus start(uint16_t port);
     void addRouteMatcher(const RouteMatcher& matcher, const RequestHandler &handler);
     ~HttpServer();
 protected:

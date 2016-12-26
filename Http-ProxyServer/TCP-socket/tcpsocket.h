@@ -42,13 +42,13 @@ public:
     static void operator delete(void* ptr, size_t size) throw();//DANGEROUS
     ~TcpSocket();
 private:
-    const int DEFAULT_FLAGS = EPOLLIN | EPOLLHUP;
-    const int OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLHUP;
+    const uint32_t DEFAULT_FLAGS = EPOLLIN | EPOLLHUP;
+    const uint32_t OUT_FLAGS = EPOLLOUT | EPOLLIN | EPOLLHUP;
     const int NONE = -1;
-    const int BUFFER_SIZE_ON_READ;
-    const int BUFFER_SIZE_ON_WRITE;
+    const size_t BUFFER_SIZE_ON_READ;
+    const size_t BUFFER_SIZE_ON_WRITE;
 
-    int currentFlags;
+    uint32_t currentFlags;
     int fd;
     unsigned int port;
 
@@ -60,11 +60,11 @@ private:
     DataReceivedHandler dataReceivedHandler;
 
     friend class TcpServerSocket;
-    TcpSocket(Application *app, int fd, char* host, char* port);
+    TcpSocket(Application *app, int fd, const char* host, const char* port);
 //    int makeSocketNonBlocking(int fd);
     void handler(const epoll_event&);
 //    bool isErrorSocket(const epoll_event& ev);
-    void appendDataForWrite(const char* data, int len);
+    void appendDataForWrite(const char* data, size_t len);
     void appendCharForWrite(char c);
     void tryWrite();
     TcpSocket(const TcpSocket&) = delete;

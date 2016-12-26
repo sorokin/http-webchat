@@ -15,7 +15,7 @@ public:
     HttpRequest(const String& method, const String& url,
                 const Data& body = "", const String& version = "1.0");
     String url() const;
-    void setUrl(const String& url);
+//    void setUrl(const String& url);
 //    void setMethod(const String& method);
 //    void setMethod(Method method);
     String method() const;

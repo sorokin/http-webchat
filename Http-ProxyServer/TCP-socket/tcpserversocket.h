@@ -23,7 +23,7 @@ public:
     enum ConnectedState {Success, AlreadyConnected, BindError, SocketCreationError, NonBlockingError, ListenError};
 
     TcpServerSocket(Application *app);
-    ConnectedState listen(const std::string& host, const unsigned int port, NewConnectionHandler newConnectionHandler);
+    ConnectedState listen(const std::string& host, const uint16_t port, NewConnectionHandler newConnectionHandler);
 //    bool isListening();
 //    std::string serverHost();
 //    unsigned int serverPort();

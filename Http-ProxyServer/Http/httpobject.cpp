@@ -12,14 +12,14 @@ bool HttpObject::append(const Data& data) {
         tmp += data;
         for (; position < tmp.size(); ++position)
             if (tmp[position] == '\n' &&
-                    (position >= 1 && tmp[position - 1] == '\n' ||
-                     position >= 2 && tmp[position - 1] == '\r' && tmp[position - 2] == '\n'))
+                    ((position >= 1 && tmp[position - 1] == '\n') ||
+                            (position >= 2 && tmp[position - 1] == '\r' && tmp[position - 2] == '\n')))
                 break;
         if (position != tmp.size()) {
             mIsBody = true;
             if (position + 1 < tmp.size()) {
-                mBody = tmp.substr(position + 1, (int)tmp.size() - position - 1);
-                tmp.erase(position + 1, (int)tmp.size() - position - 1);
+                mBody = tmp.substr(position + 1, tmp.size() - position - 1);
+                tmp.erase(position + 1, tmp.size() - position - 1);
             }
 
             std::stringstream in(tmp);
@@ -28,11 +28,11 @@ bool HttpObject::append(const Data& data) {
             getline(in, line);
             parseFirstLine(line);
             while (getline(in, line)) {
-                int pos = line.find(":");
-                if (pos == -1)
+                size_t pos = line.find(":");
+                if (pos == string::npos)
                     continue;
                 String key = toLower(trim(line.substr(0, pos)));
-                String value = trim(line.substr(pos + 1, (int)line.size() - pos - 1));
+                String value = trim(line.substr(pos + 1, line.size() - pos - 1));
                 mHeaders.push_back(make_pair(key, value));
             }
         }
@@ -49,12 +49,12 @@ bool HttpObject::hasBody() {
 }
 
 HttpObject::String HttpObject::trim(const String& s) {
-    int i = 0, j = s.size() - 1;
+    size_t i = 0, j = s.size();
     while (i < s.size() && s[i] == ' ' ) ++i;
-    while (j >= 0 && s[j] == ' ') --j;
-    if (i > j)
+    while (j > 0 && s[j - 1] == ' ') --j;
+    if (i >= j)
         return "";
-    return s.substr(i, j - i + 1);
+    return s.substr(i, j - i);
 }
 
 //HttpObject::CreationMode HttpObject::creationMode() {
@@ -83,7 +83,7 @@ void HttpObject::addHeader(const String& key, const String& val) {
 
 void HttpObject::setHeader(const String& key, const String& val) {
     String k = toLower(key);
-    for (int i = 0; i < mHeaders.size(); ++i)
+    for (size_t i = 0; i < mHeaders.size(); ++i)
         if (mHeaders[i].first == k) {
             mHeaders[i].second = val;
             return;
@@ -98,7 +98,7 @@ void HttpObject::setHeader(const String& key, const String& val) {
 
 HttpObject::String HttpObject::header(const String& key) {
     String k = toLower(key);
-    for (int i = 0; i < mHeaders.size(); ++i)
+    for (size_t i = 0; i < mHeaders.size(); ++i)
         if (mHeaders[i].first == k)
             return mHeaders[i].second;
     return "";
@@ -122,7 +122,7 @@ HttpObject::Data HttpObject::body() const {
 }
 
 std::string HttpObject::findHeader(std::string key) const{
-    for (int i = 0; i < mHeaders.size(); ++i)
+    for (size_t i = 0; i < mHeaders.size(); ++i)
         if (mHeaders[i].first == key)
             return mHeaders[i].second;
     return "";

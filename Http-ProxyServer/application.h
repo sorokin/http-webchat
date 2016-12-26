@@ -24,9 +24,9 @@ public:
 
     Application();
 
-    int setHandler(int fd, Handler handler, __uint32_t flags);
+    int setHandler(int fd, Handler handler, uint32_t flags);
     void removeHandler(int fd);
-    void changeFlags(int fd, __uint32_t flags);
+    void changeFlags(int fd, uint32_t flags);
     int exec();
     ~Application();
 
@@ -41,7 +41,7 @@ private:
     }
     static ExitHandler exitHandler;
 
-    const int MAX_EVENTS;
+    const size_t MAX_EVENTS;
     int mainLoopFD;
     static int stopFD;
     std::vector <epoll_event> events;

@@ -15,9 +15,9 @@ HttpResponse::HttpResponse(int statusCode, const String& reasonPhrase, const Str
     setHeader("Access-Control-Allow-Origin", "*");
 }
 
-void HttpResponse::setUrl(const String& url) {
-    mUrl = url;
-}
+//void HttpResponse::setUrl(const String& url) {
+//    mUrl = url;
+//}
 
 HttpResponse::String HttpResponse::url() const {
     return mUrl;

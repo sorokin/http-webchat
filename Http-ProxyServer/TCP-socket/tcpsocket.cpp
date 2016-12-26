@@ -24,7 +24,7 @@ TcpSocket::TcpSocket(Application *app):
         currentFlags(DEFAULT_FLAGS), fd(NONE), app(app) {
 }
 
-TcpSocket::TcpSocket(Application *app, int fd, char* host, char* port):TcpSocket(app) {
+TcpSocket::TcpSocket(Application *app, int fd, const char* host, const char* port):TcpSocket(app) {
     this->fd = fd;
     this->host = std::string(host);
     sscanf(port, "%d", &this->port);
@@ -185,8 +185,8 @@ void TcpSocket::handler(const epoll_event& event) {
         ::operator delete(this);
 }
 
-void TcpSocket::appendDataForWrite(const char* data, int len) {
-    for (int i = 0; i < len; ++i)
+void TcpSocket::appendDataForWrite(const char* data, size_t len) {
+    for (size_t i = 0; i < len; ++i)
         appendCharForWrite(data[i]);
 }
 
@@ -197,11 +197,11 @@ void TcpSocket::appendCharForWrite(char c) {
 void TcpSocket::tryWrite() {
     char tmpBuffer[BUFFER_SIZE_ON_WRITE];
     while (!writeBuffer.empty()) {
-        int tmpBufferSize = 0;
+        size_t tmpBufferSize = 0;
         std::deque <char>::iterator it = writeBuffer.begin();
         for (;tmpBufferSize < BUFFER_SIZE_ON_WRITE && it != writeBuffer.end(); ++tmpBufferSize, it++)
             tmpBuffer[tmpBufferSize] = *it;
-        int len = ::write(fd, tmpBuffer, tmpBufferSize);
+        ssize_t len = ::write(fd, tmpBuffer, tmpBufferSize);
         if (len == -1)
             break;
         for (int i = 0; i < len; ++i)
