@@ -1,5 +1,5 @@
 var timer;
-var myId;
+var username = null;
 
 function scrollMessages() {
     var wd = $('#messages')[0].scrollHeight;
@@ -21,41 +21,44 @@ function appendMessage(messages, message) {
     var format = wrap(date.getDate(), 2) + "-" + wrap(date.getMonth() + 1, 2) + "-" + wrap(date.getYear() % 100, 2) +
         " " + wrap(date.getHours(), 2) + ":" + wrap(date.getMinutes(), 2) + ":" + wrap(date.getSeconds(), 2);
     if (message.from != 0) {
-        if (message.from == myId)
+        if (message.from == username) {
             messages.append('<li><b>user' + message.from + '</b>(' + format + '): ' + message.text + '</li>');
-        else
+        } else {
             messages.append('<li>user' + message.from + '(' + format + '): ' + message.text + '</li>');
-    } else
+        }
+    } else {
         messages.append('<li><font color="gray"><i>System(' + format + '): ' + message.text + '</i></font></li>');
+    }
 }
 
-function join() {
+function login(content) {
     $.ajax({
-        url: '/join',
+        url: '/login',
         method: 'POST',
-        data: {},
-        success: function (data) {
+        data: {
+            username: content
+        },
+        success: function() {
+            username = content;
+            loadMessages(true)();
         }
-    });
+    })
 }
 
 function loadMessages(all) {
     return function () {
         $.ajax({
-            headers: {'Content-Type' : 'application/json; charset=utf-8'},
             url: '/messages',
             method: 'GET',
-            dataType: 'json',
+            headers: {'Content-Type' : 'application/json; charset=utf-8'},
             data: {
+                username: username,
                 all: all
             },
-            xhrFields: {
-                withCredentials: true
-            },
-            success: function (data) {
+            dataType: 'json',
+            success: function(data) {
                 for (var i = 0; i < data.messages.length; ++i)
                     appendMessage($('#messages'), data.messages[i]);
-                //$('#messages').append('<li>' + data.response + (new Date()).getTime() +'</li>');
                 if (data.messages.length != 0)
                     scrollMessages();
                 timer = setTimeout(loadMessages(false), 500);
@@ -66,14 +69,11 @@ function loadMessages(all) {
 
 function sendMessage(message) {
     $.ajax({
-        url: '/messages',
+        url: '/messages?username=' + username,
         method: 'POST',
         headers: {'Content-Type': 'application/json; charset=utf-8'},
         data: {
             message: message
-        },
-        xhrFields: {
-            withCredentials: true
         },
         dataType: 'json',
         success: function (response) {
@@ -84,31 +84,19 @@ function sendMessage(message) {
 }
 
 $(document).ready(function () {
-    myId = parseInt(document.cookie.substring(5, document.cookie.indexOf(";")));
-    /*$('#myForm').on('submit', function(event) {
-     event.preventDefault();
-
-     var message = $(this).find('input').val();
-     if (message === '')
-     return;
-     $(this).find('input').val('');
-     sendMessage(message);
-     console.log(message);
-     });*/
-
-    $(document).on('keydown', function (event) {
-        //console.log("code = " + event.keyCode);
-        //alert(event.keyCode);
+    $(document).on('keydown', function(event) {
         if (event.keyCode == 13) {
             event.preventDefault();
-            var message = $(this).find('input').val();
-            if (message === '')
+            var content = $(this).find('input').val();
+            if (content === '')
                 return;
             $(this).find('input').val('');
-            sendMessage(message);
+
+            if (username != null) {
+                sendMessage(content);
+            } else {
+                login(content);
+            }
         }
     });
-
-    join();
-    loadMessages(true)();
 });

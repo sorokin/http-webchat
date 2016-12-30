@@ -121,6 +121,46 @@ HttpObject::Data HttpObject::body() const {
     return mBody;
 }
 
+std::map<std::string, std::string> HttpObject::parseForm(std::string raw) {
+    map<string, string> form;
+    string name = "", value = "";
+    bool isInName = true;
+    for (size_t i = 0; i < raw.length(); ++i) {
+        if (raw[i] == '=') {
+            if (isInName) {
+                isInName = false;
+            } else {
+                return map<string, string>();
+            }
+        } else if (raw[i] == '&') {
+            if (!isInName) {
+                isInName = true;
+                if (form.find(name) != form.end()) {
+                    return map<string, string>();
+                }
+                form[name] = value;
+                name = "";
+                value = "";
+            }
+        } else {
+            if (isInName) {
+                name += raw[i];
+            } else {
+                value += raw[i];
+            }
+        }
+    }
+    if (!isInName) {
+        if (form.find(name) != form.end()) {
+            return map<string, string>();
+        }
+        form[name] = value;
+        return form;
+    } else {
+        return map<string, string>();
+    }
+}
+
 std::string HttpObject::findHeader(std::string key) const{
     for (size_t i = 0; i < mHeaders.size(); ++i)
         if (mHeaders[i].first == key)

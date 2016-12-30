@@ -13,8 +13,8 @@ MAKEFILE      = Makefile
 CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_CORE_LIB
-CFLAGS        = -g -pipe -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -g -pipe -std=c++11 -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+CFLAGS        = -pipe -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -std=c++11 -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 INCPATH       = -I. -isystem /usr/include/qt -isystem /usr/include/qt/QtCore -I. -I/usr/lib/qt/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake
 DEL_FILE      = rm -f
@@ -444,13 +444,7 @@ chatserver.o: ChatServer/chatserver.cpp ChatServer/chatserver.h \
 		Http/routematcher.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o chatserver.o ChatServer/chatserver.cpp
 
-httpclient.o: Http/httpclient.cpp Http/httpclient.h \
-		TCP-socket/tcpsocket.h \
-		application.h \
-		Http/httprequest.h \
-		Http/httpobject.h \
-		Http/httpresponse.h \
-		Http/httputils.h
+httpclient.o: Http/httpclient.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o httpclient.o Http/httpclient.cpp
 
 httpobject.o: Http/httpobject.cpp Http/httpobject.h

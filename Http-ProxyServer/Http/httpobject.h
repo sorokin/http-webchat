@@ -41,6 +41,7 @@ public:
 //    void setBody(const char* message);
     virtual String toString() const;
     Data body() const;
+    static std::map<std::string, std::string> parseForm(std::string raw);
     bool notKeptAlive() const;
     std::string findHeader(std::string key) const;
 
