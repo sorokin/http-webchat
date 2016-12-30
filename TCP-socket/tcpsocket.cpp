@@ -28,8 +28,9 @@ TcpSocket::TcpSocket(Application *app, int fd, const char* host, const char* por
     this->fd = fd;
     this->host = std::string(host);
     sscanf(port, "%d", &this->port);
-    app->setHandler(fd, [this](const epoll_event& ev)
-                                            {handler(ev);}, DEFAULT_FLAGS);
+    app->setHandler(fd, [this](const epoll_event& ev) {
+        handler(ev);
+    }, DEFAULT_FLAGS);
 }
 
 //TcpSocket::ConnectedState TcpSocket::connectToHost(const std::string& host, unsigned int port) {
@@ -131,11 +132,12 @@ void TcpSocket::close() {
     //printf("Closed connection on descriptor %d\n", fd);
     clearBuffers();
     app->removeHandler(fd);
-    int s = ::close(fd);
-    assert(s == 0);
-    fd = NONE;
-    host = "";
-    port = 0;
+    ::close(fd);
+//    int s = ::close(fd);
+//    assert(s == 0);
+//    fd = NONE;
+//    host = "";
+//    port = 0;
 }
 
 void TcpSocket::handler(const epoll_event& event) {

@@ -4,16 +4,30 @@ using namespace std;
 
 int Application::stopFD = 0;
 
-Application::ExitHandler Application::exitHandler;
+//Application::ExitHandler Application::exitHandler;
 
 Application::Application():MAX_EVENTS(128), events(MAX_EVENTS) {
-    mainLoopFD = epoll_create1(0);
-    stopFD = eventfd(0, EFD_NONBLOCK);
+    struct sigaction sa = {};
+    sa.sa_handler = Application::sigHandler;
+    sigset_t ss;
+    string seMsg = "Couldn't set signal handler";
+    _m1_system_call(sigemptyset(&ss), seMsg);
+    _m1_system_call(sigaddset(&ss, SIGINT), seMsg);
+    _m1_system_call(sigaddset(&ss, SIGTERM), seMsg);
+    sa.sa_mask = ss;
+    _m1_system_call(sigaction(SIGINT, &sa, 0), seMsg);
+    _m1_system_call(sigaction(SIGTERM, &sa, 0), seMsg);
+
+//    mainLoopFD = epoll_create1(0);
+    mainLoopFD = _m1_system_call(epoll_create1(0), "Couldn't run epoll fd");
+//    stopFD = eventfd(0, EFD_NONBLOCK);
+    stopFD = _m1_system_call(eventfd(0, EFD_NONBLOCK), "Couldn't run terminating fd");
 
     epoll_event ev = {};
     ev.data.fd = stopFD;
     ev.events = EPOLLIN;
-    epoll_ctl(mainLoopFD, EPOLL_CTL_ADD, stopFD, &ev);
+//    epoll_ctl(mainLoopFD, EPOLL_CTL_ADD, stopFD, &ev);
+    _m1_system_call(epoll_ctl(mainLoopFD, EPOLL_CTL_ADD, stopFD, &ev), "Couldn't add terminating fd to polling");
 }
 
 int Application::setHandler(int fd, Handler handler, uint32_t flags) {
@@ -52,9 +66,9 @@ int Application::exec() {
             if (events[i].data.fd != stopFD) {
                 handlers[events[i].data.fd](events[i]);
             } else {
-                if (exitHandler) {
-                    exitHandler();
-                }
+//                if (exitHandler) {
+//                    exitHandler();
+//                }
                 cout << "Server is closing" << endl;
                 return 0;
             }
@@ -62,6 +76,14 @@ int Application::exec() {
 }
 
 Application::~Application() {
-    int s = ::close(mainLoopFD);
-    assert(s == 0);
+    try {
+        _m1_system_call(epoll_ctl(mainLoopFD, EPOLL_CTL_DEL, stopFD, NULL),
+                        "Couldn't remove terminating fd from polling");
+        _m1_system_call(close(stopFD), "Couldn't close terminating fd");
+        _m1_system_call(close(mainLoopFD), "Couldn't close polling fd");
+    } catch (string error) {
+        cout << "Something wrong happened while destructing the application" << error << endl;
+    }
+//    int s = ::close(mainLoopFD);
+//    assert(s == 0);
 }

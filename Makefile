@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = Http-ProxyServer1.0.0
-DISTDIR = /storage/University/cpp/Http-chat/Http-ProxyServer/.tmp/Http-ProxyServer1.0.0
+DISTDIR = /storage/University/cpp/Http-chat/.tmp/Http-ProxyServer1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-O1,--sort-common,--as-needed,-z,relro
 LIBS          = $(SUBLIBS) -lQt5Core -lpthread 
@@ -418,6 +418,7 @@ compiler_clean:
 ####### Compile
 
 main.o: main.cpp application.h \
+		common.h \
 		ChatServer/chatserver.h \
 		Http/httprequest.h \
 		Http/httpobject.h \
@@ -429,11 +430,13 @@ main.o: main.cpp application.h \
 		Http/routematcher.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
-application.o: application.cpp application.h
+application.o: application.cpp application.h \
+		common.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o application.o application.cpp
 
 chatserver.o: ChatServer/chatserver.cpp ChatServer/chatserver.h \
 		application.h \
+		common.h \
 		Http/httprequest.h \
 		Http/httpobject.h \
 		Http/httpresponse.h \
@@ -460,6 +463,7 @@ httpresponse.o: Http/httpresponse.cpp Http/httpresponse.h \
 
 httpserver.o: Http/httpserver.cpp Http/httpserver.h \
 		application.h \
+		common.h \
 		TCP-socket/tcpserversocket.h \
 		TCP-socket/tcpsocket.h \
 		Http/httprequest.h \
@@ -472,6 +476,7 @@ httpserver.o: Http/httpserver.cpp Http/httpserver.h \
 httputils.o: Http/httputils.cpp Http/httputils.h \
 		TCP-socket/tcpsocket.h \
 		application.h \
+		common.h \
 		Http/httpobject.h \
 		Http/httprequest.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o httputils.o Http/httputils.cpp
@@ -481,15 +486,18 @@ routematcher.o: Http/routematcher.cpp Http/routematcher.h \
 		Http/httpobject.h \
 		Http/httputils.h \
 		TCP-socket/tcpsocket.h \
-		application.h
+		application.h \
+		common.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o routematcher.o Http/routematcher.cpp
 
 tcpsocket.o: TCP-socket/tcpsocket.cpp TCP-socket/tcpsocket.h \
-		application.h
+		application.h \
+		common.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tcpsocket.o TCP-socket/tcpsocket.cpp
 
 tcpserversocket.o: TCP-socket/tcpserversocket.cpp TCP-socket/tcpserversocket.h \
 		application.h \
+		common.h \
 		TCP-socket/tcpsocket.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tcpserversocket.o TCP-socket/tcpserversocket.cpp
 

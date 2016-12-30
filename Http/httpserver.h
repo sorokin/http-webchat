@@ -31,11 +31,12 @@ public:
         friend class HttpServer;
     };
 
-    enum ServerStatus {Success, AlreadyStarted, StartError};
+//    enum ServerStatus {Success, AlreadyStarted, StartError};
     typedef std::function <void(HttpRequest, Response)> RequestHandler;
 
     HttpServer(Application* app);
-    ServerStatus start(uint16_t port);
+
+    void start(uint16_t port);
     void addRouteMatcher(const RouteMatcher& matcher, const RequestHandler &handler);
     ~HttpServer();
 protected:

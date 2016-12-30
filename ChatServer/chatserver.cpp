@@ -135,8 +135,8 @@ ChatServer::ChatServer(Application* app):
     });
 }
 
-int ChatServer::start(uint16_t port) {
-    return httpServer->start(port);
+void ChatServer::start(uint16_t port) {
+    httpServer->start(port);
 }
 
 std::string ChatServer::getMessage(const std::string& str) {

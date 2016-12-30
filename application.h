@@ -14,6 +14,8 @@
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 
+#include "common.h"
+
 using namespace std;
 
 class Application
@@ -30,16 +32,17 @@ public:
     int exec();
     ~Application();
 
-    static void setExitHandler(ExitHandler handler) {
-        exitHandler = handler;
-        signal(SIGINT, Application::sigHandler);
-        signal(SIGTERM, Application::sigHandler);
-    }
-private:
     static void sigHandler(int) {
         ::eventfd_write(stopFD, 1);
     }
-    static ExitHandler exitHandler;
+
+//    static void setExitHandler(ExitHandler handler) {
+//        exitHandler = handler;
+//        signal(SIGINT, Application::sigHandler);
+//        signal(SIGTERM, Application::sigHandler);
+//    }
+private:
+//    static ExitHandler exitHandler;
 
     const size_t MAX_EVENTS;
     int mainLoopFD;

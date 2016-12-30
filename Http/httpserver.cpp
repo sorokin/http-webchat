@@ -8,17 +8,21 @@ void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const RequestHandl
     matchers.push_back(make_pair(matcher, handler));
 }
 
-HttpServer::ServerStatus HttpServer::start(uint16_t port) {
-    TcpServerSocket::ConnectedState e = listener.listen("127.0.0.1", port, [this]()
-    {
-        readRequest(listener.getPendingConnection());
+void HttpServer::start(uint16_t port) {
+//    TcpServerSocket::ConnectedState e = listener.listen("127.0.0.1", port, [this]()
+//    {
+//        readRequest(listener.getPendingConnection());
+//    });
+
+    listener.listen("127.0.0.1", port, [this](TcpSocket *socket) {
+        readRequest(socket);
     });
 
-    if (e == TcpServerSocket::AlreadyConnected)
-        return AlreadyStarted;
-    if (e != TcpServerSocket::Success)
-        return StartError;
-    return Success;
+//    if (e == TcpServerSocket::AlreadyConnected)
+//        return AlreadyStarted;
+//    if (e != TcpServerSocket::Success)
+//        return StartError;
+//    return Success;
 }
 
 HttpServer::Response::Response(TcpSocket* socket):socket(socket) {}

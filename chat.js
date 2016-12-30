@@ -22,9 +22,9 @@ function appendMessage(messages, message) {
         " " + wrap(date.getHours(), 2) + ":" + wrap(date.getMinutes(), 2) + ":" + wrap(date.getSeconds(), 2);
     if (message.from != 0) {
         if (message.from == username) {
-            messages.append('<li><b>user' + message.from + '</b>(' + format + '): ' + message.text + '</li>');
+            messages.append('<li><b>' + message.from + '</b>(' + format + '): ' + message.text + '</li>');
         } else {
-            messages.append('<li>user' + message.from + '(' + format + '): ' + message.text + '</li>');
+            messages.append('<li>' + message.from + '(' + format + '): ' + message.text + '</li>');
         }
     } else {
         messages.append('<li><font color="gray"><i>System(' + format + '): ' + message.text + '</i></font></li>');
@@ -76,7 +76,7 @@ function sendMessage(message) {
             message: message
         },
         dataType: 'json',
-        success: function (response) {
+        success: function(response) {
         }
     });
     clearTimeout(timer);

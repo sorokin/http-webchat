@@ -24,7 +24,8 @@ class ChatServer
 public:
     ChatServer(Application* app);
     ~ChatServer();
-    int start(uint16_t port);
+
+    void start(uint16_t port);
 
     class Message {
     public:
