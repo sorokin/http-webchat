@@ -1,5 +1,5 @@
-#ifndef HTTP_PROXYSERVER_COMMON_H
-#define HTTP_PROXYSERVER_COMMON_H
+#ifndef HTTPWEBCHAT_COMMON_H
+#define HTTPWEBCHAT_COMMON_H
 
 #include <string>
 
@@ -19,4 +19,4 @@ T _m1_system_call(T call, std::string msg) {
     return _uwv_system_call(call, -1, msg);
 }
 
-#endif //HTTP_PROXYSERVER_COMMON_H
+#endif //HTTPWEBCHAT_COMMON_H
