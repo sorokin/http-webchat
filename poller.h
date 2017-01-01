@@ -18,14 +18,12 @@ class Poller {
 public:
     typedef std::function<void(epoll_event)> Handler;
 
-    Poller();
+    static Poller& Instance();
 
     void setHandler(int, Handler, uint32_t);
     void setEvents(int, uint32_t);
     void removeHandler(int);
     void poll();
-
-    ~Poller();
 private:
     static const size_t MAX_EVENTS = 128;
 
@@ -34,7 +32,14 @@ private:
     epoll_event events[MAX_EVENTS];
     std::map<int, Handler> handlers;
 
-    void signalHandler(int);
+    static Poller instance;
+
+    Poller();
+    Poller(const Poller&) = delete;
+    ~Poller();
+    Poller& operator=(const Poller&) = delete;
+
+    static void signalHandler(int);
 };
 
 
