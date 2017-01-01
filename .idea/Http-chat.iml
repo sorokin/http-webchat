@@ -3,10 +3,16 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/common.h" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/poller.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poller.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/poller.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_server_socket.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_accept_socket.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_accept_socket.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_socket.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_socket.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/TCPSocket/tcp_server_socket.cpp" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">

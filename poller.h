@@ -3,6 +3,7 @@
 
 
 #include <cstring>
+#include <iostream>
 #include <functional>
 #include <map>
 
@@ -14,23 +15,15 @@
 
 #include "common.h"
 
+typedef std::function<void(epoll_event)> EventHandler;
+
 class Poller {
-public:
-    typedef std::function<void(epoll_event)> Handler;
-
-    static Poller& Instance();
-
-    void setHandler(int, Handler, uint32_t);
-    void setEvents(int, uint32_t);
-    void removeHandler(int);
-    void poll();
-private:
     static const size_t MAX_EVENTS = 128;
 
     int efd;
     int sfd;
     epoll_event events[MAX_EVENTS];
-    std::map<int, Handler> handlers;
+    std::map<int, EventHandler> handlers;
 
     static Poller instance;
 
@@ -40,6 +33,13 @@ private:
     Poller& operator=(const Poller&) = delete;
 
     static void signalHandler(int);
+public:
+    static Poller& Instance();
+
+    void setHandler(int, EventHandler, uint32_t);
+    void setEvents(int, uint32_t);
+    size_t removeHandler(int);
+    void poll();
 };
 
 

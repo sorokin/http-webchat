@@ -1,4 +1,3 @@
-#include <iostream>
 #include "poller.h"
 
 Poller Poller::instance;
@@ -7,7 +6,7 @@ Poller& Poller::Instance() {
     return instance;
 }
 
-void Poller::setHandler(int fd, Poller::Handler handler, uint32_t events) {
+void Poller::setHandler(int fd, EventHandler handler, uint32_t events) {
     epoll_event ev = {};
     ev.data.fd = fd;
     ev.events = events;
@@ -19,8 +18,12 @@ void Poller::setHandler(int fd, Poller::Handler handler, uint32_t events) {
             handlers[fd] = handler;
         } catch (...) {
             handlers.erase(fd);
-            _m1_system_call(epoll_ctl(efd, EPOLL_CTL_DEL, fd, &ev),
-                            "Couldn't remove fd " + std::to_string(fd) + " from polling");
+            try {
+                _m1_system_call(epoll_ctl(efd, EPOLL_CTL_DEL, fd, &ev),
+                                "Couldn't remove fd " + std::to_string(fd) + " from polling");
+            } catch (std::string error) {
+                std::cerr << error << std::endl;
+            }
         }
     } else {
         throw "This fd is already handled by a handler";
@@ -35,12 +38,13 @@ void Poller::setEvents(int fd, uint32_t events) {
                     "Couldn't change polling event set of fd " + std::to_string(fd));
 }
 
-void Poller::removeHandler(int fd) {
+size_t Poller::removeHandler(int fd) {
     if (handlers.erase(fd) == 1) {
         _m1_system_call(epoll_ctl(efd, EPOLL_CTL_DEL, fd, NULL),
                         "Couldn't remove fd " + std::to_string(fd) + " from polling");
+        return 1;
     } else {
-        throw "There was nothing to remove";
+        return 0;
     }
 }
 
