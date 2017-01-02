@@ -4,11 +4,15 @@
 
 #include <map>
 
-#include "../common.h"
+#include "http_common.h"
+
+static const std::string CRLF = "\r\n";
+
+namespace Http {
+};
 
 class HttpMessage {
 public:
-    enum Method {GET, HEAD, POST};
     enum State {START, HEADER, BODY, FINISHED, INVALID};
 
     typedef std::map<std::string, std::string> CookieMap; // TODO: реализовать поддержку куков
@@ -26,29 +30,26 @@ protected:
     HttpMessage();
     HttpMessage(const std::string&);
 
-    virtual bool shouldHaveBody() = 0;
+    virtual bool shouldHaveBody() const = 0;
     void parseHeader(const std::string&);
 public:
-    static const std::string CRLF = "\r\n";
-
-    std::string getVersion();
-    const HeaderMap& getHeaders();
-    std::string getHeader(const std::string&);
-    std::string getBody();
-    size_t getBodySize();
+    std::string getVersion() const;
+    const HeaderMap& getHeaders() const;
+    std::string getHeader(const std::string&) const;
+    std::string getBody() const;
+    size_t getBodySize() const;
 
     void setHeader(const std::string&, const std::string&);
     void appendBody(const std::string&);
 
+    State getState() const;
     virtual std::string finish() = 0;
 
-    size_t declaredBodySize();
+    size_t getDeclaredBodySize() const;
+    bool shouldKeepAlive() const;
 
-    std::string uriEncode(const std::string&);
-    std::string uriDecode(const std::string&);
-
-    std::string methodToString(Method);
-    Method stringToMethod(const std::string&);
+    static std::string uriEncode(const std::string&);
+    static std::string uriDecode(const std::string&);
 };
 
 

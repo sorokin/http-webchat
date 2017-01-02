@@ -11,7 +11,7 @@
 
 #include "tcp_server_socket.h"
 
-typedef std::function<void(TcpSocket&)> AcceptHandler;
+typedef std::function<void(TcpSocket*)> AcceptHandler;
 
 class TcpAcceptSocket: TcpSocket {
     void accept(const epoll_event&, AcceptHandler);

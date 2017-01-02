@@ -38,31 +38,31 @@ void HttpMessage::parseHeader(const std::string& header) {
     setHeader(name, value);
 }
 
-std::string HttpMessage::getVersion() {
+std::string HttpMessage::getVersion() const {
     return version;
 }
 
-const HeaderMap& HttpMessage::getHeaders() {
+const HttpMessage::HeaderMap& HttpMessage::getHeaders() const {
     return headers;
 }
 
-std::string HttpMessage::getHeader(const std::string& name) {
+std::string HttpMessage::getHeader(const std::string& name) const {
     try {
         return headers.at(toLowerCase(name));
     } catch (std::out_of_range oor) {
-        return NULL;
+        return "";
     }
 }
 
-std::string HttpMessage::getBody() {
+std::string HttpMessage::getBody() const {
     return body;
 }
 
-size_t HttpMessage::getBodySize() {
+size_t HttpMessage::getBodySize() const {
     return body.size();
 }
 
-size_t HttpMessage::declaredBodySize() {
+size_t HttpMessage::getDeclaredBodySize() const {
     if (isParsed) {
         if (state == BODY || state == FINISHED) {
             std::string resultAsString;
@@ -71,7 +71,7 @@ size_t HttpMessage::declaredBodySize() {
             } else {
                 resultAsString = getHeader("content-length");
             }
-            if (resultAsString == NULL) {
+            if (resultAsString == "") {
                 throw "The body length wasn't initialized";
             } else {
                 return std::stoul(resultAsString);
@@ -84,8 +84,12 @@ size_t HttpMessage::declaredBodySize() {
     }
 }
 
+bool HttpMessage::shouldKeepAlive() const {
+    return toLowerCase(getHeader("Connection")) == "keep-alive";
+}
+
 void HttpMessage::setHeader(const std::string& name, const std::string& value) {
-    headers[name] = value; // TODO: удалить одноимённый заголовок
+    headers[toLowerCase(name)] = value;
 }
 
 void HttpMessage::appendBody(const std::string& data) {
@@ -96,6 +100,10 @@ void HttpMessage::appendBody(const std::string& data) {
     body += data;
 }
 
+HttpMessage::State HttpMessage::getState() const {
+    return state;
+}
+
 std::string HttpMessage::uriEncode(const std::string& toEncode) {
     std::string result = toEncode;
     return result;
@@ -104,29 +112,4 @@ std::string HttpMessage::uriEncode(const std::string& toEncode) {
 std::string HttpMessage::uriDecode(const std::string& toDecode) {
     std::string result = toDecode;
     return result;
-}
-
-std::string HttpMessage::methodToString(HttpMessage::Method method) {
-    switch (method) {
-        case GET:
-            return "GET";
-        case HEAD:
-            return "HEAD";
-        case POST:
-            return "POST";
-        default:
-            throw "Invalid HTTP method";
-    }
-}
-
-HttpMessage::Method HttpMessage::stringToMethod(const std::string& string) {
-    if (string == "GET") {
-        return GET;
-    } else if (string == "HEAD") {
-        return HEAD;
-    } else if (string == "POST") {
-        return POST;
-    } else {
-        throw "Invalid HTTP method: " + string;
-    }
 }

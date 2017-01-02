@@ -5,8 +5,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILES
         main.cpp
+        HTTP/http_server.cpp
+        HTTP/http_server.h
+        HTTP/route_matcher.cpp
+        HTTP/route_matcher.h
+        HTTP/http_request.cpp
+        HTTP/http_request.h
+        HTTP/http_response.cpp
+        HTTP/http_response.h
         HTTP/http_message.cpp
         HTTP/http_message.h
+        HTTP/http_common.cpp
+        HTTP/http_common.h
         TCPSocket/tcp_accept_socket.cpp
         TCPSocket/tcp_accept_socket.h
         TCPSocket/tcp_server_socket.cpp
@@ -15,6 +25,7 @@ set(SOURCE_FILES
         TCPSocket/tcp_socket.h
         poller.cpp
         poller.h
-        common.h HTTP/http_request.cpp HTTP/http_request.h common.cpp HTTP/http_response.cpp HTTP/http_response.h)
+        common.cpp
+        common.h)
 
 add_executable(HttpWebChat ${SOURCE_FILES} main.cpp)

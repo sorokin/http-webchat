@@ -53,6 +53,6 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
         throw error;
     }
 
-    TcpServerSocket incomingSocket(poller, incomingFD, std::string(hbuf), port);
+    TcpServerSocket* incomingSocket = new TcpServerSocket(poller, incomingFD, std::string(hbuf), port);
     acceptHandler(incomingSocket);
 }

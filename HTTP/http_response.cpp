@@ -2,28 +2,31 @@
 
 HttpResponse::HttpResponse(): HttpMessage() {}
 
-HttpResponse::HttpResponse(Method requestedMethod,
+HttpResponse::HttpResponse(Http::Method requestedMethod,
                            const std::string& version, int statusCode, const std::string& reasonPhrase):
         HttpMessage(version), requestedMethod(requestedMethod), statusCode(statusCode), reasonPhrase(reasonPhrase) {}
 
-bool HttpResponse::shouldHaveBody() {
-    return (isParsed && (getHeader("Content-Length") != NULL || getHeader("Transfer-Encoding") != NULL))
-           || (!isParsed && requestedMethod != HEAD);
+bool HttpResponse::shouldHaveBody() const {
+    return (isParsed && (getHeader("Content-Length") != "" || getHeader("Transfer-Encoding") != ""))
+           || (!isParsed && requestedMethod != Http::Method::HEAD);
 }
 
-HttpMessage::Method HttpResponse::getRequestedMethod() {
+Http::Method HttpResponse::getRequestedMethod() const {
+    if (isParsed) {
+        throw "Requested method isn't known";
+    }
     return requestedMethod;
 }
 
-int HttpResponse::getStatusCode() {
+int HttpResponse::getStatusCode() const {
     return statusCode;
 }
 
-std::string HttpResponse::getReasonPhrase() {
+std::string HttpResponse::getReasonPhrase() const {
     return reasonPhrase;
 }
 
-void HttpResponse::setRequestedMethod(HttpMessage::Method method) {
+void HttpResponse::setRequestedMethod(Http::Method method) {
     if (!isParsed) {
         throw "Requested method was set during construction";
     }
@@ -35,58 +38,54 @@ bool HttpResponse::append(std::string data) {
         throw "The message is constructed, not parsed";
     }
 
-    switch (state) {
-        case START:
-            size_t space = data.find(' ');
-            std::string version = data.substr(0, space);
-            if (version.size() != 7
-                || version[0] != 'H' || version[1] != 'T' || version[2] != 'T' || version[3] != 'P'
-                || version[5] != '.' || version[4] < '0' || version[4] > '9' || version[6] < '0' || version[6] > '9') {
-                state = INVALID;
-                return true;
-            } else {
+    try {
+        switch (state) {
+            case START: {
+                size_t space = data.find(' ');
+                std::string version = data.substr(0, space);
+                if (version.size() != 8
+                    || version[0] != 'H' || version[1] != 'T' || version[2] != 'T' || version[3] != 'P'
+                    || version[4] != '/' || version[6] != '.' || version[5] < '0' || version[5] > '9'
+                    || version[7] < '0' || version[7] > '9') {
+                    throw "Invalid HTTP version: " + version;
+                }
                 this->version = version;
-            }
-            data.erase(0, space + 1);
+                data.erase(0, space + 1);
 
-            space = data.find(' ');
-            try {
+                space = data.find(' ');
                 statusCode = std::stoi(data.substr(0, space));
-            } catch (...) {
-                state = INVALID;
-                return true;
-            }
-            data.erase(0, space + 1);
+                data.erase(0, space + 1);
 
-            reasonPhrase = data;
-            state = HEADER;
-        case HEADER:
-            try {
+                reasonPhrase = data;
+                state = HEADER;
+                return false;
+            } case HEADER: {
                 parseHeader(data);
                 return state == FINISHED;
-            } catch (std::string error) {
-                state = INVALID;
-                return true;
+            } case BODY: {
+                appendBody(data);
+                if (getBodySize() == getDeclaredBodySize()) {
+                    state = FINISHED;
+                    return true;
+                } else {
+                    return false;
+                }
+            } default: {
+                throw "The message is finished";
             }
-        case BODY:
-            appendBody(data);
-            if (getBodySize() == declaredBodySize()) {
-                state = FINISHED;
-                return true;
-            } else {
-                return false;
-            }
-        default:
-            throw "The message is finished";
+        }
+    } catch (...) {
+        state = INVALID;
+        return true;
     }
 }
 
 std::string HttpResponse::finish() {
+    if (isParsed && state != FINISHED || !isParsed && state != START) {
+        return "";
+    }
     if (!isParsed && shouldHaveBody()) {
         setHeader("Content-Length", std::to_string(body.size()));
-    }
-    if (isParsed && state != FINISHED || !isParsed && state != START) {
-        return NULL;
     }
     state = FINISHED;
 

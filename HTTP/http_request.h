@@ -5,17 +5,18 @@
 #include "http_message.h"
 
 class HttpRequest: public HttpMessage {
-    Method method;
+    Http::Method method;
     std::string uri;
 
-    virtual bool shouldHaveBody();
+    virtual bool shouldHaveBody() const;
 public:
     HttpRequest();
-    HttpRequest(Method, const std::string&, const std::string&);
+    HttpRequest(Http::Method, const std::string&, const std::string&);
 
-    Method getMethod();
-    std::string getUri();
-    std::string getUriEncoded();
+    Http::Method getMethod() const;
+    std::string getMethodAsString() const;
+    std::string getUri() const;
+    std::string getUriEncoded() const;
 
     bool append(std::string);
     virtual std::string finish();

@@ -11,6 +11,7 @@ protected:
     std::string host;
     uint16_t port;
     int fd;
+
     Poller& poller;
 public:
     static const int NONE;

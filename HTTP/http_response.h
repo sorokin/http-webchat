@@ -5,20 +5,20 @@
 #include "http_message.h"
 
 class HttpResponse: public HttpMessage {
-    Method requestedMethod;
+    Http::Method requestedMethod;
     int statusCode;
     std::string reasonPhrase;
 
-    virtual bool shouldHaveBody();
+    virtual bool shouldHaveBody() const;
 public:
     HttpResponse();
-    HttpResponse(Method, const std::string&, int, const std::string&);
+    HttpResponse(Http::Method, const std::string&, int, const std::string&);
 
-    Method getRequestedMethod();
-    int getStatusCode();
-    std::string getReasonPhrase();
+    Http::Method getRequestedMethod() const;
+    int getStatusCode() const;
+    std::string getReasonPhrase() const;
 
-    void setRequestedMethod(Method);
+    void setRequestedMethod(Http::Method);
 
     bool append(std::string);
     virtual std::string finish();
