@@ -33,7 +33,7 @@ void HttpResponse::setRequestedMethod(Http::Method method) {
     requestedMethod = method;
 }
 
-bool HttpResponse::append(std::string data) {
+void HttpResponse::append(std::string data) {
     if (!isParsed) {
         throw "The message is constructed, not parsed";
     }
@@ -47,7 +47,8 @@ bool HttpResponse::append(std::string data) {
                     || version[0] != 'H' || version[1] != 'T' || version[2] != 'T' || version[3] != 'P'
                     || version[4] != '/' || version[6] != '.' || version[5] < '0' || version[5] > '9'
                     || version[7] < '0' || version[7] > '9') {
-                    throw "Invalid HTTP version: " + version;
+                    state = INVALID;
+                    return;
                 }
                 this->version = version;
                 data.erase(0, space + 1);
@@ -58,17 +59,17 @@ bool HttpResponse::append(std::string data) {
 
                 reasonPhrase = data;
                 state = HEADER;
-                return false;
+                return;
             } case HEADER: {
                 parseHeader(data);
-                return state == FINISHED;
+                return;
             } case BODY: {
                 appendBody(data);
                 if (getBodySize() == getDeclaredBodySize()) {
                     state = FINISHED;
-                    return true;
+                    return;
                 } else {
-                    return false;
+                    return;
                 }
             } default: {
                 throw "The message is finished";
@@ -76,7 +77,6 @@ bool HttpResponse::append(std::string data) {
         }
     } catch (...) {
         state = INVALID;
-        return true;
     }
 }
 

@@ -20,7 +20,7 @@ public:
 
     void setRequestedMethod(Http::Method);
 
-    bool append(std::string);
+    void append(std::string);
     virtual std::string finish();
 };
 

@@ -20,6 +20,8 @@ public:
     ~TcpSocket();
 
     virtual void close();
+
+    bool isOpened() const;
 };
 
 

@@ -17,7 +17,6 @@ class TcpServerSocket: public TcpSocket {
     SocketClosedHandler closedHandler;
 
     void eventHandler(const epoll_event&);
-    virtual void close();
 public:
     static const size_t READ_BUFFER_SIZE;
     static const size_t WRITE_BUFFER_SIZE;
@@ -27,6 +26,8 @@ public:
     void setReceivedDataHandler(SocketReceivedDataHandler);
     void setClosedHandler(SocketClosedHandler);
     void write(const std::string&);
+
+    virtual void close();
 };
 
 

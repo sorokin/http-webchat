@@ -12,6 +12,9 @@ TcpServerSocket::TcpServerSocket(Poller& poller, int fd, const std::string& host
     } catch (std::string error) {
         ::close(fd);
         throw error;
+    } catch (std::bad_alloc& ba) {
+        ::close(fd);
+        throw ba;
     }
 }
 
@@ -35,6 +38,10 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
                     receivedDataHandler(inBuffer);
                 }
             }
+        } catch (std::string error) {
+            std::cerr << "Error while reading from socket (fd " << fd << "), closing socket: "
+                      << error << std::endl;
+            close();
         } catch (std::bad_alloc& ba) {
             std::cerr << "Allocation exception while reading from socket (fd " << fd << "), closing socket: "
                       << ba.what() << std::endl;
@@ -59,6 +66,10 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
                     poller.setEvents(fd, EPOLLIN);
                 }
             }
+        } catch (std::string error) {
+            std::cerr << "Error while writing into socket (fd " << fd << "), closing socket: "
+                      << error << std::endl;
+            close();
         } catch (std::bad_alloc& ba) {
             std::cerr << "Allocation exception while writing into socket (fd " << fd << "), closing socket: "
                       << ba.what() << std::endl;
@@ -68,18 +79,20 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
     }
 }
 
-void TcpServerSocket::close() {
-    if (closedHandler) {
-        closedHandler();
-        closedHandler = NULL;
-    }
-    TcpSocket::close();
-}
-
 void TcpServerSocket::setReceivedDataHandler(SocketReceivedDataHandler socketReceivedDataHandler) {
     receivedDataHandler = socketReceivedDataHandler;
     if (socketReceivedDataHandler && !inBuffer.empty()) {
-        receivedDataHandler(inBuffer);
+        try {
+            receivedDataHandler(inBuffer);
+        } catch (std::string error) {
+            std::cerr << "Error while processing received data from socket (fd " << fd << "), closing socket: "
+                      << error << std::endl;
+            close();
+        } catch (std::bad_alloc& ba) {
+            std::cerr << "Allocation exception while processing received data from socket (fd " << fd
+                      << "), closing socket: " << ba.what() << std::endl;
+            close();
+        }
     }
 }
 
@@ -91,6 +104,25 @@ void TcpServerSocket::write(const std::string& data) {
     bool wasEmpty = outBuffer.empty();
     outBuffer.insert(outBuffer.end(), data.begin(), data.end());
     if (wasEmpty) {
-        poller.setEvents(fd, EPOLLIN | EPOLLOUT);
+        try {
+            poller.setEvents(fd, EPOLLIN | EPOLLOUT);
+        } catch (std::string error) {
+            close();
+            throw "Error while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: " + error;
+        } catch (std::exception& exception) {
+            close();
+            throw "Error while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "
+                  + exception.what();
+        }
     }
+}
+
+void TcpServerSocket::close() {
+    if (closedHandler) {
+        try {
+            closedHandler();
+        } catch (...) {}
+        closedHandler = NULL;
+    }
+    TcpSocket::close();
 }

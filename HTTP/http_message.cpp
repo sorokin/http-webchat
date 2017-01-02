@@ -9,6 +9,10 @@ HttpMessage::HttpMessage(const std::string& version): version(version) {
 }
 
 void HttpMessage::parseHeader(const std::string& header) {
+    if (!isParsed) {
+        throw "A header can only be parsed in a parsed message";
+    }
+
     if (header.empty()) {
         state = shouldHaveBody() ? BODY : FINISHED;
         return;

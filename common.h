@@ -1,6 +1,7 @@
 #ifndef HTTPWEBCHAT_COMMON_H
 #define HTTPWEBCHAT_COMMON_H
 
+
 #include <algorithm>
 #include <string>
 

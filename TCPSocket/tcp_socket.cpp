@@ -11,6 +11,9 @@ TcpSocket::TcpSocket(Poller& poller, int fd, const std::string& host, uint16_t p
     } catch (std::string error) {
         ::close(fd);
         throw error;
+    } catch (std::exception& exception) {
+        ::close(fd);
+        throw exception;
     }
 }
 
@@ -20,12 +23,18 @@ TcpSocket::~TcpSocket() {
 
 void TcpSocket::close() {
     if (fd != NONE) {
-        poller.removeHandler(fd);
         try {
+            poller.removeHandler(fd);
             _m1_system_call(::close(fd), "Socket (fd " + std::to_string(fd) + ") was closed incorrectly");
         } catch (std::string error) {
-            std::cerr << error << std::endl;
+            std::cerr << "Error while closing socket (fd " << fd << "): " << error << std::endl;
+        } catch (std::exception& exception) {
+            std::cerr << "Bad allocation while closing socket (fd " << fd << "): " << exception.what() << std::endl;
         }
         fd = NONE;
     }
+}
+
+bool TcpSocket::isOpened() const {
+    return fd != NONE;
 }

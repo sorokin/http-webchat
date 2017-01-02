@@ -5,6 +5,9 @@
 #include <set>
 #include <vector>
 
+#include <time.h>
+#include <sys/timerfd.h>
+
 #include "../TCPSocket/tcp_accept_socket.h"
 #include "http_request.h"
 #include "http_response.h"
@@ -27,10 +30,12 @@ public:
 
     static RequestHandler defaultHandler;
 private:
+    int tfd;
     std::set<TcpServerSocket*> sockets;
     std::vector<std::pair<RouteMatcher, RequestHandler>> matchers;
     std::vector<std::pair<RouteMatcher, RequestHandler>> commonMatchers;
 
+    Poller& poller;
     TcpAcceptSocket listener;
 
     void processRequest(TcpServerSocket*, const HttpRequest&);

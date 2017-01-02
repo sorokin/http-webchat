@@ -18,7 +18,7 @@ public:
     std::string getUri() const;
     std::string getUriEncoded() const;
 
-    bool append(std::string);
+    void append(std::string);
     virtual std::string finish();
 };
 

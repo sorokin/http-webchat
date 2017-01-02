@@ -26,7 +26,7 @@ std::string HttpRequest::getUriEncoded() const {
     return uriEncode(uri);
 }
 
-bool HttpRequest::append(std::string data) {
+void HttpRequest::append(std::string data) {
     if (!isParsed) {
         throw "The message is constructed, not parsed";
     }
@@ -46,29 +46,37 @@ bool HttpRequest::append(std::string data) {
                 if (data.size() != 8
                     || data[0] != 'H' || data[1] != 'T' || data[2] != 'T' || data[3] != 'P' || data[4] != '/'
                     || data[6] != '.' || data[5] < '0' || data[5] > '9' || data[7] < '0' || data[7] > '9') {
-                    throw "Invalid HTTP version: " + version;
+                    state = INVALID;
+                    return;
                 }
                 version = data;
                 state = HEADER;
-                return false;
-            } case HEADER: {
+                return;
+            }
+            case HEADER: {
                 parseHeader(data);
-                return state == FINISHED;
-            } case BODY: {
+                return;
+            }
+            case BODY: {
                 appendBody(data);
                 if (getBodySize() == getDeclaredBodySize()) {
                     state = FINISHED;
-                    return true;
+                    return;
                 } else {
-                    return false;
+                    return;
                 }
-            } default: {
+            }
+            default: {
                 throw "The message is finished";
             }
         }
-    } catch (...) {
+    } catch (std::string error) {
+        if (error == "The message is finished") {
+            throw error;
+        }
         state = INVALID;
-        return true;
+    } catch (std::exception& exception) {
+        state = INVALID;
     }
 }
 

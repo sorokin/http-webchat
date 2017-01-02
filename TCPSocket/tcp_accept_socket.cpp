@@ -21,11 +21,17 @@ TcpAcceptSocket::TcpAcceptSocket(Poller& poller, const std::string& host, uint16
                 accept(event, acceptHandler);
             } catch (std::string error) {
                 std::cerr << "Couldn't accept an incoming connection: " << error << std::endl;
+            } catch (std::exception& exception) {
+                std::cerr << "Couldn't accept an incoming connection (Bad allocation): " << exception.what()
+                          << std::endl;
             }
         }, EPOLLIN);
     } catch (std::string error) {
         ::close(fd);
         throw error;
+    } catch (std::exception& exception) {
+        ::close(fd);
+        throw exception;
     }
 }
 
@@ -51,8 +57,11 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
     } catch (std::string error) {
         ::close(incomingFD);
         throw error;
+    } catch (std::exception& exception) {
+        ::close(incomingFD);
+        throw exception;
     }
 
-    TcpServerSocket* incomingSocket = new TcpServerSocket(poller, incomingFD, std::string(hbuf), port);
-    acceptHandler(incomingSocket);
+//    TcpServerSocket incomingSocket(poller, incomingFD, std::string(hbuf), port);
+    acceptHandler(new TcpServerSocket(poller, incomingFD, std::string(hbuf), port));
 }

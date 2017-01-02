@@ -20,19 +20,19 @@ HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& re
     responseSocket.end(response);
 };
 
-HttpServer::HttpServer(Poller& poller, uint16_t port):
-        listener(TcpAcceptSocket(poller, "127.0.0.1", port, [this](TcpSocket* socket) {
-            TcpServerSocket* serverSocket = (TcpServerSocket*) socket;
+HttpServer::HttpServer(Poller& poller, uint16_t port): poller(poller),
+        listener(TcpAcceptSocket(poller, "127.0.0.1", port, [this](TcpServerSocket* socket) {
             HttpRequest* request = NULL;
 
-            serverSocket->setReceivedDataHandler([serverSocket, &request, this](std::deque<char>& dataDeque) {
-                while (!dataDeque.empty()) {
+            socket->setReceivedDataHandler([socket, &request, this](std::deque<char>& dataDeque) {
+                while (!dataDeque.empty() && socket->isOpened()) {
                     if (request == NULL) {
                         request = new HttpRequest();
                     }
 
                     if (request->getState() == HttpMessage::State::FINISHED
                         || request->getState() == HttpMessage::State::INVALID) {
+                        delete request;
                         request = NULL;
                     }
 
@@ -57,7 +57,12 @@ HttpServer::HttpServer(Poller& poller, uint16_t port):
                     }
 
                     if (request->getState() == HttpMessage::State::FINISHED) {
-                        processRequest(serverSocket, *request);
+                        try {
+                            processRequest(socket, *request);
+                        } catch (std::string error) {
+                            std::cerr << "Couldn't process a request: " << error << std::endl;
+                            socket->close();
+                        }
                         delete request;
                         request = NULL;
                     } else if (request->getState() == HttpMessage::State::INVALID) {
@@ -66,24 +71,53 @@ HttpServer::HttpServer(Poller& poller, uint16_t port):
                     }
                 }
             });
+        })) {
+    try {
+        tfd = _m1_system_call(timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK), "Couldn't create a timer fd");
 
-            serverSocket->setClosedHandler([serverSocket, this]() {
-                sockets.erase(serverSocket);
-                delete serverSocket;
-            });
-        })) {}
+        struct itimerspec its = {};
+        its.it_interval.tv_sec = 5;
+        its.it_interval.tv_nsec = 0;
+        its.it_value.tv_sec = 5;
+        its.it_interval.tv_nsec = 0;
+        _m1_system_call(timerfd_settime(tfd, 0, &its, NULL), "Couldn't run the timer fd");
+
+        poller.setHandler(tfd, [=](epoll_event event) {
+            std::set<TcpServerSocket*>::iterator it_prev = sockets.begin();
+            for (std::set<TcpServerSocket*>::iterator it = it_prev; it != sockets.end(); it_prev = it) {
+                ++it;
+                TcpServerSocket* socket = *it_prev;
+                if (!socket->isOpened()) {
+                    delete socket;
+                    sockets.erase(it_prev);
+                }
+            }
+        }, EPOLLIN);
+    } catch (std::string error) {
+        listener.close();
+        throw error;
+    } catch (std::exception exception) {
+        listener.close();
+        throw exception;
+    }
+}
 
 HttpServer::~HttpServer() {
     for (std::set<TcpServerSocket*>::iterator it = sockets.begin(); it != sockets.end(); ++it) {
         delete *it;
     }
+
+    try {
+        poller.removeHandler(tfd);
+        _m1_system_call(::close(tfd), "Timer fd (fd " + std::to_string(tfd) + ") was closed incorrectly");
+    } catch (std::string error) {
+        std::cerr << "Error while closing timer fd (fd " << tfd << "): " << error << std::endl;
+    } catch (std::exception& exception) {
+        std::cerr << "Bad allocation while closing timer fd (fd " << tfd << "): " << exception.what() << std::endl;
+    }
 }
 
 void HttpServer::processRequest(TcpServerSocket* socket, const HttpRequest& request) {
-    if (request.getState() != HttpMessage::State::FINISHED) {
-        throw "The request is invalid or wasn't finished";
-    }
-
     bool ok = false;
     for (size_t i = 0; i < matchers.size(); ++i) {
         if (matchers[i].first.match(request)) {
@@ -95,9 +129,11 @@ void HttpServer::processRequest(TcpServerSocket* socket, const HttpRequest& requ
 
     if (!ok) {
         for (size_t i = 0; i < commonMatchers.size(); ++i) {
-            commonMatchers[i].second(request, ResponseSocket(*socket));
-            ok = true;
-            break;
+            if (commonMatchers[i].first.match(request)) {
+                commonMatchers[i].second(request, ResponseSocket(*socket));
+                ok = true;
+                break;
+            }
         }
     }
 
@@ -106,12 +142,16 @@ void HttpServer::processRequest(TcpServerSocket* socket, const HttpRequest& requ
     }
 
     if (!request.shouldKeepAlive()) {
-        delete socket;
+        socket->close();
     } else {
         sockets.insert(socket);
     }
 }
 
 void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const HttpServer::RequestHandler& requestHandler) {
-    matchers.push_back(std::make_pair(matcher, requestHandler));
+    if (matcher.getUri() == "*") {
+        commonMatchers.push_back(std::make_pair(matcher, requestHandler));
+    } else {
+        matchers.push_back(std::make_pair(matcher, requestHandler));
+    }
 }
