@@ -27,7 +27,6 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
 
             ssize_t readCount = ::read(fd, buf, READ_BUFFER_SIZE);
             if (readCount == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-//                throw "Couldn't read from socket (fd " + std::to_string(fd) + "), closing it";
                 close();
                 return;
             } else if (readCount > 0) {
@@ -52,7 +51,6 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
 
             ssize_t writtenCount = ::write(fd, buf, amount);
             if (writtenCount == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
-//            throw "Couldn't write into socket (fd " + std::to_string(fd) + "), closing it";
                 close();
                 return;
             } else if (writtenCount > 0) {
