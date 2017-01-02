@@ -8,9 +8,6 @@ TcpSocket::TcpSocket(Poller& poller, int fd, const std::string& host, uint16_t p
         std::string error = "Couldn't make socket (fd " + std::to_string(fd) + ") non-blocking";
         int flags = _m1_system_call(fcntl(fd, F_GETFL, 0), error);
         _m1_system_call(fcntl(fd, F_SETFL, flags | O_NONBLOCK), error);
-    } catch (std::string error) {
-        ::close(fd);
-        throw error;
     } catch (std::exception& exception) {
         ::close(fd);
         throw exception;
@@ -26,10 +23,8 @@ void TcpSocket::close() {
         try {
             poller.removeHandler(fd);
             _m1_system_call(::close(fd), "Socket (fd " + std::to_string(fd) + ") was closed incorrectly");
-        } catch (std::string error) {
-            std::cerr << "Error while closing socket (fd " << fd << "): " << error << std::endl;
         } catch (std::exception& exception) {
-            std::cerr << "Bad allocation while closing socket (fd " << fd << "): " << exception.what() << std::endl;
+            std::cerr << "Exception while closing socket (fd " << fd << "): " << exception.what() << std::endl;
         }
         fd = NONE;
     }

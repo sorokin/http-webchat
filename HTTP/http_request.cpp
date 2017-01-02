@@ -67,16 +67,15 @@ void HttpRequest::append(std::string data) {
                 }
             }
             default: {
-                throw "The message is finished";
+                throw std::runtime_error("The message is finished");
             }
         }
-    } catch (std::string error) {
-        if (error == "The message is finished") {
-            throw error;
-        }
-        state = INVALID;
     } catch (std::exception& exception) {
-        state = INVALID;
+        if (exception.what() == "The message is finished") {
+            throw exception;
+        } else {
+            state = INVALID;
+        }
     }
 }
 

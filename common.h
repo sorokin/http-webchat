@@ -3,6 +3,7 @@
 
 
 #include <algorithm>
+#include <stdexcept>
 #include <string>
 
 #include <string.h>
@@ -10,7 +11,7 @@
 template <typename T>
 T _uwv_system_call(T call, T wrong, std::string msg) {
     if (call == wrong) {
-        throw msg + " - " + strerror(errno);
+        throw std::runtime_error(msg + " - " + strerror(errno));
     } else {
         return call;
     }

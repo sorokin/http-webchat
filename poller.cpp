@@ -21,12 +21,12 @@ void Poller::setHandler(int fd, EventHandler handler, uint32_t events) {
             try {
                 _m1_system_call(epoll_ctl(efd, EPOLL_CTL_DEL, fd, &ev),
                                 "Couldn't remove fd " + std::to_string(fd) + " from polling");
-            } catch (std::string error) {
-                std::cerr << error << std::endl;
+            } catch (std::exception& exception) {
+                std::cerr << exception.what() << std::endl;
             }
         }
     } else {
-        throw "This fd is already handled by a handler";
+        throw std::runtime_error("This fd is already handled by a handler");
     }
 }
 
@@ -82,13 +82,13 @@ Poller::Poller() {
             ev.data.fd = sfd;
             ev.events = EPOLLIN;
             _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev), "Couldn't add the stopping fd to polling");
-        } catch (std::string error) {
+        } catch (std::exception& exception1) {
             close(sfd);
-            throw error;
+            throw exception1;
         }
-    } catch (std::string error) {
+    } catch (std::exception& exception) {
         close(efd);
-        throw error;
+        throw exception;
     }
 }
 

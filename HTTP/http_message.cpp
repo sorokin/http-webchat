@@ -10,7 +10,7 @@ HttpMessage::HttpMessage(const std::string& version): version(version) {
 
 void HttpMessage::parseHeader(const std::string& header) {
     if (!isParsed) {
-        throw "A header can only be parsed in a parsed message";
+        throw std::runtime_error("A header can only be parsed in a parsed message");
     }
 
     if (header.empty()) {
@@ -20,20 +20,20 @@ void HttpMessage::parseHeader(const std::string& header) {
 
     size_t colon = header.find(':');
     if (colon == std::string::npos) {
-        throw "Invalid header: there is no colon";
+        throw std::runtime_error("Invalid header: there is no colon");
     } else if (colon == 0) {
-        throw "Invalid header: empty name";
+        throw std::runtime_error("Invalid header: empty name");
     }
     std::string name = header.substr(0, colon);
     if (name.find(' ') != std::string::npos) {
-        throw "Invalid header: there is a space in the name";
+        throw std::runtime_error("Invalid header: there is a space in the name");
     }
 
     std::string value = header.substr(colon + 1);
     size_t fns;
     for (fns = 0; fns < value.size() && (value[fns] == ' ' || value[fns] == '\t'); ++fns);
     if (fns == value.size()) {
-        throw "Invalid header: empty value";
+        throw std::runtime_error("Invalid header: empty value");
     }
     size_t lns;
     for (lns = value.size() - 1; value[lns] == ' ' || value[lns] == '\t'; --lns);
@@ -76,15 +76,15 @@ size_t HttpMessage::getDeclaredBodySize() const {
                 resultAsString = getHeader("content-length");
             }
             if (resultAsString == "") {
-                throw "The body length wasn't initialized";
+                throw std::runtime_error("The body length wasn't initialized");
             } else {
                 return std::stoul(resultAsString);
             }
         } else {
-            throw "The message headers aren't finished receiving";
+            throw std::runtime_error("The message headers aren't finished receiving");
         }
     } else {
-        throw "The body length will be set after finishing the message";
+        throw std::runtime_error("The body length will be set after finishing the message");
     }
 }
 
@@ -98,7 +98,7 @@ void HttpMessage::setHeader(const std::string& name, const std::string& value) {
 
 void HttpMessage::appendBody(const std::string& data) {
     if (!shouldHaveBody()) {
-        throw "The message shouldn't have a body";
+        throw std::runtime_error("The message shouldn't have a body");
     }
 
     body += data;

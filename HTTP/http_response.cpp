@@ -13,7 +13,7 @@ bool HttpResponse::shouldHaveBody() const {
 
 Http::Method HttpResponse::getRequestedMethod() const {
     if (isParsed) {
-        throw "Requested method isn't known";
+        throw std::runtime_error("Requested method isn't known");
     }
     return requestedMethod;
 }
@@ -28,14 +28,14 @@ std::string HttpResponse::getReasonPhrase() const {
 
 void HttpResponse::setRequestedMethod(Http::Method method) {
     if (!isParsed) {
-        throw "Requested method was set during construction";
+        throw std::runtime_error("Requested method was set during construction");
     }
     requestedMethod = method;
 }
 
 void HttpResponse::append(std::string data) {
     if (!isParsed) {
-        throw "The message is constructed, not parsed";
+        throw std::runtime_error("The message is constructed, not parsed");
     }
 
     try {
@@ -72,11 +72,15 @@ void HttpResponse::append(std::string data) {
                     return;
                 }
             } default: {
-                throw "The message is finished";
+                throw std::runtime_error("The message is finished");
             }
         }
-    } catch (...) {
-        state = INVALID;
+    } catch (std::exception& exception) {
+        if (exception.what() == "The message is finished") {
+            throw exception;
+        } else {
+            state = INVALID;
+        }
     }
 }
 

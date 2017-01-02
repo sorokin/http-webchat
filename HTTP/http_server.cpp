@@ -6,7 +6,7 @@ HttpServer::ResponseSocket::ResponseSocket(TcpServerSocket& socket): socket(sock
 
 void HttpServer::ResponseSocket::end(HttpResponse& response) {
     if (!valid) {
-        throw "The response can't be sent twice";
+        throw std::runtime_error("The response can't be sent twice");
     }
 
     socket.write(response.finish());
@@ -59,8 +59,8 @@ HttpServer::HttpServer(Poller& poller, uint16_t port): poller(poller),
                     if (request->getState() == HttpMessage::State::FINISHED) {
                         try {
                             processRequest(socket, *request);
-                        } catch (std::string error) {
-                            std::cerr << "Couldn't process a request: " << error << std::endl;
+                        } catch (std::exception& exception) {
+                            std::cerr << "Couldn't process a request: " << exception.what() << std::endl;
                             socket->close();
                         }
                         delete request;
@@ -93,9 +93,6 @@ HttpServer::HttpServer(Poller& poller, uint16_t port): poller(poller),
                 }
             }
         }, EPOLLIN);
-    } catch (std::string error) {
-        listener.close();
-        throw error;
     } catch (std::exception exception) {
         listener.close();
         throw exception;
@@ -110,10 +107,8 @@ HttpServer::~HttpServer() {
     try {
         poller.removeHandler(tfd);
         _m1_system_call(::close(tfd), "Timer fd (fd " + std::to_string(tfd) + ") was closed incorrectly");
-    } catch (std::string error) {
-        std::cerr << "Error while closing timer fd (fd " << tfd << "): " << error << std::endl;
     } catch (std::exception& exception) {
-        std::cerr << "Bad allocation while closing timer fd (fd " << tfd << "): " << exception.what() << std::endl;
+        std::cerr << "Exception while closing timer fd (fd " << tfd << "): " << exception.what() << std::endl;
     }
 }
 

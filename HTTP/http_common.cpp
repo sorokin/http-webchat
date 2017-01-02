@@ -9,7 +9,7 @@ std::string Http::methodToString(Http::Method method) {
         case POST:
             return "POST";
         default:
-            throw "Invalid HTTP method";
+            throw std::runtime_error("Invalid HTTP method");
     }
 }
 
@@ -21,6 +21,6 @@ Http::Method Http::stringToMethod(const std::string& string) {
     } else if (string == "POST") {
         return POST;
     } else {
-        throw "Invalid HTTP method: " + string;
+        throw std::runtime_error("Invalid HTTP method: " + string);
     }
 }
