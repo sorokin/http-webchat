@@ -44,7 +44,3 @@ bool RouteMatcher::match(const HttpRequest& request) const {
 
     return method == request.getMethod() && uri == requestUri;
 }
-
-bool RouteMatcher::matchOnlyMethod(const HttpRequest& request) const {
-    return method == request.getMethod() && uri == "*";
-}

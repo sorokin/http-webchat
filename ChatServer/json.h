@@ -13,14 +13,12 @@ public:
 private:
     Type type;
 
-    union {
-        bool booleanValue;
-        long integerValue;
-        double doubleValue;
-        std::string stringValue;
-        std::vector<JSON> arrayElements;
-        std::map<std::string, JSON> objectFields;
-    };
+    bool booleanValue;
+    long integerValue;
+    double doubleValue;
+    std::string stringValue;
+    std::vector<JSON> arrayValue;
+    std::map<std::string, JSON> objectValue;
 
     static JSON _parseJSON(const std::string&, size_t&);
 public:
@@ -33,6 +31,12 @@ public:
     JSON(const std::map<std::string, JSON>&);
 
     Type getType();
+    bool getBooleanValue();
+    long getIntegerValue();
+    double getDoubleValue();
+    std::string getStringValue();
+    std::vector<JSON> getArrayValue();
+    std::map<std::string, JSON> getObjectValue();
 
     static JSON parseJSON(const std::string&);
     std::string toString() const;

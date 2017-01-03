@@ -17,7 +17,6 @@ public:
     std::string getUri() const;
 
     bool match(const HttpRequest&) const;
-    bool matchOnlyMethod(const HttpRequest&) const;
 };
 
 

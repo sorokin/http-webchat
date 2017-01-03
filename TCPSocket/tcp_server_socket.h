@@ -21,7 +21,8 @@ public:
     static const size_t READ_BUFFER_SIZE;
     static const size_t WRITE_BUFFER_SIZE;
 
-    TcpServerSocket(Poller&, int, const std::string&, uint16_t);
+//    TcpServerSocket(Poller&, int, const std::string&, uint16_t);
+    TcpServerSocket(int, const std::string&, uint16_t);
 
     void setReceivedDataHandler(SocketReceivedDataHandler);
     void setClosedHandler(SocketClosedHandler);

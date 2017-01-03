@@ -16,22 +16,23 @@ ChatServer::Object::Object(const std::map<std::string, JSON::Type>& types): type
 
 std::map<std::string, JSON> ChatServer::Object::match(const std::string& data) {
     JSON payload = JSON::parseJSON(data);
-    if (payload.getType() != JSON::Type::OBJECT || payload.objectFields.size() != size) {
+    if (payload.getType() != JSON::Type::OBJECT || payload.getObjectValue().size() != size) {
         throw std::runtime_error("Object mismatched: " + data);
     }
-    for (std::map<std::string, JSON>::iterator it = payload.objectFields.begin(); it != payload.objectFields.end(); ++it) {
+    for (std::map<std::string, JSON>::iterator it = payload.getObjectValue().begin();
+         it != payload.getObjectValue().end(); ++it) {
         if (types.find(it->first) == types.end() || it->second.getType() != types[it->first]) {
             throw std::runtime_error("Object mismatched: " + data);
         }
     }
-    return payload.objectFields;
+    return payload.getObjectValue();
 }
 
 std::string ChatServer::parseMessage(const std::string& string) {
     std::map<std::string, JSON::Type> pattern;
     pattern["message"] = JSON::Type::STRING;
     std::map<std::string, JSON> messagePayload = Object(pattern).match(string);
-    return messagePayload["message"].stringValue;
+    return messagePayload["message"].getStringValue();
 }
 
 std::string ChatServer::historyAsJson(size_t begin, size_t end) {
@@ -46,14 +47,15 @@ void ChatServer::logError(const HttpRequest& request, int code, const std::strin
     std::cout << "  Result: " << response << ", sending code " << code << std::endl;
 }
 
-ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(poller, port)) {
+//ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(poller, port)) {
+ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/login"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
                 std::map<std::string, JSON::Type> pattern;
                 pattern["username"] = JSON::Type::STRING;
                 std::map<std::string, JSON> usernamePayload = Object(pattern).match(request.getBody());
-                std::string username = usernamePayload["username"].stringValue;
+                std::string username = usernamePayload["username"].getStringValue();
 
                 if (firstMessage.find(username) == firstMessage.end()) {
                     size_t first = history.size();
@@ -131,7 +133,6 @@ ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(pol
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::HEAD, "/messages"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
-                size_t begin;
                 try {
                     std::map<std::string, std::string> queryParams = Http::queryParameters(request.getUri());
                     if (queryParams.find("username") == queryParams.end() ||
@@ -145,14 +146,6 @@ ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(pol
                     if (username == "" || (allMessages != "true" && allMessages != "false")) {
                         throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
                     }
-
-                    bool isAll = (allMessages == "true");
-                    if (isAll || firstUnreadMessage.find(username) == firstUnreadMessage.end()) {
-                        begin = firstMessage[username];
-                    } else {
-                        begin = firstUnreadMessage[username];
-                    }
-                    firstUnreadMessage[username] = history.size();
                 } catch (std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
@@ -226,7 +219,7 @@ ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(pol
                         filename = "/index.html";
                     }
                     filename = "." + filename;
-                    ifstream in(filename);
+                    std::ifstream in(filename);
                     if (!in) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");
@@ -291,7 +284,7 @@ ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(pol
                         filename = "/index.html";
                     }
                     filename = "." + filename;
-                    ifstream in(filename);
+                    std::ifstream in(filename);
                     if (!in) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");

@@ -36,7 +36,8 @@ private:
     std::string historyAsJson(size_t, size_t);
     static void logError(const HttpRequest&, int, const std::string&);
 public:
-    ChatServer(Poller&, uint16_t);
+//    ChatServer(Poller&, uint16_t);
+    ChatServer(uint16_t);
 };
 
 

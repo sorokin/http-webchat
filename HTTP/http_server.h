@@ -36,12 +36,13 @@ private:
     std::vector<std::pair<RouteMatcher, RequestHandler>> matchers;
     std::vector<std::pair<RouteMatcher, RequestHandler>> commonMatchers;
 
-    Poller& poller;
+//    Poller& poller;
     TcpAcceptSocket listener;
 
     void processRequest(TcpServerSocket*, const HttpRequest&);
 public:
-    HttpServer(Poller&, uint16_t);
+//    HttpServer(Poller&, uint16_t);
+    HttpServer(uint16_t);
     ~HttpServer();
 
     void addRouteMatcher(const RouteMatcher&, const RequestHandler&);

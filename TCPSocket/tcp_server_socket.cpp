@@ -3,10 +3,12 @@
 const size_t TcpServerSocket::READ_BUFFER_SIZE = 4096;
 const size_t TcpServerSocket::WRITE_BUFFER_SIZE = 4096;
 
-TcpServerSocket::TcpServerSocket(Poller& poller, int fd, const std::string& host, uint16_t port):
-        TcpSocket(poller, fd, host, port) {
+//TcpServerSocket::TcpServerSocket(Poller& poller, int fd, const std::string& host, uint16_t port):
+//        TcpSocket(poller, fd, host, port) {
+TcpServerSocket::TcpServerSocket(int fd, const std::string& host, uint16_t port): TcpSocket(fd, host, port) {
     try {
-        poller.setHandler(fd, [this](const epoll_event& event) {
+//        poller.setHandler(fd, [this](const epoll_event& event) {
+        Poller::setHandler(fd, [this](const epoll_event& event) {
             eventHandler(event);
         }, EPOLLIN);
     } catch (std::exception& exception) {
@@ -56,7 +58,8 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
             } else if (writtenCount > 0) {
                 outBuffer.erase(outBuffer.begin(), outBuffer.begin() + writtenCount);
                 if (outBuffer.empty()) {
-                    poller.setEvents(fd, EPOLLIN);
+//                    poller.setEvents(fd, EPOLLIN);
+                    Poller::setEvents(fd, EPOLLIN);
                 }
             }
         } catch (std::exception& exception) {
@@ -90,7 +93,8 @@ void TcpServerSocket::write(const std::string& data) {
     outBuffer.insert(outBuffer.end(), data.begin(), data.end());
     if (wasEmpty) {
         try {
-            poller.setEvents(fd, EPOLLIN | EPOLLOUT);
+//            poller.setEvents(fd, EPOLLIN | EPOLLOUT);
+            Poller::setEvents(fd, EPOLLIN | EPOLLOUT);
         } catch (std::exception& exception) {
             close();
             throw std::runtime_error("Exception while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "

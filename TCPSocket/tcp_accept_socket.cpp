@@ -1,7 +1,9 @@
 #include "tcp_accept_socket.h"
 
-TcpAcceptSocket::TcpAcceptSocket(Poller& poller, const std::string& host, uint16_t port, AcceptHandler acceptHandler):
-        TcpSocket(poller, _m1_system_call(socket(AF_INET, SOCK_STREAM, 0),
+//TcpAcceptSocket::TcpAcceptSocket(Poller& poller, const std::string& host, uint16_t port, AcceptHandler acceptHandler):
+//        TcpSocket(poller, _m1_system_call(socket(AF_INET, SOCK_STREAM, 0),
+TcpAcceptSocket::TcpAcceptSocket(const std::string& host, uint16_t port, AcceptHandler acceptHandler):
+        TcpSocket(_m1_system_call(socket(AF_INET, SOCK_STREAM, 0),
                                           "Couldn't create the listening socket"), host, port) {
     try {
         int opt = 1;
@@ -16,7 +18,8 @@ TcpAcceptSocket::TcpAcceptSocket(Poller& poller, const std::string& host, uint16
 
         _m1_system_call(listen(fd, SOMAXCONN), "Couldn't execute listen on the listening socket");
 
-        poller.setHandler(fd, [=](epoll_event event) {
+//        poller.setHandler(fd, [=](epoll_event event) {
+        Poller::setHandler(fd, [=](epoll_event event) {
             try {
                 accept(event, acceptHandler);
             } catch (std::exception& exception) {
@@ -55,5 +58,6 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
         throw exception;
     }
 
-    acceptHandler(new TcpServerSocket(poller, incomingFD, std::string(hbuf), port));
+//    acceptHandler(new TcpServerSocket(poller, incomingFD, std::string(hbuf), port));
+    acceptHandler(new TcpServerSocket(incomingFD, std::string(hbuf), port));
 }

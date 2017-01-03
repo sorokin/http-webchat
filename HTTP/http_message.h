@@ -8,9 +8,6 @@
 
 static const std::string CRLF = "\r\n";
 
-namespace Http {
-};
-
 class HttpMessage {
 public:
     enum State {START, HEADER, BODY, FINISHED, INVALID};

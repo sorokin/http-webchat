@@ -23,7 +23,7 @@ std::string HttpRequest::getUri() const {
 }
 
 std::string HttpRequest::getUriEncoded() const {
-    return uriEncode(uri);
+    return Http::uriEncode(uri);
 }
 
 void HttpRequest::append(std::string data) {
@@ -40,7 +40,7 @@ void HttpRequest::append(std::string data) {
                 data.erase(0, space + 1);
 
                 space = data.find(' ');
-                uri = uriDecode(data.substr(0, space));
+                uri = Http::uriDecode(data.substr(0, space));
                 data.erase(0, space + 1);
 
                 if (data.size() != 8
@@ -88,7 +88,7 @@ std::string HttpRequest::finish() {
     }
     state = FINISHED;
 
-    std::string representation = methodToString(method) + " " + uriEncode(uri) + " " + version + CRLF;
+    std::string representation = methodToString(method) + " " + Http::uriEncode(uri) + " " + version + CRLF;
     for (HeaderMap::const_iterator it = headers.begin(); it != headers.end(); ++it) {
         representation += it->first + ": " + it->second + CRLF;
     }

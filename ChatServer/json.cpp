@@ -10,9 +10,9 @@ JSON::JSON(double doubleValue): type(DOUBLE), doubleValue(doubleValue) {}
 
 JSON::JSON(const std::string& stringValue): type(STRING), stringValue(stringValue) {}
 
-JSON::JSON(const std::vector<JSON>& arrayElements): type(ARRAY), arrayElements(arrayElements) {}
+JSON::JSON(const std::vector<JSON>& arrayElements): type(ARRAY), arrayValue(arrayElements) {}
 
-JSON::JSON(const std::map<std::string, JSON>& objectFields): type(OBJECT), objectFields(objectFields) {}
+JSON::JSON(const std::map<std::string, JSON>& objectFields): type(OBJECT), objectValue(objectFields) {}
 
 JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
     for (; cur < data.size()
@@ -156,9 +156,51 @@ JSON::Type JSON::getType() {
     return type;
 }
 
+bool JSON::getBooleanValue() {
+    if (type != BOOLEAN) {
+        throw std::runtime_error("Taking boolean value from JSON type " + type);
+    }
+    return booleanValue;
+}
+
+long JSON::getIntegerValue() {
+    if (type != INTEGER) {
+        throw std::runtime_error("Taking integer value from JSON type " + type);
+    }
+    return integerValue;
+}
+
+double JSON::getDoubleValue() {
+    if (type != DOUBLE) {
+        throw std::runtime_error("Taking double value from JSON type " + type);
+    }
+    return doubleValue;
+}
+
+std::string JSON::getStringValue() {
+    if (type != STRING) {
+        throw std::runtime_error("Taking string value from JSON type " + type);
+    }
+    return stringValue;
+}
+
+std::vector<JSON> JSON::getArrayValue() {
+    if (type != ARRAY) {
+        throw std::runtime_error("Taking array value from JSON type " + type);
+    }
+    return arrayValue;
+}
+
+std::map<std::string, JSON> JSON::getObjectValue() {
+    if (type != OBJECT) {
+        throw std::runtime_error("Taking boolean value from JSON type " + type);
+    }
+    return objectValue;
+}
+
 JSON JSON::parseJSON(const std::string& data) {
     size_t cur = 0;
-    JSON object = _parseJSON(data, &cur);
+    JSON object = _parseJSON(data, cur);
     for (; cur < data.size()
            && (data[cur] == ' ' || data[cur] == '\t' || data[cur] == '\r' || data[cur] == '\n'); ++cur);
     if (cur != data.size()) {
@@ -182,9 +224,9 @@ std::string JSON::toString() const {
             return "\"" + stringValue + "\"";
         } case ARRAY: {
             std::string result = "[";
-            for (std::vector<JSON>::const_iterator it = arrayElements.begin();
-                    it != arrayElements.end(); ++it) {
-                if (it != arrayElements.begin()) {
+            for (std::vector<JSON>::const_iterator it = arrayValue.begin();
+                    it != arrayValue.end(); ++it) {
+                if (it != arrayValue.begin()) {
                     result += ", ";
                 }
                 result += it->toString();
@@ -193,9 +235,9 @@ std::string JSON::toString() const {
             return result;
         } case OBJECT: {
             std::string result = "{";
-            for (std::map<std::string, JSON>::const_iterator it = objectFields.begin();
-                 it != objectFields.end(); ++it) {
-                if (it != objectFields.begin()) {
+            for (std::map<std::string, JSON>::const_iterator it = objectValue.begin();
+                 it != objectValue.end(); ++it) {
+                if (it != objectValue.begin()) {
                     result += ", ";
                 }
                 result += "\"" + it->first + "\": " + it->second.toString();
