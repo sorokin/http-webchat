@@ -107,13 +107,3 @@ void HttpMessage::appendBody(const std::string& data) {
 HttpMessage::State HttpMessage::getState() const {
     return state;
 }
-
-std::string HttpMessage::uriEncode(const std::string& toEncode) {
-    std::string result = toEncode;
-    return result;
-}
-
-std::string HttpMessage::uriDecode(const std::string& toDecode) {
-    std::string result = toDecode;
-    return result;
-}

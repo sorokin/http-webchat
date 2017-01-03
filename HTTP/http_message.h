@@ -47,9 +47,6 @@ public:
 
     size_t getDeclaredBodySize() const;
     bool shouldKeepAlive() const;
-
-    static std::string uriEncode(const std::string&);
-    static std::string uriDecode(const std::string&);
 };
 
 

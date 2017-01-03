@@ -26,6 +26,6 @@ set(SOURCE_FILES
         poller.cpp
         poller.h
         common.cpp
-        common.h)
+        common.h ChatServer/chat_server.cpp ChatServer/chat_server.h ChatServer/json.cpp ChatServer/json.h)
 
 add_executable(HttpWebChat ${SOURCE_FILES} main.cpp)

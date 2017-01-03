@@ -4,6 +4,11 @@ HttpServer::ResponseSocket::ResponseSocket(TcpServerSocket& socket): socket(sock
     valid = true;
 }
 
+void HttpServer::ResponseSocket::close() {
+    socket.close();
+    valid = false;
+}
+
 void HttpServer::ResponseSocket::end(HttpResponse& response) {
     if (!valid) {
         throw std::runtime_error("The response can't be sent twice");
@@ -15,7 +20,7 @@ void HttpServer::ResponseSocket::end(HttpResponse& response) {
 
 HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& request, ResponseSocket responseSocket) {
     HttpResponse response(request.getMethod(),
-                          (request.getVersion() == Http::version1_0) ? Http::version1_0 : Http::version1_1,
+                          (request.getVersion() == Http::VERSION1_0) ? Http::VERSION1_0 : Http::VERSION1_1,
                           405, "Method Not Allowed");
     responseSocket.end(response);
 };
@@ -136,11 +141,7 @@ void HttpServer::processRequest(TcpServerSocket* socket, const HttpRequest& requ
         defaultHandler(request, ResponseSocket(*socket));
     }
 
-    if (!request.shouldKeepAlive()) {
-        socket->close();
-    } else {
-        sockets.insert(socket);
-    }
+    sockets.insert(socket);
 }
 
 void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const HttpServer::RequestHandler& requestHandler) {

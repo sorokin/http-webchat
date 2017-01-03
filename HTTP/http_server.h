@@ -23,6 +23,7 @@ public:
 
         ResponseSocket(TcpServerSocket&);
     public:
+        void close();
         void end(HttpResponse&);
     };
 
