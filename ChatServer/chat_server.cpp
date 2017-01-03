@@ -19,8 +19,8 @@ std::map<std::string, JSON> ChatServer::Object::match(const std::string& data) {
     if (payload.getType() != JSON::Type::OBJECT || payload.getObjectValue().size() != size) {
         throw std::runtime_error("Object mismatched: " + data);
     }
-    for (std::map<std::string, JSON>::iterator it = payload.getObjectValue().begin();
-         it != payload.getObjectValue().end(); ++it) {
+    std::map<std::string, JSON> payloadFields = payload.getObjectValue();
+    for (std::map<std::string, JSON>::const_iterator it = payloadFields.begin(); it != payloadFields.end(); ++it) {
         if (types.find(it->first) == types.end() || it->second.getType() != types[it->first]) {
             throw std::runtime_error("Object mismatched: " + data);
         }
@@ -28,11 +28,12 @@ std::map<std::string, JSON> ChatServer::Object::match(const std::string& data) {
     return payload.getObjectValue();
 }
 
-std::string ChatServer::parseMessage(const std::string& string) {
+std::pair<std::string, std::string> ChatServer::parseMessage(const std::string& string) {
     std::map<std::string, JSON::Type> pattern;
     pattern["message"] = JSON::Type::STRING;
+    pattern["username"] = JSON::Type::STRING;
     std::map<std::string, JSON> messagePayload = Object(pattern).match(string);
-    return messagePayload["message"].getStringValue();
+    return std::make_pair(messagePayload["username"].getStringValue(), messagePayload["message"].getStringValue());
 }
 
 std::string ChatServer::historyAsJson(size_t begin, size_t end) {
@@ -58,6 +59,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 if (firstMessage.find(username) == firstMessage.end()) {
                     size_t first = history.size();
+                    std::cout << "User \"" << username << "\" joined to chat" << std::endl;
                     history.push_back(Message(username, time(NULL), "User " + username + " joined to chat!"));
                     firstMessage[username] = first;
                 }
@@ -169,20 +171,11 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/messages"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
-                std::map<std::string, std::string> queryParams = Http::queryParameters(request.getUri());
-                if (queryParams.find("username") == queryParams.end()) {
-                    throw std::runtime_error(
-                            std::string("There should be \"username\" query parameter")
-                            + " in a POST request to \"messages\"");
-                }
-                std::string username = queryParams["username"];
-                if (username == "") {
-                    throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
-                }
-
-                std::string message = parseMessage(request.getBody());
-                if (message == "") {
-                    throw std::runtime_error("Bad request: empty message");
+                std::pair<std::string, std::string> identifiedMessage = parseMessage(request.getBody());
+                std::string username = identifiedMessage.first;
+                std::string message = identifiedMessage.second;
+                if (username == "" || message == "") {
+                    throw std::runtime_error("Bad request: empty username or message");
                 }
                 std::cout << "User \"" << username << "\" sent message: \"" << message << "\"" << std::endl;
                 history.push_back(Message(username, time(NULL), message));
@@ -218,7 +211,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                         filename = "/index.html";
                     }
                     filename = "." + filename;
-                    std::ifstream in(filename);
+                    std::ifstream in(filename.c_str());
                     if (!in) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");
@@ -283,7 +276,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                         filename = "/index.html";
                     }
                     filename = "." + filename;
-                    std::ifstream in(filename);
+                    std::ifstream in(filename.c_str());
                     if (!in) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");

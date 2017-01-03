@@ -1,12 +1,9 @@
+#include <iostream>
 #include "http_message.h"
 
-HttpMessage::HttpMessage() {
-    isParsed = true;
-}
+HttpMessage::HttpMessage(): isParsed(true), state(START) {}
 
-HttpMessage::HttpMessage(const std::string& version): version(version) {
-    isParsed = false;
-}
+HttpMessage::HttpMessage(const std::string& version): version(version), isParsed(false), state(START) {}
 
 void HttpMessage::parseHeader(const std::string& header) {
     if (!isParsed) {
@@ -66,6 +63,49 @@ size_t HttpMessage::getBodySize() const {
     return body.size();
 }
 
+void HttpMessage::setHeader(const std::string& name, const std::string& value) {
+    headers[toLowerCase(name)] = value;
+}
+
+void HttpMessage::appendBody(const std::string& data) {
+    if (!shouldHaveBody()) {
+        throw std::runtime_error("The message shouldn't have a body");
+    }
+
+    body += data;
+}
+
+HttpMessage::State HttpMessage::getState() const {
+    return state;
+}
+
+void HttpMessage::finish() {
+    if (isParsed) {
+        throw std::runtime_error("Only constructed messages can be finished");
+    }
+
+    if (shouldHaveBody()) {
+        setHeader("Content-Length", std::to_string(body.size()));
+    }
+    state = FINISHED;
+}
+
+std::string HttpMessage::to_string() const {
+    if (state != FINISHED) {
+        throw std::runtime_error("Message isn't finished yet");
+    }
+
+    std::string representation = firstLine();
+    for (HeaderMap::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+        representation += it->first + ": " + it->second + CRLF;
+    }
+    representation += CRLF;
+    if (shouldHaveBody()) {
+        representation += body;
+    }
+    return representation;
+}
+
 size_t HttpMessage::getDeclaredBodySize() const {
     if (isParsed) {
         if (state == BODY || state == FINISHED) {
@@ -90,20 +130,4 @@ size_t HttpMessage::getDeclaredBodySize() const {
 
 bool HttpMessage::shouldKeepAlive() const {
     return toLowerCase(getHeader("Connection")) == "keep-alive";
-}
-
-void HttpMessage::setHeader(const std::string& name, const std::string& value) {
-    headers[toLowerCase(name)] = value;
-}
-
-void HttpMessage::appendBody(const std::string& data) {
-    if (!shouldHaveBody()) {
-        throw std::runtime_error("The message shouldn't have a body");
-    }
-
-    body += data;
-}
-
-HttpMessage::State HttpMessage::getState() const {
-    return state;
 }

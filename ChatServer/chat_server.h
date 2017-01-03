@@ -32,7 +32,7 @@ private:
     std::vector<Message> history;
     std::map<std::string, size_t> firstMessage, firstUnreadMessage;
 
-    static std::string parseMessage(const std::string&);
+    static std::pair<std::string, std::string> parseMessage(const std::string&);
     std::string historyAsJson(size_t, size_t);
     static void logError(const HttpRequest&, int, const std::string&);
 public:

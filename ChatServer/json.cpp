@@ -1,3 +1,4 @@
+#include <iostream>
 #include "json.h"
 
 JSON::JSON(): type(NULL_VALUE) {}
@@ -25,21 +26,24 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             cur += 4;
             return JSON();
         } else {
-            throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+            throw std::runtime_error("Wrong JSON (couln't parse null) at symbol " + std::to_string(cur) + ": \""
+                                     + data + "\"");
         }
     } else if (data[cur] == 't') {
         if (data[cur + 1] == 'r' && data[cur + 2] == 'u' && data[cur + 3] == 'e') {
             cur += 4;
             return JSON(true);
         } else {
-            throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+            throw std::runtime_error("Wrong JSON (couldn't parse true) at symbol " + std::to_string(cur) + ": \""
+                                     + data + "\"");
         }
     } else if (data[cur] == 'f') {
         if (data[cur + 1] == 'a' && data[cur + 2] == 'l' && data[cur + 3] == 's' && data[cur + 4] == 'e') {
             cur += 5;
             return JSON(false);
         } else {
-            throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+            throw std::runtime_error("Wrong JSON (couldn't parse false) at symbol " + std::to_string(cur) + ": \""
+                                     + data + "\"");
         }
     } else if (data[cur] == '-') {
         std::string numberAsString = "" + data[cur++];
@@ -69,6 +73,34 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             }
             return JSON(std::stod(numberAsString));
         }
+    } else if (data[cur] == '\"') {
+        ++cur;
+
+        std::string string;
+        size_t fnes;
+        for (fnes = cur; cur < data.size() && data[cur] != '\"'; ++cur) {
+            if (data[cur] == '\\') {
+                if (fnes < cur) {
+                    string += data.substr(fnes, cur - fnes);
+                }
+                if (data[cur + 1] == '\"') {
+                    string += '\"';
+                } else {
+                    throw std::runtime_error("Wrong JSON (escaping symbol other than \") at symbol "
+                                             + std::to_string(cur + 1) + ": \"" + data + "\"");
+                }
+            }
+        }
+        if (fnes < cur) {
+            string += data.substr(fnes, cur - fnes);
+        }
+
+        if (cur == data.size()) {
+            throw std::runtime_error("Wrong JSON (unfinished): " + data);
+        } else {
+            ++cur;
+            return JSON(string);
+        }
     } else if (data[cur] == '[') {
         ++cur;
 
@@ -91,7 +123,8 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             if (data[cur] == ']') {
                 break;
             } else if (data[cur++] != ',') {
-                throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+                throw std::runtime_error("Wrong JSON (should be comma in array) at symbol " + std::to_string(cur)
+                                         + ": \"" + data + "\"");
             }
         }
 
@@ -113,10 +146,19 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             }
 
             JSON key = _parseJSON(data, cur);
-            if (key.type != STRING) {
-                throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+            if (key.getType() != STRING) {
+                throw std::runtime_error("Wrong JSON (key type isn't a string) at symbol " + std::to_string(cur)
+                                         + ": \"" + data + "\"");
             }
 
+            for (; cur < data.size()
+                   && (data[cur] == ' ' || data[cur] == '\t' || data[cur] == '\r' || data[cur] == '\n'); ++cur);
+            if (cur == data.size()) {
+                throw std::runtime_error("Wrong JSON (unfinished): " + data);
+            } else if (data[cur++] != ':') {
+                throw std::runtime_error("Wrong JSON (should be colon between key and value in object) at symbol "
+                                         + std::to_string(cur) + ": \"" + data + "\"");
+            }
             for (; cur < data.size()
                    && (data[cur] == ' ' || data[cur] == '\t' || data[cur] == '\r' || data[cur] == '\n'); ++cur);
             if (cur == data.size()) {
@@ -137,7 +179,8 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             } else if (data[cur] == '}') {
                 break;
             } else if (data[cur++] != ',') {
-                throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+                throw std::runtime_error("Wrong JSON (should be comma in object) at symbol " + std::to_string(cur)
+                                         + ": \"" + data + "\"");
             }
         }
 
@@ -148,50 +191,51 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
             return JSON(objectValues);
         }
     } else {
-        throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+        throw std::runtime_error("Wrong JSON (new entity isn't parsable) at symbol " + std::to_string(cur) + ": \""
+                                 + data + "\"");
     }
 }
 
-JSON::Type JSON::getType() {
+JSON::Type JSON::getType() const {
     return type;
 }
 
-bool JSON::getBooleanValue() {
+bool JSON::getBooleanValue() const {
     if (type != BOOLEAN) {
         throw std::runtime_error("Taking boolean value from JSON type " + type);
     }
     return booleanValue;
 }
 
-long JSON::getIntegerValue() {
+long JSON::getIntegerValue() const {
     if (type != INTEGER) {
         throw std::runtime_error("Taking integer value from JSON type " + type);
     }
     return integerValue;
 }
 
-double JSON::getDoubleValue() {
+double JSON::getDoubleValue() const {
     if (type != DOUBLE) {
         throw std::runtime_error("Taking double value from JSON type " + type);
     }
     return doubleValue;
 }
 
-std::string JSON::getStringValue() {
+std::string JSON::getStringValue() const {
     if (type != STRING) {
         throw std::runtime_error("Taking string value from JSON type " + type);
     }
     return stringValue;
 }
 
-std::vector<JSON> JSON::getArrayValue() {
+std::vector<JSON> JSON::getArrayValue() const {
     if (type != ARRAY) {
         throw std::runtime_error("Taking array value from JSON type " + type);
     }
     return arrayValue;
 }
 
-std::map<std::string, JSON> JSON::getObjectValue() {
+std::map<std::string, JSON> JSON::getObjectValue() const {
     if (type != OBJECT) {
         throw std::runtime_error("Taking boolean value from JSON type " + type);
     }
@@ -204,7 +248,8 @@ JSON JSON::parseJSON(const std::string& data) {
     for (; cur < data.size()
            && (data[cur] == ' ' || data[cur] == '\t' || data[cur] == '\r' || data[cur] == '\n'); ++cur);
     if (cur != data.size()) {
-        throw std::runtime_error("Wrong JSON at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+        throw std::runtime_error("Wrong JSON (unsuspected end of JSON) at symbol " + std::to_string(cur) + ": \""
+                                 + data + "\"");
     } else {
         return object;
     }

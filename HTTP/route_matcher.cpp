@@ -10,7 +10,7 @@ std::string RouteMatcher::transformRoute(const std::string& uri) {
     }
 
     std::string result = toLowerCase(uri);
-    if (result[result.size() - 1] != '/' && result.size() > 1) {
+    if (result[result.size() - 1] == '/' && result.size() > 1) {
         result.erase(result.size() - 1, 1);
     }
     return result;
@@ -43,5 +43,5 @@ bool RouteMatcher::match(const HttpRequest& request) const {
         requestUri.erase(symbol, requestUri.size() - symbol);
     }
 
-    return method == request.getMethod() && uri == requestUri;
+    return method == request.getMethod() && (uri == requestUri || uri == "*");
 }

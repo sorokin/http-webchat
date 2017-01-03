@@ -20,8 +20,7 @@ TcpAcceptSocket::TcpAcceptSocket(const std::string& host, uint16_t port, AcceptH
             try {
                 accept(event, acceptHandler);
             } catch (std::exception& exception) {
-                std::cerr << "Couldn't accept an incoming connection (Bad allocation): " << exception.what()
-                          << std::endl;
+                std::cerr << "Couldn't accept an incoming connection: " << exception.what() << std::endl;
             }
         }, EPOLLIN);
     } catch (std::exception& exception) {

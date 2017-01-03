@@ -22,8 +22,8 @@ std::string HttpRequest::getUri() const {
     return uri;
 }
 
-std::string HttpRequest::getUriEncoded() const {
-    return Http::uriEncode(uri);
+std::string HttpRequest::getUriDecoded() const {
+    return Http::uriDecode(uri);
 }
 
 void HttpRequest::append(std::string data) {
@@ -40,7 +40,7 @@ void HttpRequest::append(std::string data) {
                 data.erase(0, space + 1);
 
                 space = data.find(' ');
-                uri = Http::uriDecode(data.substr(0, space));
+                uri = data.substr(0, space);
                 data.erase(0, space + 1);
 
                 if (data.size() != 8
@@ -79,23 +79,6 @@ void HttpRequest::append(std::string data) {
     }
 }
 
-std::string HttpRequest::finish() {
-    if (isParsed && state != FINISHED || !isParsed && state != START) {
-        return "";
-    }
-    if (!isParsed && shouldHaveBody()) {
-        setHeader("Content-Length", std::to_string(body.size()));
-    }
-    state = FINISHED;
-
-    std::string representation = methodToString(method) + " " + Http::uriEncode(uri) + " " + version + CRLF;
-    for (HeaderMap::const_iterator it = headers.begin(); it != headers.end(); ++it) {
-        representation += it->first + ": " + it->second + CRLF;
-    }
-    representation += CRLF;
-    if (shouldHaveBody()) {
-        representation += body;
-    }
-
-    return representation;
+std::string HttpRequest::firstLine() const {
+    return methodToString(method) + " " + uri + " " + version + CRLF;
 }

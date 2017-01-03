@@ -21,7 +21,7 @@ public:
     void setRequestedMethod(Http::Method);
 
     void append(std::string);
-    virtual std::string finish();
+    virtual std::string firstLine() const;
 };
 
 

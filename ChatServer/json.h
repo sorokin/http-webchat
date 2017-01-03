@@ -30,13 +30,13 @@ public:
     JSON(const std::vector<JSON>&);
     JSON(const std::map<std::string, JSON>&);
 
-    Type getType();
-    bool getBooleanValue();
-    long getIntegerValue();
-    double getDoubleValue();
-    std::string getStringValue();
-    std::vector<JSON> getArrayValue();
-    std::map<std::string, JSON> getObjectValue();
+    Type getType() const;
+    bool getBooleanValue() const;
+    long getIntegerValue() const;
+    double getDoubleValue() const;
+    std::string getStringValue() const;
+    std::vector<JSON> getArrayValue() const;
+    std::map<std::string, JSON> getObjectValue() const;
 
     static JSON parseJSON(const std::string&);
     std::string toString() const;

@@ -14,7 +14,8 @@ void HttpServer::ResponseSocket::end(HttpResponse& response) {
         throw std::runtime_error("The response can't be sent twice");
     }
 
-    socket.write(response.finish());
+    response.finish();
+    socket.write(response.to_string());
     valid = false;
 }
 
@@ -28,16 +29,10 @@ HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& re
 HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", port, [this](TcpServerSocket* socket) {
             HttpRequest* request = NULL;
 
-            socket->setReceivedDataHandler([socket, &request, this](std::deque<char>& dataDeque) {
+            socket->setReceivedDataHandler([=](std::deque<char>& dataDeque) mutable {
                 while (!dataDeque.empty() && socket->isOpened()) {
                     if (request == NULL) {
                         request = new HttpRequest();
-                    }
-
-                    if (request->getState() == HttpMessage::State::FINISHED
-                        || request->getState() == HttpMessage::State::INVALID) {
-                        delete request;
-                        request = NULL;
                     }
 
                     if (request->getState() == HttpMessage::State::START

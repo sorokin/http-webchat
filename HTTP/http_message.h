@@ -40,7 +40,9 @@ public:
     void appendBody(const std::string&);
 
     State getState() const;
-    virtual std::string finish() = 0;
+    virtual std::string firstLine() const = 0;
+    void finish();
+    std::string to_string() const;
 
     size_t getDeclaredBodySize() const;
     bool shouldKeepAlive() const;

@@ -4,7 +4,8 @@ HttpResponse::HttpResponse(): HttpMessage() {}
 
 HttpResponse::HttpResponse(Http::Method requestedMethod,
                            const std::string& version, int statusCode, const std::string& reasonPhrase):
-        HttpMessage(version), requestedMethod(requestedMethod), statusCode(statusCode), reasonPhrase(reasonPhrase) {}
+        HttpMessage(version), requestedMethod(requestedMethod), statusCode(statusCode), reasonPhrase(reasonPhrase) {
+}
 
 bool HttpResponse::shouldHaveBody() const {
     return (isParsed && (getHeader("Content-Length") != "" || getHeader("Transfer-Encoding") != ""))
@@ -84,23 +85,6 @@ void HttpResponse::append(std::string data) {
     }
 }
 
-std::string HttpResponse::finish() {
-    if (isParsed && state != FINISHED || !isParsed && state != START) {
-        return "";
-    }
-    if (!isParsed && shouldHaveBody()) {
-        setHeader("Content-Length", std::to_string(body.size()));
-    }
-    state = FINISHED;
-
-    std::string representation = version + " " + std::to_string(statusCode) + " " + reasonPhrase + CRLF;
-    for (HeaderMap::const_iterator it = headers.begin(); it != headers.end(); ++it) {
-        representation += it->first + ": " + it->second + CRLF;
-    }
-    representation += CRLF;
-    if (shouldHaveBody()) {
-        representation += body;
-    }
-
-    return representation;
+std::string HttpResponse::firstLine() const {
+    return version + " " + std::to_string(statusCode) + " " + reasonPhrase + CRLF;
 }

@@ -116,7 +116,8 @@ std::string Http::uriEncode(const std::string& toEncode) {
 
 std::string Http::uriDecode(const std::string& toDecode) {
     std::string result = "";
-    for (size_t cur = 0, faps = 0; cur < toDecode.size(); ++cur) {
+    size_t faps = 0;
+    for (size_t cur = 0; cur < toDecode.size(); ++cur) {
         if (toDecode[cur] == '%') {
             if (cur > toDecode.size() - 3) {
                 throw std::runtime_error("Invalid URL-encoded string (percent encoding near the end): " + toDecode);
@@ -203,13 +204,18 @@ std::string Http::uriDecode(const std::string& toDecode) {
                 throw std::runtime_error("Invalid URL-encoded string (invalid percent encoding "
                                          + toDecode.substr(cur, 3) + "): " + toDecode);
             }
+            faps = cur + 3;
         }
     }
+    if (faps < toDecode.size()) {
+        result += toDecode.substr(faps, toDecode.size() - faps);
+    }
+
     return result;
 }
 
 std::string Http::getUriPath(const std::string& uri) {
-        std::string path = uri;
+    std::string path = uri;
     size_t authority = path.find("//");
     if (authority != std::string::npos) {
         path.erase(0, authority + 2);

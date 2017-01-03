@@ -16,10 +16,10 @@ public:
     Http::Method getMethod() const;
     std::string getMethodAsString() const;
     std::string getUri() const;
-    std::string getUriEncoded() const;
+    std::string getUriDecoded() const;
 
     void append(std::string);
-    virtual std::string finish();
+    virtual std::string firstLine() const;
 };
 
 
