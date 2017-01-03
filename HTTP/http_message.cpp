@@ -1,4 +1,3 @@
-#include <iostream>
 #include "http_message.h"
 
 HttpMessage::HttpMessage(): isParsed(true), state(START) {}

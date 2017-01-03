@@ -2,8 +2,6 @@
 #define HTTPWEBCHAT_HTTPMESSAGE_H
 
 
-#include <map>
-
 #include "http_common.h"
 
 static const std::string CRLF = "\r\n";
@@ -16,7 +14,6 @@ public:
 protected:
     State state;
     bool isParsed;
-    bool hasBody;
     bool isChunked;
 
     std::string version;

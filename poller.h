@@ -2,7 +2,6 @@
 #define HTTPWEBCHAT_POLLER_H
 
 
-#include <cstring>
 #include <iostream>
 #include <functional>
 #include <map>

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "json.h"
 
 JSON::JSON(): type(NULL_VALUE) {}

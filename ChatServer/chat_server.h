@@ -10,10 +10,6 @@
 class ChatServer {
 public:
     class Message: public JSON {
-        std::string from;
-        time_t time;
-        std::string text;
-
         static std::map<std::string, JSON> makeFields(const std::string&, time_t, const std::string&);
     public:
         Message(const std::string&, time_t, const std::string&);

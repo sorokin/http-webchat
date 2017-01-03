@@ -2,7 +2,6 @@
 #define HTTPWEBCHAT_TCPSERVERSOCKET_H
 
 
-#include <algorithm>
 #include <deque>
 
 #include "tcp_socket.h"

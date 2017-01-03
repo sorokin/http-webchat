@@ -1,4 +1,3 @@
-#include <iostream>
 #include "http_common.h"
 
 std::string Http::methodToString(Http::Method method) {
@@ -36,76 +35,112 @@ std::string Http::uriEncode(const std::string& toEncode) {
         switch (*it) {
             case '\t': {
                 result += "%09";
+                break;
             } case '\n': {
                 result += "%0A";
+                break;
             } case '\r': {
                 result += "%0D";
+                break;
             } case ' ': {
                 result += "%20";
+                break;
             } case '!': {
                 result += "%21";
+                break;
             } case '\"': {
                 result += "%22";
+                break;
             } case '#': {
                 result += "%23";
+                break;
             } case '$': {
                 result += "%24";
+                break;
             } case '%': {
                 result += "%25";
+                break;
             } case '&': {
                 result += "%26";
+                break;
             } case '\'': {
                 result += "%27";
+                break;
             } case '(': {
                 result += "%28";
+                break;
             } case ')': {
                 result += "%29";
+                break;
             } case '*': {
                 result += "%2A";
+                break;
             } case '+': {
                 result += "%2B";
+                break;
             } case ',': {
                 result += "%2C";
+                break;
             } case '-': {
                 result += "%2D";
+                break;
             } case '.': {
                 result += "%2E";
+                break;
             } case '/': {
                 result += "%2F";
+                break;
             } case ':': {
                 result += "%3A";
+                break;
             } case ';': {
                 result += "%3B";
+                break;
             } case '<': {
                 result += "%3C";
+                break;
             } case '=': {
                 result += "%3D";
+                break;
             } case '>': {
                 result += "%3E";
+                break;
             } case '?': {
                 result += "%3F";
+                break;
             } case '@': {
                 result += "%40";
+                break;
             } case '[': {
                 result += "%5B";
+                break;
             } case '\\': {
                 result += "%5C";
+                break;
             } case ']': {
                 result += "%5D";
+                break;
             } case '^': {
                 result += "%5E";
+                break;
             } case '_': {
                 result += "%5F";
+                break;
             } case '`': {
                 result += "%60";
+                break;
             } case '{': {
                 result += "%7B";
+                break;
             } case '|': {
                 result += "%7C";
+                break;
             } case '}': {
                 result += "%7D";
+                break;
             } case '~': {
                 result += "%7E";
+                break;
             } default: {
                 result += *it;
             }

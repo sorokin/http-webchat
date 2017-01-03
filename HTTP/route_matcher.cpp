@@ -1,4 +1,3 @@
-#include <iostream>
 #include "route_matcher.h"
 
 RouteMatcher::RouteMatcher(Http::Method method, const std::string& uri):

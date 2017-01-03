@@ -5,9 +5,6 @@
 #include <cinttypes>
 
 #include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 
 #include "tcp_server_socket.h"
 
