@@ -12,7 +12,6 @@ class HttpMessage {
 public:
     enum State {START, HEADER, BODY, FINISHED, INVALID};
 
-    typedef std::map<std::string, std::string> CookieMap; // TODO: реализовать поддержку куков
     typedef std::map<std::string, std::string> HeaderMap;
 protected:
     State state;
