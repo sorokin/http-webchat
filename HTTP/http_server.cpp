@@ -25,8 +25,6 @@ HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& re
     responseSocket.end(response);
 };
 
-//HttpServer::HttpServer(Poller& poller, uint16_t port): poller(poller),
-//        listener(TcpAcceptSocket(poller, "127.0.0.1", port, [this](TcpServerSocket* socket) {
 HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", port, [this](TcpServerSocket* socket) {
             HttpRequest* request = NULL;
 
@@ -88,7 +86,6 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
         its.it_interval.tv_nsec = 0;
         _m1_system_call(timerfd_settime(tfd, 0, &its, NULL), "Couldn't run the timer fd");
 
-//        poller.setHandler(tfd, [=](epoll_event event) {
         Poller::setHandler(tfd, [=](epoll_event event) {
             std::set<TcpServerSocket*>::iterator it_prev = sockets.begin();
             for (std::set<TcpServerSocket*>::iterator it = it_prev; it != sockets.end(); it_prev = it) {
@@ -112,7 +109,6 @@ HttpServer::~HttpServer() {
     }
 
     try {
-//        poller.removeHandler(tfd);
         Poller::removeHandler(tfd);
         _m1_system_call(::close(tfd), "Timer fd (fd " + std::to_string(tfd) + ") was closed incorrectly");
     } catch (std::exception& exception) {

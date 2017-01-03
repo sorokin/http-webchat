@@ -1,3 +1,4 @@
+#include <iostream>
 #include "route_matcher.h"
 
 RouteMatcher::RouteMatcher(Http::Method method, const std::string& uri):
@@ -9,7 +10,7 @@ std::string RouteMatcher::transformRoute(const std::string& uri) {
     }
 
     std::string result = toLowerCase(uri);
-    if (result[result.size() - 1] != '/' && result.size() != 1) {
+    if (result[result.size() - 1] != '/' && result.size() > 1) {
         result.erase(result.size() - 1, 1);
     }
     return result;

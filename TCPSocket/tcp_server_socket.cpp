@@ -3,11 +3,8 @@
 const size_t TcpServerSocket::READ_BUFFER_SIZE = 4096;
 const size_t TcpServerSocket::WRITE_BUFFER_SIZE = 4096;
 
-//TcpServerSocket::TcpServerSocket(Poller& poller, int fd, const std::string& host, uint16_t port):
-//        TcpSocket(poller, fd, host, port) {
 TcpServerSocket::TcpServerSocket(int fd, const std::string& host, uint16_t port): TcpSocket(fd, host, port) {
     try {
-//        poller.setHandler(fd, [this](const epoll_event& event) {
         Poller::setHandler(fd, [this](const epoll_event& event) {
             eventHandler(event);
         }, EPOLLIN);
@@ -58,7 +55,6 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
             } else if (writtenCount > 0) {
                 outBuffer.erase(outBuffer.begin(), outBuffer.begin() + writtenCount);
                 if (outBuffer.empty()) {
-//                    poller.setEvents(fd, EPOLLIN);
                     Poller::setEvents(fd, EPOLLIN);
                 }
             }
@@ -93,7 +89,6 @@ void TcpServerSocket::write(const std::string& data) {
     outBuffer.insert(outBuffer.end(), data.begin(), data.end());
     if (wasEmpty) {
         try {
-//            poller.setEvents(fd, EPOLLIN | EPOLLOUT);
             Poller::setEvents(fd, EPOLLIN | EPOLLOUT);
         } catch (std::exception& exception) {
             close();

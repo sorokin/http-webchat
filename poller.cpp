@@ -1,14 +1,60 @@
 #include "poller.h"
 
-//Poller& Poller::getInstance() {
-//    static Poller instance;
-//    return instance;
-//}
-
 int Poller::efd;
 int Poller::sfd;
 epoll_event Poller::events[MAX_EVENTS];
 std::map<int, EventHandler> Poller::handlers;
+
+void Poller::signalHandler(int) {
+    eventfd_write(sfd, 1);
+}
+
+void Poller::start() {
+    struct sigaction sa = {};
+    sa.sa_handler = Poller::signalHandler;
+    sigset_t ss;
+    std::string seMsg = "Couldn't set signal handler";
+    _m1_system_call(sigemptyset(&ss), seMsg);
+    _m1_system_call(sigaddset(&ss, SIGINT), seMsg);
+    _m1_system_call(sigaddset(&ss, SIGTERM), seMsg);
+    sa.sa_mask = ss;
+    _m1_system_call(sigaction(SIGINT, &sa, 0), seMsg);
+    _m1_system_call(sigaction(SIGTERM, &sa, 0), seMsg);
+
+    efd = _m1_system_call(epoll_create1(0), "Couldn't run the polling fd");
+    try {
+        sfd = _m1_system_call(eventfd(0, EFD_NONBLOCK), "Couldn't run the stopping fd");
+        try {
+            epoll_event ev = {};
+            ev.data.fd = sfd;
+            ev.events = EPOLLIN;
+            _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev), "Couldn't add the stopping fd to polling");
+        } catch (std::exception& exception1) {
+            close(sfd);
+            throw exception1;
+        }
+    } catch (std::exception& exception) {
+        close(efd);
+        throw exception;
+    }
+}
+
+void Poller::stop() {
+    int res = epoll_ctl(efd, EPOLL_CTL_DEL, sfd, NULL);
+    if (res == -1) {
+        std::cerr << "Couldn't remove the stopping fd from polling: " << strerror(errno) << std::endl;
+    }
+
+    res = close(sfd);
+    if (res == -1) {
+        std::cerr << "Couldn't close the stopping fd: " << strerror(errno) << std::endl;
+    }
+
+    res = close(efd);
+    if (res == -1) {
+        std::cerr << "Couldn't close the polling fd: " << strerror(errno) << std::endl;
+    }
+}
 
 void Poller::setHandler(int fd, EventHandler handler, uint32_t events) {
     epoll_event ev = {};
@@ -66,101 +112,10 @@ void Poller::poll() {
 }
 
 
-//Poller::Poller() {
-//    struct sigaction sa = {};
-//    sa.sa_handler = Poller::signalHandler;
-//    sigset_t ss;
-//    std::string seMsg = "Couldn't set signal handler";
-//    _m1_system_call(sigemptyset(&ss), seMsg);
-//    _m1_system_call(sigaddset(&ss, SIGINT), seMsg);
-//    _m1_system_call(sigaddset(&ss, SIGTERM), seMsg);
-//    sa.sa_mask = ss;
-//    _m1_system_call(sigaction(SIGINT, &sa, 0), seMsg);
-//    _m1_system_call(sigaction(SIGTERM, &sa, 0), seMsg);
-//
-//    efd = _m1_system_call(epoll_create1(0), "Couldn't run the polling fd");
-//    try {
-//        sfd = _m1_system_call(eventfd(0, EFD_NONBLOCK), "Couldn't run the stopping fd");
-//        try {
-//            epoll_event ev = {};
-//            ev.data.fd = sfd;
-//            ev.events = EPOLLIN;
-//            _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev), "Couldn't add the stopping fd to polling");
-//        } catch (std::exception& exception1) {
-//            close(sfd);
-//            throw exception1;
-//        }
-//    } catch (std::exception& exception) {
-//        close(efd);
-//        throw exception;
-//    }
-//}
-
-void Poller::start() {
-    struct sigaction sa = {};
-    sa.sa_handler = Poller::signalHandler;
-    sigset_t ss;
-    std::string seMsg = "Couldn't set signal handler";
-    _m1_system_call(sigemptyset(&ss), seMsg);
-    _m1_system_call(sigaddset(&ss, SIGINT), seMsg);
-    _m1_system_call(sigaddset(&ss, SIGTERM), seMsg);
-    sa.sa_mask = ss;
-    _m1_system_call(sigaction(SIGINT, &sa, 0), seMsg);
-    _m1_system_call(sigaction(SIGTERM, &sa, 0), seMsg);
-
-    efd = _m1_system_call(epoll_create1(0), "Couldn't run the polling fd");
-    try {
-        sfd = _m1_system_call(eventfd(0, EFD_NONBLOCK), "Couldn't run the stopping fd");
-        try {
-            epoll_event ev = {};
-            ev.data.fd = sfd;
-            ev.events = EPOLLIN;
-            _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev), "Couldn't add the stopping fd to polling");
-        } catch (std::exception& exception1) {
-            close(sfd);
-            throw exception1;
-        }
-    } catch (std::exception& exception) {
-        close(efd);
-        throw exception;
-    }
+Poller::Poller() {
+    Poller::start();
 }
 
-//Poller::~Poller() {
-//    int res = epoll_ctl(efd, EPOLL_CTL_DEL, sfd, NULL);
-//    if (res == -1) {
-//        std::cerr << "Couldn't remove the stopping fd from polling: " << strerror(errno) << std::endl;
-//    }
-//
-//    res = close(sfd);
-//    if (res == -1) {
-//        std::cerr << "Couldn't close the stopping fd: " << strerror(errno) << std::endl;
-//    }
-//
-//    res = close(efd);
-//    if (res == -1) {
-//        std::cerr << "Couldn't close the polling fd: " << strerror(errno) << std::endl;
-//    }
-//}
-
-void Poller::stop() {
-    int res = epoll_ctl(efd, EPOLL_CTL_DEL, sfd, NULL);
-    if (res == -1) {
-        std::cerr << "Couldn't remove the stopping fd from polling: " << strerror(errno) << std::endl;
-    }
-
-    res = close(sfd);
-    if (res == -1) {
-        std::cerr << "Couldn't close the stopping fd: " << strerror(errno) << std::endl;
-    }
-
-    res = close(efd);
-    if (res == -1) {
-        std::cerr << "Couldn't close the polling fd: " << strerror(errno) << std::endl;
-    }
-}
-
-void Poller::signalHandler(int) {
-//    eventfd_write(getInstance().sfd, 1);
-    eventfd_write(sfd, 1);
+Poller::~Poller() {
+    Poller::stop();
 }

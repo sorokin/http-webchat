@@ -2,8 +2,6 @@
 
 const int TcpSocket::NONE = -1;
 
-//TcpSocket::TcpSocket(Poller& poller, int fd, const std::string& host, uint16_t port):
-//        poller(poller), fd(fd), host(host), port(port) {
 TcpSocket::TcpSocket(int fd, const std::string& host, uint16_t port):fd(fd), host(host), port(port) {
     try {
         std::string error = "Couldn't make socket (fd " + std::to_string(fd) + ") non-blocking";
@@ -22,7 +20,6 @@ TcpSocket::~TcpSocket() {
 void TcpSocket::close() {
     if (fd != NONE) {
         try {
-//            poller.removeHandler(fd);
             Poller::removeHandler(fd);
             _m1_system_call(::close(fd), "Socket (fd " + std::to_string(fd) + ") was closed incorrectly");
         } catch (std::exception& exception) {

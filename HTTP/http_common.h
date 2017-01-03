@@ -15,7 +15,7 @@ namespace Http {
     std::string methodToString(Method);
     Method stringToMethod(const std::string&);
 
-    std::string uriEncode(const std::string&); // TODO: кодирование/декодирование URL
+    std::string uriEncode(const std::string&);
     std::string uriDecode(const std::string&);
 
     std::string getUriPath(const std::string&);

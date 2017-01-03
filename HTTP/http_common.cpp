@@ -1,3 +1,4 @@
+#include <iostream>
 #include "http_common.h"
 
 std::string Http::methodToString(Http::Method method) {
@@ -208,7 +209,7 @@ std::string Http::uriDecode(const std::string& toDecode) {
 }
 
 std::string Http::getUriPath(const std::string& uri) {
-    std::string path = uri;
+        std::string path = uri;
     size_t authority = path.find("//");
     if (authority != std::string::npos) {
         path.erase(0, authority + 2);

@@ -47,7 +47,6 @@ void ChatServer::logError(const HttpRequest& request, int code, const std::strin
     std::cout << "  Result: " << response << ", sending code " << code << std::endl;
 }
 
-//ChatServer::ChatServer(Poller& poller, uint16_t port): httpServer(HttpServer(poller, port)) {
 ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/login"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
