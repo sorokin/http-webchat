@@ -60,10 +60,13 @@ function loadMessages(all) {
                     appendMessage(messageList, data.messages[i]);
                 }
 
-                var clientHeight = messageList.height();
-                var scrollHeight = messageList[0].scrollHeight;
-                if (clientHeight < scrollHeight) {
-                    messageList.scrollTop(scrollHeight);
+                if (data.messages.length > 0) {
+                    var messageBlock = $('#message-block');
+                    var clientHeight = messageBlock.height();
+                    var scrollHeight = messageBlock.get(0).scrollHeight;
+                    if (clientHeight < scrollHeight) {
+                        messageBlock.scrollTop(scrollHeight);
+                    }
                 }
 
                 timer = setTimeout(loadMessages(false), 500);
@@ -102,7 +105,6 @@ function usernameEnter(event) {
         usernameField.addClass('username-error');
         setTimeout(unRed, 200);
     } else if (newUsername != '') {
-        console.log('calling login');
         login(newUsername);
     }
 }
