@@ -63,6 +63,12 @@ size_t HttpMessage::getBodySize() const {
 }
 
 void HttpMessage::setHeader(const std::string& name, const std::string& value) {
+    std::string lowerCaseName = toLowerCase(name);
+    if (lowerCaseName == "content-length") {
+        isChunked = false;
+    } else if (lowerCaseName == "transfer-encoding") {
+        isChunked = true;
+    }
     headers[toLowerCase(name)] = value;
 }
 

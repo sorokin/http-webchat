@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Web Chat</title>
+
+    <link rel="stylesheet" type="text/css" href="chat.css">
+    <script type="text/javascript" src="jquery.js" defer></script>
+    <script type="text/javascript" src="chat.js" defer></script>
+</head>
+<body>
+    <div class="main-div">
+        <div class="header">
+            <div class="username-block">
+                <p class="username-label"><b>Username</b></p>
+                <form class="username-form">
+                    <input id="username" />
+                    <button id="usernameEnter">Enter</button>
+                </form>
+            </div>
+            <div class="indicator-block">
+                <img id="indicator" src="red_light.png" />
+            </div>
+        </div>
+
+        <div class="message-block">
+            <ul id="messages" class="message-list">
+                <!--<li><b>Dimon</b> (04.01.2017 04:31:15): Hi!</li>-->
+            </ul>
+        </div>
+
+        <div class="footer">
+            <form class="message-form">
+                <textarea id="message" class="message" disabled></textarea>
+                <button id="messageEnter" class="message-button" disabled>Enter</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

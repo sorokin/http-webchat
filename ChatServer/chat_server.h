@@ -9,6 +9,8 @@
 
 class ChatServer {
 public:
+    static constexpr const char* ADMIN_NAME = "Admin";
+
     class Message: public JSON {
         static std::map<std::string, JSON> makeFields(const std::string&, time_t, const std::string&);
     public:

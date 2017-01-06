@@ -1,1 +1,6 @@
 *.o
+HttpWebChat
+.idea/.name
+.idea/compiler.xml
+.idea/copyright
+.idea/workspace.xml

@@ -265,7 +265,15 @@ std::string JSON::toString() const {
         } case DOUBLE: {
             return std::to_string(doubleValue);
         } case STRING: {
-            return "\"" + stringValue + "\"";
+            std::string encodedValue = stringValue;
+            for (std::string::iterator it = encodedValue.begin(); it != encodedValue.end(); ++it) {
+                if ((*it) == '"') {
+                    std::string::iterator toReplace = it++;
+                    encodedValue.replace(toReplace, it, "\\\"");
+                }
+            }
+
+            return "\"" + encodedValue + "\"";
         } case ARRAY: {
             std::string result = "[";
             for (std::vector<JSON>::const_iterator it = arrayValue.begin();

@@ -57,10 +57,14 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                 std::map<std::string, JSON> usernamePayload = Object(pattern).match(request.getBody());
                 std::string username = usernamePayload["username"].getStringValue();
 
+                if (username == ADMIN_NAME) {
+                    throw std::runtime_error("One can't login with username Admin");
+                }
+
                 if (firstMessage.find(username) == firstMessage.end()) {
                     size_t first = history.size();
                     std::cout << "User \"" << username << "\" joined to chat" << std::endl;
-                    history.push_back(Message(username, time(NULL), "User " + username + " joined to chat!"));
+                    history.push_back(Message(ADMIN_NAME, time(NULL), "User " + username + " joined to chat!"));
                     firstMessage[username] = first;
                 }
             } catch (std::exception& exception) {
@@ -100,6 +104,8 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     std::string allMessages = queryParams["all"];
                     if (username == "" || (allMessages != "true" && allMessages != "false")) {
                         throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
+                    } else if (username == ADMIN_NAME) {
+                        throw std::runtime_error("One can't get messages from username Admin");
                     }
 
                     bool isAll = (allMessages == "true");
@@ -146,6 +152,8 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     std::string allMessages = queryParams["all"];
                     if (username == "" || (allMessages != "true" && allMessages != "false")) {
                         throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
+                    } else if (username == ADMIN_NAME) {
+                        throw std::runtime_error("One can't get messages from username Admin");
                     }
                 } catch (std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
@@ -176,7 +184,10 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                 std::string message = identifiedMessage.second;
                 if (username == "" || message == "") {
                     throw std::runtime_error("Bad request: empty username or message");
+                } else if (username == ADMIN_NAME) {
+                    throw std::runtime_error("One can't post a message from username Admin");
                 }
+
                 std::cout << "User \"" << username << "\" sent message: \"" << message << "\"" << std::endl;
                 history.push_back(Message(username, time(NULL), message));
             } catch (std::exception& exception) {

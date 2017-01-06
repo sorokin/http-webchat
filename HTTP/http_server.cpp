@@ -82,13 +82,11 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
         _m1_system_call(timerfd_settime(tfd, 0, &its, NULL), "Couldn't run the timer fd");
 
         Poller::setHandler(tfd, [=](epoll_event event) {
-            std::set<TcpServerSocket*>::iterator it_prev = sockets.begin();
-            for (std::set<TcpServerSocket*>::iterator it = it_prev; it != sockets.end(); it_prev = it) {
-                ++it;
-                TcpServerSocket* socket = *it_prev;
+            for (std::set<TcpServerSocket*>::iterator it = sockets.begin(); it != sockets.end(); ++it) {
+                TcpServerSocket* socket = *it;
                 if (!socket->isOpened()) {
                     delete socket;
-                    sockets.erase(it_prev);
+                    sockets.erase(it++);
                 }
             }
         }, EPOLLIN);
