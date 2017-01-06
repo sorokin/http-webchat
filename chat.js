@@ -9,16 +9,16 @@ function appendMessage(list, message) {
     message.text = message.text.replace('\\"', '"');
 
     var date = new Date(message.time * 1000);
-    var format = format2Dig(date.getDate()) + '.' + format2Dig(date.getMonth()) + '.' + date.getYear() + ' '
+    var format = format2Dig(date.getDate()) + '.' + format2Dig(date.getMonth() + 1) + '.' + date.getFullYear() + ' '
         + format2Dig(date.getHours()) + ':' + format2Dig(date.getMinutes()) + ':' + format2Dig(date.getSeconds());
 
     if (message.from == username) {
-        list.append('<li><b>' + message.from + ' (' + format + '):</b> ' + message.text + '</li>');
+        list.append('<li><b>' + message.from + ' (' + format + '):</b> <pre>' + message.text + '</pre></li>');
     } else if (message.from == 'Admin') {
-        list.append('<li><span class="admin-name">' + message.from + ' (' + format + '):</span> '
-            + message.text + '</li>');
+        list.append('<li><span class="admin-name">' + message.from + ' (' + format + '):</span> <pre>'
+            + message.text + '</pre></li>');
     } else {
-        list.append('<li>' + message.from + ' (' + format + '): ' + message.text + '</li>');
+        list.append('<li>' + message.from + ' (' + format + '): <pre>' + message.text + '</pre></li>');
     }
 }
 
@@ -33,15 +33,17 @@ function login(content) {
         success: function () {
             username = content;
 
+            var messageField = $('#message');
             $('#username').attr('disabled', true);
             $('#usernameEnter').attr('disabled', true);
-            $('#message').attr('disabled', false);
+            messageField.attr('disabled', false);
             $('#messageEnter').attr('disabled', false);
+            messageField.focus();
             $('#indicator').attr('src', 'green_light.png');
 
             loadMessages(true)();
         }
-    })
+    });
 }
 
 function loadMessages(all) {
@@ -88,7 +90,7 @@ function sendMessage(message) {
             clearTimeout(timer);
             loadMessages(false)();
         }
-    })
+    });
 }
 
 function usernameEnter(event) {

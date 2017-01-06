@@ -265,6 +265,8 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     response.setHeader("Content-Type", "application/javascript");
                 } else if (type == "html" || type == "htm") {
                     response.setHeader("Content-Type", "text/html");
+                } else if (type == "css") {
+                    response.setHeader("Content-Type", "text/css");
                 }
                 response.appendBody(body);
                 responseSocket.end(response);

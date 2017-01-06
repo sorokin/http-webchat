@@ -82,12 +82,18 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
                 if (fnes < cur) {
                     string += data.substr(fnes, cur - fnes);
                 }
-                if (data[cur + 1] == '\"') {
-                    string += '\"';
+                if (data[cur + 1] == '"') {
+                    string += '"';
+                } else if (data[cur + 1] == 'n') {
+                    string += '\n';
+                } else if (data[cur + 1] == '\\') {
+                    string += '\\';
                 } else {
-                    throw std::runtime_error("Wrong JSON (escaping symbol other than \") at symbol "
+                    throw std::runtime_error("Wrong JSON (escaping symbol other than '\"', '\\' or \\n) at symbol "
                                              + std::to_string(cur + 1) + ": \"" + data + "\"");
                 }
+                fnes = cur + 2;
+                ++cur;
             }
         }
         if (fnes < cur) {
@@ -265,11 +271,16 @@ std::string JSON::toString() const {
         } case DOUBLE: {
             return std::to_string(doubleValue);
         } case STRING: {
-            std::string encodedValue = stringValue;
-            for (std::string::iterator it = encodedValue.begin(); it != encodedValue.end(); ++it) {
-                if ((*it) == '"') {
-                    std::string::iterator toReplace = it++;
-                    encodedValue.replace(toReplace, it, "\\\"");
+            std::string encodedValue;
+            for (size_t i = 0; i < stringValue.size(); ++i) {
+                if (stringValue[i] == '"') {
+                    encodedValue += "\\\"";
+                } else if (stringValue[i] == '\n') {
+                    encodedValue += "\\n";
+                } else if (stringValue[i] == '\\') {
+                    encodedValue += "\\\\";
+                } else {
+                    encodedValue += stringValue[i];
                 }
             }
 
