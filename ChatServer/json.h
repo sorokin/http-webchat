@@ -20,6 +20,7 @@ private:
     std::vector<JSON> arrayValue;
     std::map<std::string, JSON> objectValue;
 
+    static JSON readNumber(const std::string&, size_t&, bool);
     static JSON _parseJSON(const std::string&, size_t&);
 public:
     JSON();

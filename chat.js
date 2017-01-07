@@ -13,12 +13,13 @@ function appendMessage(list, message) {
         + format2Dig(date.getHours()) + ':' + format2Dig(date.getMinutes()) + ':' + format2Dig(date.getSeconds());
 
     if (message.from == username) {
-        list.append('<li><b>' + message.from + ' (' + format + '):</b> <pre>' + message.text + '</pre></li>');
+        list.append('<li><b>' + message.from + ' (' + format + '):</b> <pre class="inline">' + message.text
+            + '</pre></li>');
     } else if (message.from == 'Admin') {
-        list.append('<li><span class="admin-name">' + message.from + ' (' + format + '):</span> <pre>'
+        list.append('<li><span class="admin-name">' + message.from + ' (' + format + '):</span> <pre class="inline">'
             + message.text + '</pre></li>');
     } else {
-        list.append('<li>' + message.from + ' (' + format + '): <pre>' + message.text + '</pre></li>');
+        list.append('<li>' + message.from + ' (' + format + '): <pre class="inline">' + message.text + '</pre></li>');
     }
 }
 

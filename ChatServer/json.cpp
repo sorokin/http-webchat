@@ -14,6 +14,37 @@ JSON::JSON(const std::vector<JSON>& arrayElements): type(ARRAY), arrayValue(arra
 
 JSON::JSON(const std::map<std::string, JSON>& objectFields): type(OBJECT), objectValue(objectFields) {}
 
+JSON JSON::readNumber(const std::string& data, size_t& cur, bool isNegative) {
+    std::string numberAsString = (isNegative ? "-" : "");
+    if (data[cur] == '0') {
+        if (data[cur + 1] >= '0' && data[cur + 1] <= '9') {
+            throw std::runtime_error("Wrong JSON (number starting with 0) at symbol " + std::to_string(cur) + ": \""
+                                     + data + "\"");
+        } else {
+            numberAsString += data[cur++];
+        }
+    } else if (data[cur] >= '1' && data[cur] <= '9') {
+        for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
+            numberAsString += data[cur];
+        }
+    } else {
+        throw std::runtime_error("Wrong JSON (pure minus) at symbol " + std::to_string(cur) + ": \"" + data + "\"");
+    }
+
+    if (data[cur] != '.') {
+        return JSON(std::stol(numberAsString));
+    } else {
+        numberAsString += data[cur++];
+        if (cur == data.size()) {
+            throw std::runtime_error("Wrong JSON (unfinished): " + data);
+        }
+        for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
+            numberAsString += data[cur];
+        }
+        return JSON(std::stod(numberAsString));
+    }
+}
+
 JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
     for (; cur < data.size()
            && (data[cur] == ' ' || data[cur] == '\t' || data[cur] == '\r' || data[cur] == '\n'); ++cur);
@@ -45,33 +76,13 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
                                      + data + "\"");
         }
     } else if (data[cur] == '-') {
-        std::string numberAsString = "" + data[cur++];
-        for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
-            numberAsString += data[cur];
-        }
-        if (data[cur] != '.') {
-            return JSON(std::stol(numberAsString));
+        if (++cur == data.size()) {
+            throw std::runtime_error("Wrong JSON (unfinished): " + data);
         } else {
-            numberAsString += data[cur++];
-            for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
-                numberAsString += data[cur];
-            }
-            return JSON(std::stod(numberAsString));
+            return readNumber(data, cur, true);
         }
     } else if (data[cur] >= '0' && data[cur] <= '9') {
-        std::string numberAsString = "" + data[cur];
-        for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
-            numberAsString += data[cur];
-        }
-        if (data[cur] != '.') {
-            return JSON(std::stol(numberAsString));
-        } else {
-            numberAsString += data[cur++];
-            for (; cur < data.size() && data[cur] >= '0' && data[cur] <= '9'; ++cur) {
-                numberAsString += data[cur];
-            }
-            return JSON(std::stod(numberAsString));
-        }
+        return readNumber(data, cur, false);
     } else if (data[cur] == '\"') {
         ++cur;
 
@@ -88,8 +99,18 @@ JSON JSON::_parseJSON(const std::string& data, size_t& cur) {
                     string += '\n';
                 } else if (data[cur + 1] == '\\') {
                     string += '\\';
+                } else if (data[cur + 1] == 't') {
+                    string += '\t';
+                } else if (data[cur + 1] == 'r') {
+                    string += '\r';
+                } else if (data[cur + 1] == 'b') {
+                    string += '\b';
+                } else if (data[cur + 1] == 'f') {
+                    string += '\f';
+                } else if (data[cur + 1] == '/') {
+                    string += '/';
                 } else {
-                    throw std::runtime_error("Wrong JSON (escaping symbol other than '\"', '\\' or \\n) at symbol "
+                    throw std::runtime_error("Wrong JSON (invalid escape sequence) at symbol "
                                              + std::to_string(cur + 1) + ": \"" + data + "\"");
                 }
                 fnes = cur + 2;
@@ -279,6 +300,14 @@ std::string JSON::toString() const {
                     encodedValue += "\\n";
                 } else if (stringValue[i] == '\\') {
                     encodedValue += "\\\\";
+                } else if (stringValue[i] == '\t') {
+                    encodedValue += "\\t";
+                } else if (stringValue[i] == '\r') {
+                    encodedValue += "\\r";
+                } else if (stringValue[i] == '\b') {
+                    encodedValue += "\\b";
+                } else if (stringValue[i] == '\f') {
+                    encodedValue += "\\f";
                 } else {
                     encodedValue += stringValue[i];
                 }
