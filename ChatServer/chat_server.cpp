@@ -67,7 +67,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     history.push_back(Message(ADMIN_NAME, time(NULL), "User " + username + " joined to chat!"));
                     firstMessage[username] = first;
                 }
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 logError(request, 400, "Bad request: " + std::string(exception.what()));
                 HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                 responseSocket.end(response);
@@ -80,7 +80,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     response.setHeader("Connection", "Keep-Alive");
                 }
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;
@@ -115,7 +115,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                         begin = firstUnreadMessage[username];
                     }
                     firstUnreadMessage[username] = history.size();
-                } catch (std::exception& exception) {
+                } catch (const std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -129,7 +129,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                 response.setHeader("Content-Type", "application/json; charset=UTF-8");
                 response.appendBody(historyAsJson(begin, history.size()));
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;
@@ -155,7 +155,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     } else if (username == ADMIN_NAME) {
                         throw std::runtime_error("One can't get messages from username Admin");
                     }
-                } catch (std::exception& exception) {
+                } catch (const std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -168,7 +168,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                 }
                 response.setHeader("Content-Type", "application/json; charset=UTF-8");
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;
@@ -190,7 +190,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 std::cout << "User \"" << username << "\" sent message: \"" << message << "\"" << std::endl;
                 history.push_back(Message(username, time(NULL), message));
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 logError(request, 400, "Bad request: " + std::string(exception.what()));
                 HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                 responseSocket.end(response);
@@ -203,7 +203,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     response.setHeader("Connection", "Keep-Alive");
                 }
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;
@@ -250,7 +250,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     type = (ext != std::string::npos)
                                        ? filename.substr(ext + 1, filename.size() - ext - 1)
                                        : "";
-                } catch (std::exception& exception) {
+                } catch (const std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -270,7 +270,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                 }
                 response.appendBody(body);
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;
@@ -312,7 +312,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     type = (ext != std::string::npos)
                                        ? filename.substr(ext + 1, filename.size() - ext - 1)
                                        : "";
-                } catch (std::exception& exception) {
+                } catch (const std::exception& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -329,7 +329,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     response.setHeader("Content-Type", "text/html");
                 }
                 responseSocket.end(response);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Exception while responding to request (method "
                           << Http::methodToString(request.getMethod()) << ", URL \"" << request.getUri()
                           << "\"), closing connection: " << exception.what() << "" << std::endl;

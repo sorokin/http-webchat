@@ -29,11 +29,11 @@ void Poller::start() {
             ev.data.fd = sfd;
             ev.events = EPOLLIN;
             _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, sfd, &ev), "Couldn't add the stopping fd to polling");
-        } catch (std::exception& exception1) {
+        } catch (const std::exception& exception1) {
             close(sfd);
             throw exception1;
         }
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         close(efd);
         throw exception;
     }
@@ -69,7 +69,7 @@ void Poller::setHandler(int fd, const EventHandler& handler, uint32_t events) {
             aSize = handlers.size();
             _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev),
                             "Couldn't add fd " + std::to_string(fd) + " to polling");
-        } catch (std::exception& exception) {
+        } catch (const std::exception& exception) {
             if (bSize < aSize) {
                 handlers.erase(fdIterator);
             }

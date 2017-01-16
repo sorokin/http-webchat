@@ -49,7 +49,7 @@ const HttpMessage::HeaderMap& HttpMessage::getHeaders() const {
 std::string HttpMessage::getHeader(const std::string& name) const {
     try {
         return headers.at(toLowerCase(name));
-    } catch (std::out_of_range oor) {
+    } catch (const std::out_of_range& oor) {
         return "";
     }
 }

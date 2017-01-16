@@ -11,7 +11,7 @@ int main(int, char**) {
         cout << "Server started on port " << PORT << endl;
         Poller::poll();
         return 0;
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         cerr << "Exception: " << exception.what() << endl;
         return 1;
     }

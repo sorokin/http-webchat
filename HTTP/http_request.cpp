@@ -70,7 +70,7 @@ void HttpRequest::append(std::string data) {
                 throw std::runtime_error("The message is finished");
             }
         }
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         if (exception.what() == "The message is finished") {
             throw exception;
         } else {

@@ -8,7 +8,7 @@ TcpServerSocket::TcpServerSocket(int fd, const std::string& host, uint16_t port)
         Poller::setHandler(fd, [this](const epoll_event& event) {
             eventHandler(event);
         }, EPOLLIN);
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         ::close(fd);
         throw exception;
     }
@@ -34,7 +34,7 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
                     receivedDataHandler(inBuffer);
                 }
             }
-        } catch (std::exception& exception) {
+        } catch (const std::exception& exception) {
             std::cerr << "Exception while reading from socket (fd " << fd << "), closing socket: "
                       << exception.what() << std::endl;
             close();
@@ -58,7 +58,7 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
                     Poller::setEvents(fd, EPOLLIN);
                 }
             }
-        } catch (std::exception& exception) {
+        } catch (const std::exception& exception) {
             std::cerr << "Exception while writing into socket (fd " << fd << "), closing socket: "
                       << exception.what() << std::endl;
             close();
@@ -72,7 +72,7 @@ void TcpServerSocket::setReceivedDataHandler(SocketReceivedDataHandler socketRec
     if (socketReceivedDataHandler && !inBuffer.empty()) {
         try {
             receivedDataHandler(inBuffer);
-        } catch (std::exception& exception) {
+        } catch (const std::exception& exception) {
             std::cerr << "Exception while processing received data from socket (fd " << fd
                       << "), closing socket: " << exception.what() << std::endl;
             close();
@@ -90,7 +90,7 @@ void TcpServerSocket::write(const std::string& data) {
     if (wasEmpty) {
         try {
             Poller::setEvents(fd, EPOLLIN | EPOLLOUT);
-        } catch (std::exception& exception) {
+        } catch (const std::exception& exception) {
             close();
             throw std::runtime_error("Exception while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "
                   + exception.what());

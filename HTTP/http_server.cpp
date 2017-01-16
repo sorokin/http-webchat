@@ -58,7 +58,7 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
                     if (request->getState() == HttpMessage::State::FINISHED) {
                         try {
                             processRequest(socket, *request);
-                        } catch (std::exception& exception) {
+                        } catch (const std::exception& exception) {
                             std::cerr << "Couldn't process a request: " << exception.what() << std::endl;
                             socket->close();
                         }
@@ -90,7 +90,7 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
                 }
             }
         }, EPOLLIN);
-    } catch (std::exception exception) {
+    } catch (const std::exception& exception) {
         listener.close();
         throw exception;
     }
@@ -104,7 +104,7 @@ HttpServer::~HttpServer() {
     try {
         Poller::removeHandler(tfd);
         _m1_system_call(::close(tfd), "Timer fd (fd " + std::to_string(tfd) + ") was closed incorrectly");
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         std::cerr << "Exception while closing timer fd (fd " << tfd << "): " << exception.what() << std::endl;
     }
 }

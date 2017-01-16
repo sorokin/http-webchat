@@ -19,11 +19,11 @@ TcpAcceptSocket::TcpAcceptSocket(const std::string& host, uint16_t port, AcceptH
         Poller::setHandler(fd, [=](epoll_event event) {
             try {
                 accept(event, acceptHandler);
-            } catch (std::exception& exception) {
+            } catch (const std::exception& exception) {
                 std::cerr << "Couldn't accept an incoming connection: " << exception.what() << std::endl;
             }
         }, EPOLLIN);
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         ::close(fd);
         throw exception;
     }
@@ -49,7 +49,7 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
         }
 
         sscanf(pbuf, "%" SCNd16, &port);
-    } catch (std::exception& exception) {
+    } catch (const std::exception& exception) {
         ::close(incomingFD);
         throw exception;
     }
