@@ -15,7 +15,7 @@ public:
     static const int NONE;
 
     TcpSocket(int, const std::string&, uint16_t);
-    ~TcpSocket();
+    virtual ~TcpSocket();
 
     virtual void close();
 

@@ -21,6 +21,7 @@ public:
     static const size_t WRITE_BUFFER_SIZE;
 
     TcpServerSocket(int, const std::string&, uint16_t);
+    virtual ~TcpServerSocket();
 
     void setReceivedDataHandler(SocketReceivedDataHandler);
     void setClosedHandler(SocketClosedHandler);

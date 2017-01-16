@@ -98,6 +98,10 @@ void TcpServerSocket::write(const std::string& data) {
     }
 }
 
+TcpServerSocket::~TcpServerSocket() {
+    close();
+}
+
 void TcpServerSocket::close() {
     if (closedHandler) {
         try {
