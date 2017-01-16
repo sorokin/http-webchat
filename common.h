@@ -18,7 +18,7 @@ inline T _uwv_system_call(T call, T wrong, std::string msg) {
 
 template <typename T>
 inline T _m1_system_call(T call, std::string msg) {
-    return _uwv_system_call(call, -1, msg);
+    return _uwv_system_call(call, (T) -1, msg);
 }
 
 std::string toLowerCase(const std::string& string);

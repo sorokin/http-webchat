@@ -26,13 +26,15 @@ class Poller {
 
     static void signalHandler(int);
 
-    static void start();
-    static void stop();
+    static void _start();
+    static void _stop();
 public:
     static void setHandler(int, const EventHandler&, uint32_t);
     static void setEvents(int, uint32_t);
     static size_t removeHandler(int);
+
     static void poll();
+    static void stop();
 
     Poller();
     ~Poller();

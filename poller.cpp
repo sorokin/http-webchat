@@ -9,7 +9,7 @@ void Poller::signalHandler(int) {
     eventfd_write(sfd, 1);
 }
 
-void Poller::start() {
+void Poller::_start() {
     struct sigaction sa = {};
     sa.sa_handler = Poller::signalHandler;
     sigset_t ss;
@@ -39,7 +39,7 @@ void Poller::start() {
     }
 }
 
-void Poller::stop() {
+void Poller::_stop() {
     int res = epoll_ctl(efd, EPOLL_CTL_DEL, sfd, NULL);
     if (res == -1) {
         std::cerr << "Couldn't remove the stopping fd from polling: " << strerror(errno) << std::endl;
@@ -109,11 +109,15 @@ void Poller::poll() {
     }
 }
 
+void Poller::stop() {
+    eventfd_write(sfd, 1);
+}
+
 
 Poller::Poller() {
-    Poller::start();
+    Poller::_start();
 }
 
 Poller::~Poller() {
-    Poller::stop();
+    Poller::_stop();
 }

@@ -89,6 +89,9 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
                     sockets.erase(it++);
                 }
             }
+
+            uint64_t time;
+            _m1_system_call(read(tfd, &time, sizeof time), "Couldn't read timer fd");
         }, EPOLLIN);
     } catch (const std::exception& exception) {
         listener.close();
