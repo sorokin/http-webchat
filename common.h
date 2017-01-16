@@ -8,7 +8,7 @@
 #include <string.h>
 
 template <typename T>
-T _uwv_system_call(T call, T wrong, std::string msg) {
+inline T _uwv_system_call(T call, T wrong, std::string msg) {
     if (call == wrong) {
         throw std::runtime_error(msg + " - " + strerror(errno));
     } else {
@@ -17,7 +17,7 @@ T _uwv_system_call(T call, T wrong, std::string msg) {
 }
 
 template <typename T>
-T _m1_system_call(T call, std::string msg) {
+inline T _m1_system_call(T call, std::string msg) {
     return _uwv_system_call(call, -1, msg);
 }
 
