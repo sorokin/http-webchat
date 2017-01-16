@@ -56,27 +56,25 @@ void Poller::stop() {
     }
 }
 
-void Poller::setHandler(int fd, EventHandler handler, uint32_t events) {
+void Poller::setHandler(int fd, const EventHandler& handler, uint32_t events) {
     epoll_event ev = {};
     ev.data.fd = fd;
     ev.events = events;
 
-    if (handlers.find(fd) == handlers.end()) {
-        _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev),
-                        "Couldn't add fd " + std::to_string(fd) + " to polling");
+    std::map<int, EventHandler>::iterator fdIterator = handlers.find(fd);
+    size_t bSize = handlers.size(), aSize = bSize;
+    if (fdIterator == handlers.end()) {
         try {
-            handlers[fd] = handler;
-        } catch (...) {
-            handlers.erase(fd);
-            try {
-                _m1_system_call(epoll_ctl(efd, EPOLL_CTL_DEL, fd, &ev),
-                                "Couldn't remove fd " + std::to_string(fd) + " from polling");
-            } catch (std::exception& exception) {
-                std::cerr << exception.what() << std::endl;
+            fdIterator = handlers.insert(fdIterator, std::make_pair(fd, handler));
+            aSize = handlers.size();
+            _m1_system_call(epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev),
+                            "Couldn't add fd " + std::to_string(fd) + " to polling");
+        } catch (std::exception& exception) {
+            if (bSize < aSize) {
+                handlers.erase(fdIterator);
             }
+            throw exception;
         }
-    } else {
-        throw std::runtime_error("This fd is already handled by a handler");
     }
 }
 

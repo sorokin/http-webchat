@@ -29,7 +29,7 @@ class Poller {
     static void start();
     static void stop();
 public:
-    static void setHandler(int, EventHandler, uint32_t);
+    static void setHandler(int, const EventHandler&, uint32_t);
     static void setEvents(int, uint32_t);
     static size_t removeHandler(int);
     static void poll();
