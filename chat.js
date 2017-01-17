@@ -72,7 +72,7 @@ function loadMessages(all) {
                     }
                 }
 
-                timer = setTimeout(loadMessages(false), 500);
+                timer = setTimeout(loadMessages(false), 1000);
             }
         });
     }

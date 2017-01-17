@@ -4,6 +4,8 @@
 
 #include <deque>
 
+#include <sys/socket.h>
+
 #include "tcp_socket.h"
 
 typedef std::function<void(std::deque<char>&)> SocketReceivedDataHandler;

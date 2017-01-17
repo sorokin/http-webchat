@@ -24,15 +24,19 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
         try {
             char buf[READ_BUFFER_SIZE];
 
-            ssize_t readCount = ::read(fd, buf, READ_BUFFER_SIZE);
-            if (readCount == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
+            ssize_t readCount;
+            bool received = false;
+
+            while ((readCount = recv(fd, buf, READ_BUFFER_SIZE, MSG_DONTWAIT)) > 0) {
+                received = true;
+                inBuffer.insert(inBuffer.end(), buf, buf + readCount);
+            }
+
+            if (readCount == 0 || readCount == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
                 close();
                 return;
-            } else if (readCount > 0) {
-                inBuffer.insert(inBuffer.end(), buf, buf + readCount);
-                if (receivedDataHandler) {
-                    receivedDataHandler(inBuffer);
-                }
+            } else if (received && receivedDataHandler) {
+                receivedDataHandler(inBuffer);
             }
         } catch (const std::exception& exception) {
             std::cerr << "Exception while reading from socket (fd " << fd << "), closing socket: "
@@ -47,16 +51,19 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
             char buf[WRITE_BUFFER_SIZE];
             size_t amount = std::min(outBuffer.size(), WRITE_BUFFER_SIZE);
             std::copy(outBuffer.begin(), outBuffer.begin() + amount, buf);
+            ssize_t writtenCount;
 
-            ssize_t writtenCount = ::write(fd, buf, amount);
+            while (!outBuffer.empty() && (writtenCount = send(fd, buf, amount, MSG_DONTWAIT)) > 0) {
+                outBuffer.erase(outBuffer.begin(), outBuffer.begin() + writtenCount);
+                amount = std::min(outBuffer.size(), WRITE_BUFFER_SIZE);
+                std::copy(outBuffer.begin(), outBuffer.begin() + amount, buf);
+            }
+
             if (writtenCount == -1 && errno != EAGAIN && errno != EWOULDBLOCK) {
                 close();
                 return;
-            } else if (writtenCount > 0) {
-                outBuffer.erase(outBuffer.begin(), outBuffer.begin() + writtenCount);
-                if (outBuffer.empty()) {
-                    Poller::setEvents(fd, EPOLLIN);
-                }
+            } else if (outBuffer.empty()) {
+                Poller::setEvents(fd, EPOLLIN);
             }
         } catch (const std::exception& exception) {
             std::cerr << "Exception while writing into socket (fd " << fd << "), closing socket: "
