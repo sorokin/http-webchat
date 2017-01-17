@@ -11,6 +11,7 @@
 
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
+#include <sys/signalfd.h>
 
 #include "common.h"
 
@@ -24,8 +25,6 @@ class Poller {
     static epoll_event events[MAX_EVENTS];
     static std::map<int, EventHandler> handlers;
 
-    static void signalHandler(int);
-
     static void _start();
     static void _stop();
 public:
@@ -34,7 +33,6 @@ public:
     static size_t removeHandler(int);
 
     static void poll();
-    static void stop();
 
     Poller();
     ~Poller();
