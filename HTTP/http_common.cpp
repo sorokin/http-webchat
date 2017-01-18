@@ -11,7 +11,7 @@ std::string Http::methodToString(Http::Method method) {
         case POST:
             return "POST";
         default:
-            throw std::runtime_error("Invalid HTTP method");
+            throw OwnException("Invalid HTTP method");
     }
 }
 
@@ -25,7 +25,7 @@ Http::Method Http::stringToMethod(const std::string& string) {
     } else if (string == "POST") {
         return POST;
     } else {
-        throw std::runtime_error("Invalid HTTP method: " + string);
+        throw OwnException("Invalid HTTP method: " + string);
     }
 }
 
@@ -155,7 +155,7 @@ std::string Http::uriDecode(const std::string& toDecode) {
     for (size_t cur = 0; cur < toDecode.size(); ++cur) {
         if (toDecode[cur] == '%') {
             if (cur > toDecode.size() - 3) {
-                throw std::runtime_error("Invalid URL-encoded string (percent encoding near the end): " + toDecode);
+                throw OwnException("Invalid URL-encoded string (percent encoding near the end): " + toDecode);
             }
             if (faps < cur) {
                 result += toDecode.substr(faps, cur - faps);
@@ -236,7 +236,7 @@ std::string Http::uriDecode(const std::string& toDecode) {
             } else if (fst == '7' && snd == 'E') {
                 result += '~';
             } else {
-                throw std::runtime_error("Invalid URL-encoded string (invalid percent encoding "
+                throw OwnException("Invalid URL-encoded string (invalid percent encoding "
                                          + toDecode.substr(cur, 3) + "): " + toDecode);
             }
             faps = cur + 3;
@@ -296,11 +296,11 @@ std::map<std::string, std::string> Http::queryParameters(const std::string& uri)
 
         size_t equal = parameter.find('=');
         if (equal == std::string::npos || equal == 0 || equal == parameter.size() - 1) {
-            throw std::runtime_error("Wrong query parameter: " + parameter);
+            throw OwnException("Wrong query parameter: " + parameter);
         }
         std::string value = parameter.substr(equal + 1, parameter.size() - equal - 1);
         if (value.find('=') != std::string::npos) {
-            throw std::runtime_error("Wrong query parameter: " + parameter);
+            throw OwnException("Wrong query parameter: " + parameter);
         }
         parameters[uriDecode(parameter.substr(0, equal))] = uriDecode(value);
     }
@@ -310,11 +310,11 @@ std::map<std::string, std::string> Http::queryParameters(const std::string& uri)
     }
     size_t equal = query.find('=');
     if (equal == std::string::npos || equal == 0 || equal == query.size() - 1) {
-        throw std::runtime_error("Wrong query parameter: " + query);
+        throw OwnException("Wrong query parameter: " + query);
     }
     std::string value = query.substr(equal + 1, query.size() - equal - 1);
     if (value.find('=') != std::string::npos) {
-        throw std::runtime_error("Wrong query parameter: " + query);
+        throw OwnException("Wrong query parameter: " + query);
     }
     parameters[uriDecode(query.substr(0, equal))] = uriDecode(value);
 

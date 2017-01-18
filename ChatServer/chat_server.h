@@ -4,6 +4,7 @@
 
 #include <fstream>
 
+#include "../resource.h"
 #include "../HTTP/http_server.h"
 #include "json.h"
 

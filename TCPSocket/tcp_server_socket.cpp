@@ -99,7 +99,7 @@ void TcpServerSocket::write(const std::string& data) {
             Poller::setEvents(fd, EPOLLIN | EPOLLOUT);
         } catch (const std::exception& exception) {
             close();
-            throw std::runtime_error("Exception while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "
+            throw OwnException("Exception while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "
                   + exception.what());
         }
     }

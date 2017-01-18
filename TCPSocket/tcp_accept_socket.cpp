@@ -34,7 +34,7 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
     uint16_t port;
 
     if (!(event.events & EPOLLIN)) {
-        throw std::runtime_error("Got an error epoll event while accepting socket, \"events\" = "
+        throw OwnException("Got an error epoll event while accepting socket, \"events\" = "
                                  + std::to_string(event.events));
     }
 
@@ -45,7 +45,7 @@ void TcpAcceptSocket::accept(const epoll_event& event, AcceptHandler acceptHandl
     try {
         int res = getnameinfo(&in, in_len, hbuf, sizeof hbuf, pbuf, sizeof pbuf, NI_NUMERICHOST | NI_NUMERICSERV);
         if (res != 0) {
-            throw std::runtime_error("Couldn't get info about incoming connection: " + std::string(gai_strerror(res)));
+            throw OwnException("Couldn't get info about incoming connection: " + std::string(gai_strerror(res)));
         }
 
         sscanf(pbuf, "%" SCNd16, &port);

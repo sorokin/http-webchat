@@ -67,7 +67,7 @@ void HttpRequest::append(std::string data) {
                 }
             }
             default: {
-                throw std::runtime_error("The message is finished");
+                throw OwnException("The message is finished");
             }
         }
     } catch (const std::exception& exception) {

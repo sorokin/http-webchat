@@ -11,7 +11,7 @@ void HttpServer::ResponseSocket::close() {
 
 void HttpServer::ResponseSocket::end(HttpResponse& response) {
     if (!valid) {
-        throw std::runtime_error("The response can't be sent twice");
+        throw OwnException("The response can't be sent twice");
     }
 
     response.finish();

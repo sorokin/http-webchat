@@ -7,10 +7,16 @@
 
 #include <string.h>
 
+class OwnException: public std::runtime_error {
+public:
+    OwnException(const std::string&);
+    OwnException(const char*);
+};
+
 template <typename T>
 inline T _uwv_system_call(T call, T wrong, std::string msg) {
     if (call == wrong) {
-        throw std::runtime_error(msg + " - " + strerror(errno));
+        throw OwnException(msg + " - " + strerror(errno));
     } else {
         return call;
     }

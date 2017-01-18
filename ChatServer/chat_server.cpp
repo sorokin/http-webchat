@@ -17,12 +17,12 @@ ChatServer::Object::Object(const std::map<std::string, JSON::Type>& types): type
 std::map<std::string, JSON> ChatServer::Object::match(const std::string& data) {
     JSON payload = JSON::parseJSON(data);
     if (payload.getType() != JSON::Type::OBJECT || payload.getObjectValue().size() != size) {
-        throw std::runtime_error("Object mismatched: " + data);
+        throw OwnException("Object mismatched: " + data);
     }
     std::map<std::string, JSON> payloadFields = payload.getObjectValue();
     for (std::map<std::string, JSON>::const_iterator it = payloadFields.begin(); it != payloadFields.end(); ++it) {
         if (types.find(it->first) == types.end() || it->second.getType() != types[it->first]) {
-            throw std::runtime_error("Object mismatched: " + data);
+            throw OwnException("Object mismatched: " + data);
         }
     }
     return payload.getObjectValue();
@@ -52,29 +52,29 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/login"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
-                std::map<std::string, JSON::Type> pattern;
-                pattern["username"] = JSON::Type::STRING;
-                std::map<std::string, JSON> usernamePayload = Object(pattern).match(request.getBody());
-                std::string username = usernamePayload["username"].getStringValue();
+                try {
+                    std::map<std::string, JSON::Type> pattern;
+                    pattern["username"] = JSON::Type::STRING;
+                    std::map<std::string, JSON> usernamePayload = Object(pattern).match(request.getBody());
+                    std::string username = usernamePayload["username"].getStringValue();
 
-                if (username == ADMIN_NAME) {
-                    throw std::runtime_error("One can't login with username Admin");
+                    if (username == ADMIN_NAME) {
+                        throw OwnException("One can't login with username Admin");
+                    }
+
+                    if (firstMessage.find(username) == firstMessage.end()) {
+                        size_t first = history.size();
+                        std::cout << "User \"" << username << "\" joined to chat" << std::endl;
+                        history.push_back(Message(ADMIN_NAME, time(NULL), "User " + username + " joined to chat!"));
+                        firstMessage[username] = first;
+                    }
+                } catch (const OwnException& exception) {
+                    logError(request, 400, "Bad request: " + std::string(exception.what()));
+                    HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
+                    responseSocket.end(response);
+                    return;
                 }
 
-                if (firstMessage.find(username) == firstMessage.end()) {
-                    size_t first = history.size();
-                    std::cout << "User \"" << username << "\" joined to chat" << std::endl;
-                    history.push_back(Message(ADMIN_NAME, time(NULL), "User " + username + " joined to chat!"));
-                    firstMessage[username] = first;
-                }
-            } catch (const std::exception& exception) {
-                logError(request, 400, "Bad request: " + std::string(exception.what()));
-                HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
-                responseSocket.end(response);
-                return;
-            }
-
-            try {
                 HttpResponse response = HttpResponse(request.getMethod(), Http::VERSION1_1, 200, "OK");
                 if (!request.shouldKeepAlive()) {
                     response.setHeader("Connection", "Keep-Alive");
@@ -92,20 +92,21 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
                 size_t begin;
+
                 try {
                     std::map<std::string, std::string> queryParams = Http::queryParameters(request.getUri());
                     if (queryParams.find("username") == queryParams.end() ||
                             queryParams.find("all") == queryParams.end()) {
-                        throw std::runtime_error(
+                        throw OwnException(
                                 std::string("There should be \"username\" and \"all\" query parameters")
                                 + " in a GET request to \"messages\"");
                     }
                     std::string username = queryParams["username"];
                     std::string allMessages = queryParams["all"];
                     if (username == "" || (allMessages != "true" && allMessages != "false")) {
-                        throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
+                        throw OwnException("Bad request: empty username or invalid all messages indicator");
                     } else if (username == ADMIN_NAME) {
-                        throw std::runtime_error("One can't get messages from username Admin");
+                        throw OwnException("One can't get messages from username Admin");
                     }
 
                     bool isAll = (allMessages == "true");
@@ -115,7 +116,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                         begin = firstUnreadMessage[username];
                     }
                     firstUnreadMessage[username] = history.size();
-                } catch (const std::exception& exception) {
+                } catch (const OwnException& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -144,18 +145,18 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     std::map<std::string, std::string> queryParams = Http::queryParameters(request.getUri());
                     if (queryParams.find("username") == queryParams.end() ||
                             queryParams.find("all") == queryParams.end()) {
-                        throw std::runtime_error(
+                        throw OwnException(
                                 std::string("There should be \"username\" and \"all\" query parameters")
                                 + " in a GET request to \"messages\"");
                     }
                     std::string username = queryParams["username"];
                     std::string allMessages = queryParams["all"];
                     if (username == "" || (allMessages != "true" && allMessages != "false")) {
-                        throw std::runtime_error("Bad request: empty username or invalid all messages indicator");
+                        throw OwnException("Bad request: empty username or invalid all messages indicator");
                     } else if (username == ADMIN_NAME) {
-                        throw std::runtime_error("One can't get messages from username Admin");
+                        throw OwnException("One can't get messages from username Admin");
                     }
-                } catch (const std::exception& exception) {
+                } catch (const OwnException& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
@@ -179,25 +180,25 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/messages"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
-                std::pair<std::string, std::string> identifiedMessage = parseMessage(request.getBody());
-                std::string username = identifiedMessage.first;
-                std::string message = identifiedMessage.second;
-                if (username == "" || message == "") {
-                    throw std::runtime_error("Bad request: empty username or message");
-                } else if (username == ADMIN_NAME) {
-                    throw std::runtime_error("One can't post a message from username Admin");
+                try {
+                    std::pair<std::string, std::string> identifiedMessage = parseMessage(request.getBody());
+                    std::string username = identifiedMessage.first;
+                    std::string message = identifiedMessage.second;
+                    if (username == "" || message == "") {
+                        throw OwnException("Bad request: empty username or message");
+                    } else if (username == ADMIN_NAME) {
+                        throw OwnException("One can't post a message from username Admin");
+                    }
+
+                    std::cout << "User \"" << username << "\" sent message: \"" << message << "\"" << std::endl;
+                    history.push_back(Message(username, time(NULL), message));
+                } catch (const OwnException& exception) {
+                    logError(request, 400, "Bad request: " + std::string(exception.what()));
+                    HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
+                    responseSocket.end(response);
+                    return;
                 }
 
-                std::cout << "User \"" << username << "\" sent message: \"" << message << "\"" << std::endl;
-                history.push_back(Message(username, time(NULL), message));
-            } catch (const std::exception& exception) {
-                logError(request, 400, "Bad request: " + std::string(exception.what()));
-                HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
-                responseSocket.end(response);
-                return;
-            }
-
-            try {
                 HttpResponse response(request.getMethod(), Http::VERSION1_1, 200, "OK");
                 if (!request.shouldKeepAlive()) {
                     response.setHeader("Connection", "Keep-Alive");
@@ -218,12 +219,18 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 try {
                     std::string filename = Http::getUriPath(request.getUri());
-                    if (filename == "/") {
-                        filename = "/index.html";
+                    std::cout << "Requested filename = \"" << filename << "\"" << std::endl;
+                    if (filename[0] == '/') {
+                        filename.erase(0, 1);
                     }
-                    filename = "." + filename;
-                    std::ifstream in(filename.c_str());
-                    if (!in) {
+                    if (filename == "") {
+                        filename = "index.html";
+                    }
+
+                    try {
+                        Resource resource = Resource::getResource(filename);
+                        body = std::string(resource.data(), resource.size());
+                    } catch (const std::out_of_range& out_of_range) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");
                         response.appendBody("<html>"
@@ -241,17 +248,12 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                         return;
                     }
 
-                    std::string line;
-                    while (getline(in, line)) {
-                        body += line + "\n";
-                    }
-
                     size_t ext = filename.find('.');
                     type = (ext != std::string::npos)
                                        ? filename.substr(ext + 1, filename.size() - ext - 1)
                                        : "";
-                } catch (const std::exception& exception) {
-                    logError(request, 400, "Bad request: " + std::string(exception.what()));
+                } catch (const OwnException& own_exception) {
+                    logError(request, 400, "Bad request: " + std::string(own_exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
                     return;
@@ -285,25 +287,19 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 try {
                     std::string filename = Http::getUriPath(request.getUri());
-                    if (filename == "/") {
-                        filename = "/index.html";
+                    std::cout << "Requested filename = \"" << filename << "\"" << std::endl;
+                    if (filename[0] == '/') {
+                        filename.erase(0, 1);
                     }
-                    filename = "." + filename;
-                    std::ifstream in(filename.c_str());
-                    if (!in) {
+                    if (filename == "") {
+                        filename = "index.html";
+                    }
+
+                    try {
+                        Resource resource = Resource::getResource(filename);
+                    } catch (const std::out_of_range& out_of_range) {
                         logError(request, 404, "Not found: " + filename);
                         HttpResponse response(request.getMethod(), Http::VERSION1_1, 404, "Not Found");
-                        response.appendBody("<html>"
-                                                    "<head>"
-                                                    "<title>The resource isn't found</title>"
-                                                    "</head>"
-                                                    "<body>"
-                                                    "<h1>Not found</h1>"
-                                                    "<p>The requested URL " + Http::getUriPath(request.getUri())
-                                            + " was not found on this server.</p>"
-                                                    "<hr>"
-                                                    "</body>"
-                                                    "</html>");
                         responseSocket.end(response);
                         return;
                     }
@@ -312,7 +308,7 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
                     type = (ext != std::string::npos)
                                        ? filename.substr(ext + 1, filename.size() - ext - 1)
                                        : "";
-                } catch (const std::exception& exception) {
+                } catch (const OwnException& exception) {
                     logError(request, 400, "Bad request: " + std::string(exception.what()));
                     HttpResponse response(request.getMethod(), Http::VERSION1_1, 400, "Bad Request");
                     responseSocket.end(response);
