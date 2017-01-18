@@ -27,50 +27,52 @@ HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& re
 };
 
 HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", port, [this](TcpServerSocket* socket) {
-            HttpRequest* request = NULL;
+    HttpRequest* request = NULL;
 
-            socket->setReceivedDataHandler([=](std::deque<char>& dataDeque) mutable {
-                while (!dataDeque.empty() && socket->isOpened()) {
-                    if (request == NULL) {
-                        request = new HttpRequest();
-                    }
+    socket->setReceivedDataHandler([=](std::deque<char>& dataDeque) mutable {
+        while (!dataDeque.empty() && socket->isOpened()) {
+            if (request == NULL) {
+                request = new HttpRequest();
+            }
 
-                    if (request->getState() == HttpMessage::State::START
-                        || request->getState() == HttpMessage::State::HEADER) {
-                        std::deque<char>::iterator lf;
-                        while ((request->getState() == HttpMessage::State::START
-                                || request->getState() == HttpMessage::State::HEADER)
-                               && (lf = std::find(dataDeque.begin(), dataDeque.end(), '\n')) != dataDeque.end()) {
-                            request->append(std::string(dataDeque.begin(), lf - 1));
-                            dataDeque.erase(dataDeque.begin(), lf + 1);
-                        }
-                    }
-
-                    if (request->getState() == HttpMessage::State::BODY) {
-                        size_t currentBodySize = request->getBodySize();
-                        size_t declaredBodySize = request->getDeclaredBodySize();
-                        size_t charsToGet = std::min(declaredBodySize - currentBodySize, dataDeque.size());
-
-                        request->append(std::string(dataDeque.begin(), dataDeque.begin() + charsToGet));
-                        dataDeque.erase(dataDeque.begin(), dataDeque.begin() + charsToGet);
-                    }
-
-                    if (request->getState() == HttpMessage::State::FINISHED) {
-                        try {
-                            processRequest(socket, *request);
-                        } catch (const std::exception& exception) {
-                            std::cerr << "Couldn't process a request: " << exception.what() << std::endl;
-                            socket->close();
-                        }
-                        delete request;
-                        request = NULL;
-                    } else if (request->getState() == HttpMessage::State::INVALID) {
-                        delete request;
-                        request = NULL;
-                    }
+            if (request->getState() == HttpMessage::State::START
+                || request->getState() == HttpMessage::State::HEADER) {
+                std::deque<char>::iterator lf;
+                while ((request->getState() == HttpMessage::State::START
+                        || request->getState() == HttpMessage::State::HEADER)
+                       && (lf = std::find(dataDeque.begin(), dataDeque.end(), '\n')) != dataDeque.end()) {
+                    request->append(std::string(dataDeque.begin(), lf - 1));
+                    dataDeque.erase(dataDeque.begin(), lf + 1);
                 }
-            });
-        })) {
+            }
+
+            if (request->getState() == HttpMessage::State::BODY) {
+                size_t currentBodySize = request->getBodySize();
+                size_t declaredBodySize = request->getDeclaredBodySize();
+                size_t charsToGet = std::min(declaredBodySize - currentBodySize, dataDeque.size());
+
+                request->append(std::string(dataDeque.begin(), dataDeque.begin() + charsToGet));
+                dataDeque.erase(dataDeque.begin(), dataDeque.begin() + charsToGet);
+            }
+
+            if (request->getState() == HttpMessage::State::FINISHED) {
+                try {
+                    processRequest(socket, *request);
+                } catch (const std::exception& exception) {
+                    std::cerr << "Couldn't process a request: " << exception.what() << std::endl;
+                    socket->close();
+                }
+                delete request;
+                request = NULL;
+            } else if (request->getState() == HttpMessage::State::INVALID) {
+                delete request;
+                request = NULL;
+            }
+        }
+    });
+
+    sockets.insert(socket);
+})) {
     try {
         tfd = _m1_system_call(timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK), "Couldn't create a timer fd");
 
@@ -135,8 +137,6 @@ void HttpServer::processRequest(TcpServerSocket* socket, const HttpRequest& requ
     if (!ok) {
         defaultHandler(request, ResponseSocket(*socket));
     }
-
-    sockets.insert(socket);
 }
 
 void HttpServer::addRouteMatcher(const RouteMatcher& matcher, const HttpServer::RequestHandler& requestHandler) {
