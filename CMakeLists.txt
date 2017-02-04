@@ -44,9 +44,7 @@ set(RESOURCE_FILES
         Resources/jquery.js
 )
 
-add_executable(HttpWebChat ${SOURCE_FILES})
-
-set(LIBRARIES "")
+set(BINARY_RESOURCES "")
 foreach(RESOURCE_FILE IN LISTS RESOURCE_FILES)
     string(REPLACE "/" ";" SEGMENTS ${RESOURCE_FILE})
     list(GET SEGMENTS 1 FILENAME)
@@ -55,13 +53,9 @@ foreach(RESOURCE_FILE IN LISTS RESOURCE_FILES)
     add_custom_command(OUTPUT ${OUTPUT_FILENAME}
             COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/Resources
                 && ld -r -b binary -o ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILENAME} ${FILENAME})
-    add_library(${NAME}
-            STATIC
-            ${OUTPUT_FILENAME})
-    list(APPEND LIBRARIES ${NAME})
-    set_target_properties(${NAME}
-            PROPERTIES
-            LINKER_LANGUAGE C)
+    list(APPEND BINARY_RESOURCES ${OUTPUT_FILENAME})
 endforeach()
 
-target_link_libraries(HttpWebChat ${LIBRARIES})
+add_executable(HttpWebChat ${SOURCE_FILES} ${BINARY_RESOURCES})
+
+target_link_libraries(HttpWebChat)
