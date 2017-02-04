@@ -48,7 +48,7 @@ void ChatServer::logError(const HttpRequest& request, int code, const std::strin
     std::cout << "  Result: " << response << ", sending code " << code << std::endl;
 }
 
-ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
+ChatServer::ChatServer(uint16_t port, Poller& poller): httpServer(HttpServer(port, poller)) {
     httpServer.addRouteMatcher(RouteMatcher(Http::Method::POST, "/login"),
         [this](const HttpRequest& request, HttpServer::ResponseSocket responseSocket) {
             try {
@@ -219,7 +219,6 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 try {
                     std::string filename = Http::getUriPath(request.getUri());
-                    std::cout << "Requested filename = \"" << filename << "\"" << std::endl;
                     if (filename[0] == '/') {
                         filename.erase(0, 1);
                     }
@@ -287,7 +286,6 @@ ChatServer::ChatServer(uint16_t port): httpServer(HttpServer(port)) {
 
                 try {
                     std::string filename = Http::getUriPath(request.getUri());
-                    std::cout << "Requested filename = \"" << filename << "\"" << std::endl;
                     if (filename[0] == '/') {
                         filename.erase(0, 1);
                     }

@@ -26,7 +26,7 @@ HttpServer::RequestHandler HttpServer::defaultHandler = [](const HttpRequest& re
     responseSocket.end(response);
 };
 
-HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", port, [this](TcpServerSocket* socket) {
+HttpServer::HttpServer(uint16_t port, Poller& poller): listener(TcpAcceptSocket("127.0.0.1", port, [this](TcpServerSocket* socket) {
     HttpRequest* request = NULL;
 
     socket->setReceivedDataHandler([=](std::deque<char>& dataDeque) mutable {
@@ -72,7 +72,7 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
     });
 
     sockets.insert(socket);
-})) {
+}, poller)), poller(poller) {
     try {
         tfd = _m1_system_call(timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK), "Couldn't create a timer fd");
 
@@ -83,7 +83,7 @@ HttpServer::HttpServer(uint16_t port): listener(TcpAcceptSocket("127.0.0.1", por
         its.it_interval.tv_nsec = 0;
         _m1_system_call(timerfd_settime(tfd, 0, &its, NULL), "Couldn't run the timer fd");
 
-        Poller::setHandler(tfd, [=](epoll_event event) {
+        poller.setHandler(tfd, [=](epoll_event event) {
             for (std::set<TcpServerSocket*>::iterator it = sockets.begin(); it != sockets.end(); ++it) {
                 TcpServerSocket* socket = *it;
                 if (!socket->isOpened()) {
@@ -107,7 +107,7 @@ HttpServer::~HttpServer() {
     }
 
     try {
-        Poller::removeHandler(tfd);
+        poller.removeHandler(tfd);
         _m1_system_call(::close(tfd), "Timer fd (fd " + std::to_string(tfd) + ") was closed incorrectly");
     } catch (const std::exception& exception) {
         std::cerr << "Exception while closing timer fd (fd " << tfd << "): " << exception.what() << std::endl;

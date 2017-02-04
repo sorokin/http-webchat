@@ -3,9 +3,9 @@
 const size_t TcpServerSocket::READ_BUFFER_SIZE = 4096;
 const size_t TcpServerSocket::WRITE_BUFFER_SIZE = 4096;
 
-TcpServerSocket::TcpServerSocket(int fd, const std::string& host, uint16_t port): TcpSocket(fd, host, port) {
+TcpServerSocket::TcpServerSocket(int fd, const std::string& host, uint16_t port, Poller& poller): TcpSocket(fd, host, port, poller) {
     try {
-        Poller::setHandler(fd, [this](const epoll_event& event) {
+        poller.setHandler(fd, [this](const epoll_event& event) {
             eventHandler(event);
         }, EPOLLIN);
     } catch (const std::exception& exception) {
@@ -63,7 +63,7 @@ void TcpServerSocket::eventHandler(const epoll_event& event) {
                 close();
                 return;
             } else if (outBuffer.empty()) {
-                Poller::setEvents(fd, EPOLLIN);
+                poller.setEvents(fd, EPOLLIN);
             }
         } catch (const std::exception& exception) {
             std::cerr << "Exception while writing into socket (fd " << fd << "), closing socket: "
@@ -96,7 +96,7 @@ void TcpServerSocket::write(const std::string& data) {
     outBuffer.insert(outBuffer.end(), data.begin(), data.end());
     if (wasEmpty) {
         try {
-            Poller::setEvents(fd, EPOLLIN | EPOLLOUT);
+            poller.setEvents(fd, EPOLLIN | EPOLLOUT);
         } catch (const std::exception& exception) {
             close();
             throw OwnException("Exception while writing to buffer of socket (fd " + std::to_string(fd) + "), closing socket: "

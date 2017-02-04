@@ -1,11 +1,6 @@
 #include "poller.h"
 
-int Poller::efd;
-int Poller::sfd;
-epoll_event Poller::events[MAX_EVENTS];
-std::map<int, EventHandler> Poller::handlers;
-
-void Poller::_start() {
+Poller::Poller() {
     efd = _m1_system_call(epoll_create1(0), "Couldn't run the polling fd");
     try {
         sigset_t ss;
@@ -31,7 +26,7 @@ void Poller::_start() {
     }
 }
 
-void Poller::_stop() {
+Poller::~Poller() {
     int res = epoll_ctl(efd, EPOLL_CTL_DEL, sfd, NULL);
     if (res == -1) {
         std::cerr << "Couldn't remove the signal fd from polling: " << strerror(errno) << std::endl;
@@ -99,13 +94,4 @@ void Poller::poll() {
             }
         }
     }
-}
-
-
-Poller::Poller() {
-    Poller::_start();
-}
-
-Poller::~Poller() {
-    Poller::_stop();
 }

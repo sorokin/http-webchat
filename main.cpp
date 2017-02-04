@@ -7,9 +7,9 @@ const uint16_t PORT = 3334;
 int main(int, char**) {
     try {
         Poller poller;
-        ChatServer server(PORT);
+        ChatServer server(PORT, poller);
         cout << "Server started on port " << PORT << endl;
-        Poller::poll();
+        poller.poll();
         return 0;
     } catch (const std::exception& exception) {
         cerr << "Exception: " << exception.what() << endl;

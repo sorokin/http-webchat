@@ -11,10 +11,12 @@ protected:
     std::string host;
     uint16_t port;
     int fd;
+
+    Poller& poller;
 public:
     static const int NONE;
 
-    TcpSocket(int, const std::string&, uint16_t);
+    TcpSocket(int, const std::string&, uint16_t, Poller&);
     virtual ~TcpSocket();
 
     virtual void close();

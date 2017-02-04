@@ -20,19 +20,19 @@ typedef std::function<void(epoll_event)> EventHandler;
 class Poller {
     static const size_t MAX_EVENTS = 128;
 
-    static int efd;
-    static int sfd;
-    static epoll_event events[MAX_EVENTS];
-    static std::map<int, EventHandler> handlers;
+    int efd;
+    int sfd;
+    epoll_event events[MAX_EVENTS];
+    std::map<int, EventHandler> handlers;
 
-    static void _start();
-    static void _stop();
+    void _start();
+    void _stop();
 public:
-    static void setHandler(int, const EventHandler&, uint32_t);
-    static void setEvents(int, uint32_t);
-    static size_t removeHandler(int);
+    void setHandler(int, const EventHandler&, uint32_t);
+    void setEvents(int, uint32_t);
+    size_t removeHandler(int);
 
-    static void poll();
+    void poll();
 
     Poller();
     ~Poller();
