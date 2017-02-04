@@ -24,9 +24,6 @@ class Poller {
     int sfd;
     epoll_event events[MAX_EVENTS];
     std::map<int, EventHandler> handlers;
-
-    void _start();
-    void _stop();
 public:
     void setHandler(int, const EventHandler&, uint32_t);
     void setEvents(int, uint32_t);
@@ -36,6 +33,9 @@ public:
 
     Poller();
     ~Poller();
+
+    Poller(const Poller&) = delete;
+    Poller& operator=(const Poller&) = delete;
 };
 
 
